@@ -1,24 +1,24 @@
 [
   {
     "ref": [
-      "001INC - 001BP - K0001"
+      "001INC 001BP K0001"
     ],
     "oem": [],
     "fmsi": [
       "D001"
     ],
     "posición": "Delantera",
-    "medidas": "104.4 x 56.3",
+    "medidas": "104,4 x 56,3",
     "imagenes": [
       "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
     ],
     "aplicaciones": [
       {
-        "marca": "Chevrolet",
+        "marca": "Chevrtolet",
         "serie": "Monza",
         "litros": "1.8 2.0",
         "año": "1985-1992",
-        "especificacion": "Holis"
+        "especificacion": ""
       },
       {
         "marca": "Fiat",
@@ -32,6 +32,27 @@
         "serie": "Uno",
         "litros": "",
         "año": "1992",
+        "especificacion": ""
+      },
+      {
+        "marca": "Fiat",
+        "serie": "Premio",
+        "litros": "1.3",
+        "año": "1990-1997",
+        "especificacion": ""
+      },
+      {
+        "marca": "Daewoo",
+        "serie": "Cielo",
+        "litros": "",
+        "año": "",
+        "especificacion": ""
+      },
+      {
+        "marca": "Daewoo",
+        "serie": "Facer (Adaptación)",
+        "litros": "",
+        "año": "",
         "especificacion": ""
       }
     ]
