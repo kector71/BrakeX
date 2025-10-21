@@ -1,0 +1,69 @@
+[
+  {
+    "ref": [
+      "001"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D001"
+    ],
+    "posición": "Delantera",
+    "medidas": "104,4 x 56,3",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Chevrtolet",
+        "serie": "Monza",
+        "litros": "",
+        "año": "",
+        "especificacion": ""
+      },
+      {
+        "marca": "Fiat",
+        "serie": "Tempra",
+        "litros": "",
+        "año": "1996",
+        "especificacion": ""
+      },
+      {
+        "marca": "Fiat",
+        "serie": "Uno",
+        "litros": "",
+        "año": "1992",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "002"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D002"
+    ],
+    "posición": "Delantera",
+    "medidas": "108,8 x 44,5",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Fiat",
+        "serie": "125 argentino",
+        "litros": "",
+        "año": "1996",
+        "especificacion": ""
+      },
+      {
+        "marca": "Fiat",
+        "serie": "128 argentino",
+        "litros": "",
+        "año": "1976",
+        "especificacion": ""
+      }
+    ]
+  }
+]
