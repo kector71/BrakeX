@@ -1,19 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Variables globales
-    let brakePadsData = []; // Todos los datos cargados desde data.json
+    let brakePadsData = [];
     let currentPage = 1;
     const itemsPerPage = 24;
     let filteredDataCache = []; 
-    let brandColorMap = {};
+    let brandColorMap = {}; // Mapa para colores de marcas
 
-    // Elementos del DOM
+    
     const els = {
         body: document.body, headerX: document.querySelector('.header-x'), darkBtn: document.getElementById('darkBtn'), 
         sunIcon: document.querySelector('.lp-icon-sun'), moonIcon: document.querySelector('.lp-icon-moon'), 
-        upBtn: document.getElementById('upBtn'), menuBtn: document.getElementById('menuBtn'),                 
-        sideMenu: document.getElementById('side-menu'), sideMenuOverlay: document.getElementById('side-menu-overlay'), 
-        menuCloseBtn: document.getElementById('menuCloseBtn'), openGuideLink: document.getElementById('open-guide-link'), 
+        upBtn: document.getElementById('upBtn'), 
+        menuBtn: document.getElementById('menuBtn'), 
+        sideMenu: document.getElementById('side-menu'), 
+        sideMenuOverlay: document.getElementById('side-menu-overlay'), 
+        menuCloseBtn: document.getElementById('menuCloseBtn'), 
+        openGuideLink: document.getElementById('open-guide-link'), 
         busqueda: document.getElementById('busquedaRapida'), marca: document.getElementById('filtroMarca'), 
         modelo: document.getElementById('filtroModelo'), anio: document.getElementById('filtroAnio'), 
         oem: document.getElementById('filtroOem'), fmsi: document.getElementById('filtroFmsi'), 
@@ -24,12 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
         datalistAnio: document.getElementById('anios'), datalistOem: document.getElementById('oemList'), 
         datalistFmsi: document.getElementById('fmsiList'), 
         results: document.getElementById('results-container'), 
-        viewGridBtn: document.getElementById('viewGridBtn'), viewListBtn: document.getElementById('viewListBtn'),
+        viewGridBtn: document.getElementById('viewGridBtn'),
+        viewListBtn: document.getElementById('viewListBtn'),
         countContainer: document.getElementById('result-count-container'),
         paginationContainer: document.getElementById('pagination-container'),
         resultsHeaderCard: document.getElementById('results-header-card'),
         brandTagsContainer: document.getElementById('brand-tags-container'),
-        modal: document.getElementById('card-modal'), modalContent: document.querySelector('#card-modal .modal-content'), 
+        footer: document.getElementById('footerBanner'),
+        modal: document.getElementById('card-modal'),
+        modalContent: document.querySelector('#card-modal .modal-content'), 
         modalCloseBtn: document.querySelector('#card-modal .modal-close-btn'),
         modalCarousel: document.querySelector('#card-modal .modal-image-carousel'),
         modalRef: document.querySelector('#card-modal .modal-ref'),
@@ -44,60 +49,133 @@ document.addEventListener('DOMContentLoaded', () => {
         guideModalCloseBtn: document.querySelector('#guide-modal .modal-close-btn') 
     };
         
-    // --- FUNCIONES UTILITARIAS ---
-    const debounce = (func, delay) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => func.apply(this, a), delay); }; };
-    const fillDatalist = (dl, v) => { dl.innerHTML = v.map(i => `<option value="${i}">`).join(''); };
-    const getPositionFilter = () => { let p = []; if (els.posDel.classList.contains('active')) p.push('Delantera'); if (els.posTras.classList.contains('active')) p.push('Trasera'); return p; };
-    
-    // --- LÓGICA DE FILTRADO ---
+    const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
+    const fillDatalist = (datalist, values) => { datalist.innerHTML = values.map(v => `<option value="${v}">`).join(''); };
+    const getPositionFilter = () => { const activePositions = []; if (els.posDel.classList.contains('active')) activePositions.push('Delantera'); if (els.posTras.classList.contains('active')) activePositions.push('Trasera'); return activePositions; };
+    const hasVehicleFilters = () => { return els.busqueda.value.trim() !== '' || els.marca.value.trim() !== '' || els.modelo.value.trim() !== '' || els.anio.value.trim() !== '' || getPositionFilter().length > 0 || els.oem.value.trim() !== '' || els.fmsi.value.trim() !== '' || els.medidasAncho.value.trim() !== '' || els.medidasAlto.value.trim() !== ''; };
+
     const filterData = () => {
         if (!brakePadsData.length) return;
-        const fbusq = (val) => (val || '').toLowerCase().trim(); const activePos = getPositionFilter();
-        const filters = { 
-            busqueda: fbusq(els.busqueda.value), marca: fbusq(els.marca.value), 
-            modelo: fbusq(els.modelo.value), anio: fbusq(els.anio.value), 
-            oem: fbusq(els.oem.value), fmsi: fbusq(els.fmsi.value), 
-            ancho: parseFloat(els.medidasAncho.value) || 0, alto: parseFloat(els.medidasAlto.value) || 0, 
-            pos: activePos 
-        };
-        const TOLERANCIA = 1.0;
+        const fbusq = (val) => val.toLowerCase().trim(); const activePos = getPositionFilter();
+        const filters = { busqueda: fbusq(els.busqueda.value), marca: fbusq(els.marca.value), modelo: fbusq(els.modelo.value), anio: fbusq(els.anio.value), oem: fbusq(els.oem.value), fmsi: fbusq(els.fmsi.value), ancho: parseFloat(els.medidasAncho.value), alto: parseFloat(els.medidasAlto.value), pos: activePos };
         
-        filteredDataCache = brakePadsData.filter(item => {
-            const itemVehicles = (item.aplicaciones || []).map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
+        const filtered = brakePadsData.filter(item => {
+            const itemVehicles = item.aplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
+            const itemPosicion = item.posición;
+
             const busqMatch = !filters.busqueda ||
-                (item.ref || []).some(r => fbusq(r).includes(filters.busqueda)) || 
-                (item.oem || []).some(o => fbusq(o).includes(filters.busqueda)) || 
-                (item.fmsi || []).some(f => fbusq(f).includes(filters.busqueda)) || 
+                item.ref?.some(r => r.toLowerCase().includes(filters.busqueda)) || 
+                item.oem?.some(o => o.toLowerCase().includes(filters.busqueda)) || 
+                item.fmsi?.some(f => f.toLowerCase().includes(filters.busqueda)) || 
                 itemVehicles.includes(filters.busqueda);
 
-            const appMatch = !filters.marca && !filters.modelo && !filters.anio || 
-                (item.aplicaciones || []).some(app => 
-                    (!filters.marca || fbusq(app.marca).includes(filters.marca)) && 
-                    (!filters.modelo || fbusq(app.serie).includes(filters.modelo)) && 
-                    (!filters.anio || fbusq(app.año).includes(filters.anio))
-                );
+            const appMatch = !filters.marca && !filters.modelo && !filters.anio || item.aplicaciones.some(app => (!filters.marca || app.marca.toLowerCase().includes(filters.marca)) && (!filters.modelo || app.serie.toLowerCase().includes(filters.modelo)) && (!filters.anio || app.año.toLowerCase().includes(filters.anio)));
 
-            const oemMatch = !filters.oem || (item.oem || []).some(o => fbusq(o).includes(filters.oem));
-            const fmsiMatch = !filters.fmsi || (item.fmsi || []).some(f => fbusq(f).includes(filters.fmsi));
-            const posMatch = filters.pos.length === 0 || filters.pos.includes(item.posición);
-            const anchoMatch = !filters.ancho || Math.abs(item.anchoNum - filters.ancho) <= TOLERANCIA;
-            const altoMatch = !filters.alto || Math.abs(item.altoNum - filters.alto) <= TOLERANCIA;
+            const oemMatch = !filters.oem || (item.oem && item.oem.some(o => o.toLowerCase().includes(filters.oem)));
+            const fmsiMatch = !filters.fmsi || (item.fmsi && item.fmsi.some(f => f.toLowerCase().includes(filters.fmsi)));
 
-            return busqMatch && appMatch && oemMatch && fmsiMatch && posMatch && anchoMatch && altoMatch;
+            let posMatch = true; if (filters.pos.length > 0) { posMatch = filters.pos.includes(itemPosicion); }
+            const TOLERANCIA = 1.0;
+            const anchoMatchTolerancia = !filters.ancho || (item.anchoNum >= (filters.ancho - TOLERANCIA) && item.anchoNum <= (filters.ancho + TOLERANCIA));
+            const altoMatchTolerancia = !filters.alto || (item.altoNum >= (filters.alto - TOLERANCIA) && item.altoNum <= (filters.alto + TOLERANCIA));
+            return busqMatch && appMatch && oemMatch && fmsiMatch && posMatch && anchoMatchTolerancia && altoMatchTolerancia;
         });
 
+        filteredDataCache = filtered;
         currentPage = 1;
         renderCurrentPage();
         updateURLWithFilters();
     };
     
-    // --- RENDERIZADO DE RESULTADOS Y PAGINACIÓN ---
-    const showSkeletonLoader = (count = 12) => { 
-        els.results.innerHTML = Array(count).fill('<div class="skeleton-card"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-box"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>').join(''); 
+    function navigateCarousel(carouselContainer, direction) {
+        const track = carouselContainer.querySelector('.image-track'); 
+        const images = carouselContainer.querySelectorAll('.result-image');
+        const counter = els.modalCounterWrapper.querySelector('.carousel-counter');
+        
+        if (!track || images.length <= 1) return; 
+        let currentIndex = parseInt(track.dataset.currentIndex) || 0; 
+        const totalImages = images.length; 
+        let newIndex = currentIndex + direction;
+        if (newIndex >= totalImages) { newIndex = 0; } else if (newIndex < 0) { newIndex = totalImages - 1; }
+        track.style.transform = `translateX(-${newIndex * 100}%)`; 
+        track.dataset.currentIndex = newIndex; 
+        
+        if (counter) counter.textContent = `${newIndex + 1}/${totalImages}`;
+    }
+    
+    const renderApplicationsList = (aplicaciones) => { const groupedApps = aplicaciones.reduce((acc, app) => { const marca = app.marca || 'N/A'; if (!acc[marca]) { acc[marca] = []; } acc[marca].push(app); return acc; }, {}); Object.keys(groupedApps).forEach(marca => { groupedApps[marca].sort((a, b) => { const serieA = a.serie || ''; const serieB = b.serie || ''; if (serieA < serieB) return -1; if (serieA > serieB) return 1; const anioA = a.año || ''; const anioB = b.año || ''; if (anioA < anioB) return -1; if (anioA > anioB) return 1; return 0; }); }); let appListHTML = ''; for (const marca in groupedApps) { appListHTML += `<div class="app-brand-header">${marca.toUpperCase()}</div>`; groupedApps[marca].forEach(app => { appListHTML += `<div class="app-detail-row"><div>${app.serie || ''}</div><div>${app.litros || ''}</div><div>${app.año || ''}</div></div>`; }); } return appListHTML; };
+    
+    const renderSpecs = (item) => {
+        let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`;
+        const refText = (item.ref && item.ref.length > 0 ? item.ref.join(', ') : 'N/A');
+        specsHTML += `<div class="app-detail-row"><div><strong>Referencias</strong></div><div></div><div>${refText}</div></div>`;
+        const oemText = (item.oem && item.oem.length > 0 ? item.oem.join(', ') : 'N/A');
+        specsHTML += `<div class="app-detail-row"><div><strong>OEM</strong></div><div></div><div>${oemText}</div></div>`;
+        const fmsiText = (item.fmsi && item.fmsi.length > 0 ? item.fmsi.join(', ') : 'N/A');
+        specsHTML += `<div class="app-detail-row"><div><strong>Platina FMSI</strong></div><div></div><div>${fmsiText}</div></div>`;
+        specsHTML += `<div class="app-detail-row"><div><strong>Ancho</strong></div><div></div><div>${item.anchoNum || 'N/A'} mm</div></div>`;
+        specsHTML += `<div class="app-detail-row"><div><strong>Alto</strong></div><div></div><div>${item.altoNum || 'N/A'} mm</div></div>`;
+        return specsHTML;
+    };
+
+    const showSkeletonLoader = (count = 6) => { 
+        let skeletonHTML = ''; 
+        for (let i = 0; i < count; i++) { 
+            skeletonHTML += `<div class="skeleton-card"><div class="skeleton-line long"></div><div class="skeleton-line short"></div><div class="skeleton-box"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>`; 
+        } 
+        els.results.innerHTML = skeletonHTML; 
         els.paginationContainer.innerHTML = '';
     };
 
-    function setupPagination(totalItems) { /* (Código idéntico al anterior) */ }
+    function setupPagination(totalItems) {
+        els.paginationContainer.innerHTML = '';
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (totalPages <= 1) return;
+
+        let paginationHTML = '';
+
+        paginationHTML += `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>Anterior</button>`;
+
+        const maxPagesToShow = 5;
+        const halfPages = Math.floor(maxPagesToShow / 2);
+        let startPage, endPage;
+
+        if (totalPages <= maxPagesToShow) {
+            startPage = 1;
+            endPage = totalPages;
+        } else if (currentPage <= halfPages + 1) {
+            startPage = 1;
+            endPage = maxPagesToShow;
+        } else if (currentPage >= totalPages - halfPages) {
+            startPage = totalPages - maxPagesToShow + 1;
+            endPage = totalPages;
+        } else {
+            startPage = currentPage - halfPages;
+            endPage = currentPage + halfPages;
+        }
+
+        if (startPage > 1) {
+            paginationHTML += `<button class="page-btn" data-page="1">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += `<button class="page-btn" disabled>...</button>`;
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += `<button class="page-btn" disabled>...</button>`;
+            }
+            paginationHTML += `<button class="page-btn" data-page="${totalPages}">${totalPages}</button>`;
+        }
+        
+        paginationHTML += `<button class="page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>Siguiente</button>`;
+
+        els.paginationContainer.innerHTML = paginationHTML;
+    }
 
     const renderCurrentPage = () => {
         const totalResults = filteredDataCache.length;
@@ -110,103 +188,242 @@ document.addEventListener('DOMContentLoaded', () => {
         els.countContainer.innerHTML = `Mostrando <strong>${startNum}–${endNum}</strong> de <strong>${totalResults}</strong> resultados`;
 
         if (totalResults === 0) { 
-            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"/><path d="M21 21L16.65 16.65"/><path d="M11 8V11L13 13"/></svg><p>No se encontraron pastillas</p><span>Intenta ajustar tus filtros.</span></div>`;
-            els.paginationContainer.innerHTML = ''; return; 
+            els.results.innerHTML = `
+            <div class="no-results-container">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"></path>
+                    <path d="M21 21L16.65 16.65"></path>
+                    <path d="M11 8V11L13 13"></path>
+                </svg>
+                <p>No se encontraron pastillas</p>
+                <span>Intenta ajustar tus filtros de búsqueda.</span>
+            </div>`;
+            els.paginationContainer.innerHTML = '';
+            return; 
         }
 
         els.results.innerHTML = paginatedData.map((item, index) => {
             const posBadgeClass = item.posición === 'Delantera' ? 'delantera' : 'trasera';
             const posBadge = `<span class="position-badge ${posBadgeClass}">${item.posición}</span>`;
-            const primaryRef = (item.ref && item.ref.length > 0) ? item.ref[0] : 'N/A'; 
+            const primaryRef = item.ref && item.ref.length > 0 ? item.ref[0] : 'N/A'; 
             
-            // *** CAMBIO: Usar la primera imagen del array 'imagenes' ***
-            const firstImageSrc = (item.imagenes && item.imagenes.length > 0) ? item.imagenes[0] : 'https://via.placeholder.com/300x200.png?text=Sin+Imagen'; 
+            // *** CAMBIO AQUÍ ***
+            // Usa la primera imagen del array 'imagenes' o un placeholder si no hay.
+            const firstImageSrc = (item.imagenes && item.imagenes.length > 0)
+                ? item.imagenes[0]
+                : 'https://via.placeholder.com/300x200.png?text=No+Img'; // Imagen de respaldo
 
-            const appSummaryItems = (item.aplicaciones || []).slice(0, 3).map(app => `${app.marca} ${app.serie}`).filter((v, i, s) => s.indexOf(v) === i); 
-            let appSummaryHTML = appSummaryItems.length > 0 ? `<div class="card-app-summary">${appSummaryItems.join(', ')}${(item.aplicaciones || []).length > 3 ? ', ...' : ''}</div>` : '';
+            const appSummaryItems = item.aplicaciones.slice(0, 3).map(app => `${app.marca} ${app.serie}`).filter((value, index, self) => self.indexOf(value) === index); 
+            let appSummaryHTML = '';
+            if (appSummaryItems.length > 0) {
+                appSummaryHTML = `<div class="card-app-summary">${appSummaryItems.join(', ')}${item.aplicaciones.length > 3 ? ', ...' : ''}</div>`;
+            }
             
-            return `<div class="result-card" data-ref="${primaryRef}" style="animation-delay: ${index * 50}ms" tabindex="0" role="button" aria-haspopup="dialog"> 
-                        <div class="card-thumbnail"><img src="${firstImageSrc}" alt="Referencia ${primaryRef}" class="result-image" loading="lazy"></div>
-                        <div class="card-content-wrapper"><div class="card-details"><div class="card-ref">${primaryRef}</div>${posBadge}</div>${appSummaryHTML}</div> 
-                    </div>`; 
+            return `
+                <div class="result-card" data-ref="${primaryRef}" style="animation-delay: ${index * 50}ms" tabindex="0" role="button" aria-haspopup="dialog"> 
+                    <div class="card-thumbnail"><img src="${firstImageSrc}" alt="Referencia ${primaryRef}" class="result-image" loading="lazy"></div>
+                    <div class="card-content-wrapper">
+                        <div class="card-details">
+                            <div class="card-ref">${primaryRef}</div>
+                            ${posBadge}
+                        </div>
+                        ${appSummaryHTML} 
+                    </div> 
+                </div>`; 
         }).join('');
         
-        // Remover listener antiguo y añadir nuevo para evitar duplicados
         els.results.removeEventListener('click', handleCardClick); 
         els.results.addEventListener('click', handleCardClick); 
         setupPagination(totalResults);
     };
 
-    // --- LÓGICA DEL MODAL ---
     function handleCardClick(event) {
         const card = event.target.closest('.result-card');
-        if (!card) return;
-        const primaryRef = card.dataset.ref; 
-        const itemData = brakePadsData.find(item => item.ref && item.ref[0] === primaryRef); 
-        if (itemData) openModal(itemData); 
+        if (card) { 
+            const primaryRef = card.dataset.ref; 
+            const itemData = brakePadsData.find(item => item.ref && item.ref.length > 0 && item.ref[0] === primaryRef); 
+            if (itemData) { 
+                openModal(itemData); 
+            } 
+        }
     }
     
-    const updateScrollIndicator = () => { /* (Código idéntico al anterior) */ };
-    
-    function navigateCarousel(carouselContainer, direction) { /* (Código idéntico al anterior) */ }
+    const updateScrollIndicator = () => {
+        const wrapper = els.modalDetailsWrapper;
+        const content = els.modalDetailsContent;
+        if (wrapper && content) {
+            wrapper.offsetHeight; 
+            content.offsetHeight;
+            const isScrollable = content.scrollHeight > content.clientHeight;
+            const isAtBottom = content.scrollTop + content.clientHeight >= content.scrollHeight - 5; 
+            if (isScrollable && !isAtBottom) {
+                wrapper.classList.add('scrollable');
+            } else {
+                wrapper.classList.remove('scrollable');
+            }
+        }
+    };
 
     function openModal(item) {
-        const primaryRef = (item.ref && item.ref.length > 0) ? item.ref[0] : 'N/A';
+        const primaryRef = item.ref && item.ref.length > 0 ? item.ref[0] : 'N/A';
         els.modalRef.textContent = primaryRef; 
 
         const posBadgeClass = item.posición === 'Delantera' ? 'delantera' : 'trasera';
         els.modalPosition.innerHTML = `<span class="position-badge ${posBadgeClass}">${item.posición}</span>`;
         
-        // *** CAMBIO: Crear carrusel desde el array 'imagenes' ***
-        const images = (item.imagenes && item.imagenes.length > 0) ? item.imagenes : ['https://via.placeholder.com/300x200.png?text=Sin+Imagen'];
-        const imageCount = images.length;
-        let imageTrackHTML = images.map((imgUrl, i) => 
-            `<img src="${imgUrl}" alt="Ref ${primaryRef} Vista ${i + 1}" class="result-image">`
-        ).join('');
-            
-        els.modalCarousel.innerHTML = `
-            <div class="image-track" style="display:flex; width: ${imageCount * 100}%;" data-current-index="0">${imageTrackHTML}</div> 
-            ${imageCount > 1 ? `
-                <button class="carousel-nav-btn" data-direction="-1" aria-label="Anterior">‹</button>
-                <button class="carousel-nav-btn" data-direction="1" aria-label="Siguiente">›</button>
-            ` : ''}`;
+        // *** CAMBIO AQUÍ ***
+        // Lee el array 'imagenes' del item.
+        const images = (item.imagenes && item.imagenes.length > 0)
+            ? item.imagenes
+            : ['https://via.placeholder.com/300x200.png?text=No+Img']; // Fallback
         
-        // Re-asignar listeners a los botones del carrusel
+        const imageCount = images.length;
+        let imageTrackHTML = '';
+        
+        // Crea un <img> para cada imagen en el array
+        images.forEach((imgSrc, i) => {
+            imageTrackHTML += `<img src="${imgSrc}" alt="Referencia ${primaryRef} Vista ${i + 1}" class="result-image">`;
+        });
+        
+        els.modalCarousel.innerHTML = `<div class="image-track" style="display:flex;" data-current-index="0">${imageTrackHTML}</div> ${imageCount > 1 ? `<button class="carousel-nav-btn" data-direction="-1" aria-label="Imagen anterior">‹</button><button class="carousel-nav-btn" data-direction="1" aria-label="Siguiente imagen">›</button>` : ''}`;
+        
         els.modalCarousel.querySelectorAll('.carousel-nav-btn').forEach(btn => { 
-            btn.onclick = (e) => { e.stopPropagation(); navigateCarousel(els.modalCarousel, parseInt(e.currentTarget.dataset.direction)); }; 
+            btn.onclick = (e) => { 
+                e.stopPropagation(); 
+                const direction = parseInt(e.currentTarget.dataset.direction); 
+                navigateCarousel(els.modalCarousel, direction); 
+            }; 
         });
 
-        // Configurar swipe si es táctil
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) { setupSwipe(els.modalCarousel); }
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            setupSwipe(els.modalCarousel);
+        }
 
-        // Actualizar contador
-        els.modalCounterWrapper.innerHTML = imageCount > 1 ? `<span class="carousel-counter">1/${imageCount}</span>` : '';
+        if (imageCount > 1) {
+            els.modalCounterWrapper.innerHTML = `<span class="carousel-counter">1/${imageCount}</span>`;
+        } else {
+            els.modalCounterWrapper.innerHTML = '';
+        }
 
-        // Renderizar aplicaciones y especificaciones
-        els.modalAppsSpecs.innerHTML = `<div class="applications-list-container">${renderApplicationsList(item.aplicaciones || [])}${renderSpecs(item)}</div>`;
+        els.modalAppsSpecs.innerHTML = `<div class="applications-list-container">${renderApplicationsList(item.aplicaciones)}${renderSpecs(item)}</div>`;
         
         els.modalContent.classList.remove('closing'); 
         els.modal.style.display = 'flex'; 
         document.body.style.overflow = 'hidden'; 
         
-        // Actualizar indicador de scroll después de un pequeño delay
-        requestAnimationFrame(() => setTimeout(updateScrollIndicator, 100));
-        els.modalDetailsContent.addEventListener('scroll', updateScrollIndicator);
+        window.requestAnimationFrame(() => {
+            setTimeout(() => {
+                updateScrollIndicator();
+                els.modalDetailsContent.addEventListener('scroll', updateScrollIndicator);
+            }, 100); 
+        });
     }
 
-    function closeModal() { /* (Código idéntico al anterior) */ }
-    function openGuideModal() { /* (Código idéntico al anterior) */ }
-    function closeGuideModal() { /* (Código idéntico al anterior) */ }
-    function openSideMenu() { /* (Código idéntico al anterior) */ }
-    function closeSideMenu() { /* (Código idéntico al anterior) */ }
-    function setupSwipe(carouselElement) { /* (Código idéntico al anterior) */ }
+    function closeModal() {
+        els.modalContent.classList.add('closing');
+        
+        els.modalDetailsContent.removeEventListener('scroll', updateScrollIndicator);
+        els.modalDetailsWrapper.classList.remove('scrollable'); 
 
-    // --- MANEJO DE ESTADO (URL, RIPPLE, CLEAR) ---
-    const clearAllFilters = () => { /* (Código idéntico al anterior) */ };
-    const createRippleEffect = (event) => { /* (Código idéntico al anterior) */ };
-    const updateURLWithFilters = () => { /* (Código idéntico al anterior) */ };
-    const applyFiltersFromURL = () => { /* (Código idéntico al anterior, pero ajustado para brandColorMap) */ 
-        const params = new URLSearchParams(window.location.search);
+        setTimeout(() => {
+            els.modal.style.display = 'none'; 
+            document.body.style.overflow = ''; 
+            els.modalCarousel.innerHTML = ''; 
+            els.modalRef.textContent = ''; 
+            els.modalPosition.innerHTML = ''; 
+            els.modalAppsSpecs.innerHTML = ''; 
+            els.modalCounterWrapper.innerHTML = '';
+            els.modalContent.classList.remove('closing');
+        }, 220); 
+    }
+
+    function openGuideModal() {
+        els.guideModalContent.classList.remove('closing');
+        els.guideModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeGuideModal() {
+        els.guideModalContent.classList.add('closing');
+        setTimeout(() => {
+            els.guideModal.style.display = 'none';
+            document.body.style.overflow = '';
+                els.guideModalContent.classList.remove('closing');
+        }, 220);
+    }
+    
+    function openSideMenu() {
+        els.sideMenu.classList.add('open');
+        els.sideMenu.setAttribute('aria-hidden', 'false');
+        els.sideMenuOverlay.style.display = 'block';
+        requestAnimationFrame(() => {
+                els.sideMenuOverlay.classList.add('visible');
+        });
+        els.menuBtn.setAttribute('aria-expanded', 'true');
+            els.menuCloseBtn.focus(); 
+    }
+
+    function closeSideMenu() {
+        els.sideMenu.classList.remove('open');
+        els.sideMenu.setAttribute('aria-hidden', 'true');
+        els.sideMenuOverlay.classList.remove('visible');
+        els.menuBtn.setAttribute('aria-expanded', 'false');
+        els.menuBtn.focus(); 
+        setTimeout(() => { 
+            if (!els.sideMenuOverlay.classList.contains('visible')) {
+                els.sideMenuOverlay.style.display = 'none'; 
+            }
+        }, 300);
+    }
+
+    function setupSwipe(carouselElement) {
+        let startX, startY, endX, endY;
+        const threshold = 50; 
+        carouselElement.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+        carouselElement.addEventListener('touchmove', (e) => {
+            if (Math.abs(e.touches[0].clientX - startX) > Math.abs(e.touches[0].clientY - startY)) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        carouselElement.addEventListener('touchend', (e) => {
+            endX = e.changedTouches[0].clientX;
+            endY = e.changedTouches[0].clientY;
+            const diffX = endX - startX;
+            const diffY = endY - startY;
+            if (Math.abs(diffX) > threshold && Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 0) {
+                    navigateCarousel(carouselElement, -1);
+                } else {
+                    navigateCarousel(carouselElement, 1);
+                }
+            }
+        });
+    }
+
+    const clearAllFilters = () => { 
+        const inputsToClear = [els.busqueda, els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto]; 
+        inputsToClear.forEach(input => input.value = ''); 
+        els.posDel.classList.remove('active'); 
+        els.posTras.classList.remove('active'); 
+        
+        if (els.brandTagsContainer) {
+                els.brandTagsContainer.querySelectorAll('.brand-tag.active')
+                    .forEach(activeTag => {
+                        activeTag.classList.remove('active');
+                        activeTag.style.borderColor = ''; 
+                        activeTag.style.color = ''; 
+                    });
+        }
+
+        filterData(); 
+    };
+    const createRippleEffect = (event) => { const button = event.currentTarget; const circle = document.createElement('span'); const diameter = Math.max(button.clientWidth, button.clientHeight); const radius = diameter / 2; const rect = button.getBoundingClientRect(); circle.style.width = circle.style.height = `${diameter}px`; circle.style.left = `${event.clientX - (rect.left + radius)}px`; circle.style.top = `${event.clientY - (rect.top + radius)}px`; circle.classList.add('ripple'); const ripple = button.getElementsByClassName('ripple')[0]; if (ripple) { ripple.remove(); } button.appendChild(circle); };
+    const updateURLWithFilters = () => { const params = new URLSearchParams(); const filters = { busqueda: els.busqueda.value.trim(), marca: els.marca.value.trim(), modelo: els.modelo.value.trim(), anio: els.anio.value.trim(), oem: els.oem.value.trim(), fmsi: els.fmsi.value.trim(), ancho: els.medidasAncho.value.trim(), alto: els.medidasAlto.value.trim(), }; for (const key in filters) { if (filters[key]) { params.set(key, filters[key]); } } const activePositions = getPositionFilter(); if (activePositions.length > 0) { params.set('pos', activePositions.join(',')); } const newUrl = `${window.location.pathname}?${params.toString()}`; history.pushState({}, '', newUrl); };
+    const applyFiltersFromURL = () => { 
+        const params = new URLSearchParams(window.location.search); 
         els.busqueda.value = params.get('busqueda') || ''; 
         const brandFromURL = params.get('marca'); 
         els.marca.value = brandFromURL || ''; 
@@ -217,153 +434,290 @@ document.addEventListener('DOMContentLoaded', () => {
         els.medidasAncho.value = params.get('ancho') || ''; 
         els.medidasAlto.value = params.get('alto') || ''; 
         const posParam = params.get('pos'); 
-        if (posParam) { 
-            if (posParam.includes('Delantera')) els.posDel.classList.add('active'); 
-            if (posParam.includes('Trasera')) els.posTras.classList.add('active'); 
-        } 
+        if (posParam) { if (posParam.includes('Delantera')) els.posDel.classList.add('active'); if (posParam.includes('Trasera')) els.posTras.classList.add('active'); } 
 
-        // Actualizar tags de marca desde URL
         if (els.brandTagsContainer) { 
-             els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => {
-                 activeTag.classList.remove('active');
-                 activeTag.style.borderColor = ''; activeTag.style.color = '';       
-             });
-             if (brandFromURL) { 
-                  const tagToActivate = els.brandTagsContainer.querySelector(`.brand-tag[data-brand="${brandFromURL}"]`);
-                  if (tagToActivate) {
-                      tagToActivate.classList.add('active');
-                      const colorVar = brandColorMap[brandFromURL]; 
-                      if (colorVar) {
-                          const activeColor = getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
-                          tagToActivate.style.borderColor = activeColor; tagToActivate.style.color = activeColor;       
-                      }
-                  }
-             } 
+                els.brandTagsContainer.querySelectorAll('.brand-tag.active')
+                    .forEach(activeTag => {
+                        activeTag.classList.remove('active');
+                        activeTag.style.borderColor = ''; 
+                        activeTag.style.color = ''; 
+                    });
+        }
+        if (brandFromURL && els.brandTagsContainer) { 
+            const tagToActivate = els.brandTagsContainer.querySelector(`.brand-tag[data-brand="${brandFromURL}"]`);
+            if (tagToActivate) {
+                tagToActivate.classList.add('active');
+                const colorVar = brandColorMap[brandFromURL]; 
+                if (colorVar) {
+                    const activeColor = getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
+                    tagToActivate.style.borderColor = activeColor; 
+                    tagToActivate.style.color = activeColor; 
+                }
+            }
         } 
     };
 
-    // --- EVENT LISTENERS ---
     function setupEventListeners() {
-        // Botones flotantes, scroll, menú lateral (idénticos)
-        [els.darkBtn, els.upBtn, els.menuBtn].forEach(btn => btn?.addEventListener('click', createRippleEffect)); 
-        els.darkBtn?.addEventListener('click', () => { /* ... código dark mode ... */ });
-        els.upBtn?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        window.addEventListener('scroll', () => { els.upBtn?.classList.toggle('show', window.scrollY > 300); });
-        els.menuBtn?.addEventListener('click', openSideMenu);
-        els.menuCloseBtn?.addEventListener('click', closeSideMenu);
-        els.sideMenuOverlay?.addEventListener('click', closeSideMenu);
-        els.openGuideLink?.addEventListener('click', () => { closeSideMenu(); setTimeout(openGuideModal, 50); });
-        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && els.sideMenu?.classList.contains('open')) closeSideMenu(); });
+        [els.darkBtn, els.upBtn, els.menuBtn].forEach(btn => btn.addEventListener('click', createRippleEffect)); 
         
-        // Filtros (idénticos)
-        const debouncedFilter = debounce(filterData, 350); // Ligeramente más delay
-        const restartSearchIconAnimation = () => { /* ... código animación ... */ };
-        els.busqueda?.addEventListener('input', (e) => { /* ... código búsqueda ... */ debouncedFilter(); });
-        els.busqueda?.addEventListener('blur', () => { /* ... código búsqueda ... */ });
-        els.busqueda?.addEventListener('focus', () => { /* ... código búsqueda ... */ });
-        [els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto].forEach(input => input?.addEventListener('input', debouncedFilter));
-        [els.posDel, els.posTras].forEach(btn => btn?.addEventListener('click', (e) => { e.currentTarget.classList.toggle('active'); filterData(); }));
+        els.darkBtn.addEventListener('click', () => { const isDark = els.body.classList.toggle('lp-dark'); els.darkBtn.setAttribute('aria-pressed', String(isDark)); const iconAnimation = (icon, isShowing) => { const keyframes = isShowing ? [{ opacity: 0, transform: 'scale(0.6)' }, { opacity: 1, transform: 'scale(1)' }] : [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(0.6)' }]; icon.animate(keyframes, { duration: 400, fill: 'forwards', easing: 'ease-in-out' }); }; iconAnimation(els.sunIcon, !isDark); iconAnimation(els.moonIcon, isDark); els.headerX.style.animation = 'bounceHeader 0.6s cubic-bezier(0.68,-0.55,0.27,1.55)'; setTimeout(() => { els.headerX.style.animation = ''; }, 600); });
+        els.upBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        window.addEventListener('scroll', () => { els.upBtn.classList.toggle('show', window.scrollY > 300); });
         
-        // Botón Limpiar Filtros (idéntico)
-        const trashLid = els.clearBtn?.querySelector('.trash-lid'); const trashBody = els.clearBtn?.querySelector('.trash-body'); 
-        const NUM_SPARKS = 10; const SPARK_COLORS = ['#00ffff', '#ff00ff', '#00ff7f', '#ffc700', '#ff5722'];
-        function createSparks(button) { /* ... código sparks ... */ }
-        els.clearBtn?.addEventListener('click', (e) => { /* ... código limpiar filtros ... */ });
-
-        // Tags de Marca (idéntico)
-        els.brandTagsContainer?.addEventListener('click', (e) => { /* ... código tags ... */ });
-
-        // Paginación (idéntico)
-        els.paginationContainer?.addEventListener('click', (e) => { /* ... código paginación ... */ });
-
-        // Modales (idénticos)
-        els.modalCloseBtn?.addEventListener('click', closeModal);
-        els.modal?.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
-        els.guideModalCloseBtn?.addEventListener('click', closeGuideModal);
-        els.guideModal?.addEventListener('click', (e) => { if (e.target === els.guideModal) closeGuideModal(); });
-        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && els.guideModal?.style.display === 'flex') closeGuideModal(); });
+        els.menuBtn.addEventListener('click', openSideMenu);
+        els.menuCloseBtn.addEventListener('click', closeSideMenu);
+        els.sideMenuOverlay.addEventListener('click', closeSideMenu);
+        els.openGuideLink.addEventListener('click', () => {
+            closeSideMenu(); 
+            setTimeout(openGuideModal, 50); 
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && els.sideMenu.classList.contains('open')) {
+                closeSideMenu();
+            }
+        });
         
-        // Botones de cambio de vista (Grid/Lista)
-        const switchView = (view) => {
-             if (view === 'grid' && els.results?.classList.contains('list-view')) {
-                 els.results.classList.remove('list-view');
-                 els.viewGridBtn?.classList.add('active'); els.viewGridBtn?.setAttribute('aria-checked', 'true');
-                 els.viewListBtn?.classList.remove('active'); els.viewListBtn?.setAttribute('aria-checked', 'false');
-                 localStorage.setItem('viewMode', 'grid');
-             } else if (view === 'list' && !els.results?.classList.contains('list-view')) {
-                 els.results.classList.add('list-view');
-                 els.viewGridBtn?.classList.remove('active'); els.viewGridBtn?.setAttribute('aria-checked', 'false');
-                 els.viewListBtn?.classList.add('active'); els.viewListBtn?.setAttribute('aria-checked', 'true');
-                 localStorage.setItem('viewMode', 'list');
-             }
-        };
-        els.viewGridBtn?.addEventListener('click', () => switchView('grid'));
-        els.viewListBtn?.addEventListener('click', () => switchView('list'));
-        // Aplicar vista guardada al inicio
+        const debouncedFilter = debounce(filterData, 300);
+
         const savedView = localStorage.getItem('viewMode');
-        switchView(savedView === 'list' ? 'list' : 'grid');
+        if (savedView === 'list') {
+            els.results.classList.add('list-view');
+            els.viewGridBtn.classList.remove('active');
+            els.viewGridBtn.setAttribute('aria-checked', 'false');
+            els.viewListBtn.classList.add('active');
+            els.viewListBtn.setAttribute('aria-checked', 'true');
+        } else {
+            els.results.classList.remove('list-view');
+            els.viewGridBtn.classList.add('active');
+            els.viewGridBtn.setAttribute('aria-checked', 'true');
+            els.viewListBtn.classList.remove('active');
+            els.viewListBtn.setAttribute('aria-checked', 'false');
+        }
+        els.viewGridBtn.addEventListener('click', () => {
+            if (els.results.classList.contains('list-view')) {
+                els.results.classList.remove('list-view');
+                els.viewGridBtn.classList.add('active');
+                els.viewGridBtn.setAttribute('aria-checked', 'true');
+                els.viewListBtn.classList.remove('active');
+                els.viewListBtn.setAttribute('aria-checked', 'false');
+                localStorage.setItem('viewMode', 'grid');
+            }
+        });
+        els.viewListBtn.addEventListener('click', () => {
+            if (!els.results.classList.contains('list-view')) {
+                els.results.classList.add('list-view');
+                els.viewGridBtn.classList.remove('active');
+                els.viewGridBtn.setAttribute('aria-checked', 'false');
+                els.viewListBtn.classList.add('active');
+                els.viewListBtn.setAttribute('aria-checked', 'true');
+                localStorage.setItem('viewMode', 'list');
+            }
+        });
+        
+        const restartSearchIconAnimation = () => {
+            const oldIcon = els.searchContainer.querySelector('.search-icon');
+            if (oldIcon) {
+                const newIcon = oldIcon.cloneNode(true);
+                oldIcon.parentNode.replaceChild(newIcon, oldIcon);
+                
+                if (els.busqueda.value.trim() !== '') {
+                    newIcon.style.animation = 'none'; 
+                    void newIcon.offsetWidth; 
+                    newIcon.style.animation = ''; 
+                }
+            }
+        };
+        els.busqueda.addEventListener('input', (e) => {
+            if (e.target.value.trim() !== '') {
+                els.searchContainer.classList.add('active');
+                restartSearchIconAnimation(); 
+            } else {
+                els.searchContainer.classList.remove('active');
+            }
+            debouncedFilter();
+        });
+        els.busqueda.addEventListener('blur', () => {
+            if (els.busqueda.value.trim() === '') {
+                els.searchContainer.classList.remove('active');
+            }
+        });
+        els.busqueda.addEventListener('focus', () => {
+            if (els.busqueda.value.trim() !== '') {
+                els.searchContainer.classList.add('active');
+                restartSearchIconAnimation();
+            }
+        });
+
+        const otherFilterInputs = [els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto];
+        otherFilterInputs.forEach(input => input.addEventListener('input', debouncedFilter));
+        
+        [els.posDel, els.posTras].forEach(btn => btn.addEventListener('click', (e) => { e.currentTarget.classList.toggle('active'); filterData(); }));
+        
+        const trashLid = els.clearBtn.querySelector('.trash-lid'); 
+        const trashBody = els.clearBtn.querySelector('.trash-body'); 
+        const NUM_SPARKS = 10; 
+        const SPARK_COLORS = ['#00ffff', '#ff00ff', '#00ff7f', '#ffc700', '#ff5722'];
+        function createSparks(button) { for (let i = 0; i < NUM_SPARKS; i++) { const spark = document.createElement('div'); spark.classList.add('spark'); const size = Math.random() * 4 + 3; spark.style.width = `${size}px`; spark.style.height = `${size}px`; spark.style.backgroundColor = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)]; spark.style.left = `calc(50% + ${Math.random() * 20 - 10}px)`; spark.style.top = `calc(50% + ${Math.random() * 20 - 10}px)`; const angle = Math.random() * Math.PI * 2; const distance = Math.random() * 25 + 20; const sparkX = Math.cos(angle) * distance; const sparkY = Math.sin(angle) * distance; spark.style.setProperty('--spark-x', `${sparkX}px`); spark.style.setProperty('--spark-y', `${sparkY}px`); button.appendChild(spark); spark.addEventListener('animationend', () => spark.remove(), { once: true }); } }
+        
+        els.clearBtn.addEventListener('click', (e) => {
+            if (els.clearBtn.disabled) return;
+            els.clearBtn.disabled = true;
+
+            const rect = e.currentTarget.getBoundingClientRect();
+            createRippleEffect({ currentTarget: e.currentTarget, clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2, target: e.currentTarget, preventDefault: () => {} });
+
+            els.clearBtn.classList.add('animate-button');
+            if (trashLid) trashLid.classList.add('animate-lid');
+            if (trashBody) trashBody.classList.add('animate-body');
+            createSparks(els.clearBtn);
+            clearAllFilters();
+            
+            setTimeout(() => {
+                els.clearBtn.classList.remove('animate-button');
+                if (trashLid) trashLid.classList.remove('animate-lid');
+                if (trashBody) trashBody.classList.remove('animate-body');
+                els.clearBtn.disabled = false;
+            }, 900); 
+        });
+
+        if (els.brandTagsContainer) {
+            els.brandTagsContainer.addEventListener('click', (e) => {
+                const tag = e.target.closest('.brand-tag');
+                if (!tag) return; 
+
+                const brand = tag.dataset.brand;
+                const isActive = tag.classList.contains('active');
+
+                els.brandTagsContainer.querySelectorAll('.brand-tag.active')
+                    .forEach(activeTag => {
+                        activeTag.classList.remove('active');
+                        activeTag.style.borderColor = ''; 
+                        activeTag.style.color = ''; 
+                    });
+
+                if (isActive) {
+                    els.marca.value = '';
+                } else {
+                    tag.classList.add('active');
+                    const colorVar = brandColorMap[brand]; 
+                    if (colorVar) {
+                        const activeColor = getComputedStyle(document.documentElement).getPropertyValue(colorVar).trim();
+                        tag.style.borderColor = activeColor; 
+                        tag.style.color = activeColor; 
+                    }
+                    els.marca.value = brand; 
+                }
+                
+                filterData(); 
+            });
+        }
+
+        els.paginationContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.page-btn');
+            if (!btn || btn.disabled || btn.classList.contains('active')) {
+                return;
+            }
+
+            const newPage = parseInt(btn.dataset.page);
+            if (newPage) {
+                currentPage = newPage;
+                renderCurrentPage();
+                els.resultsHeaderCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+            }
+        });
+
+        els.modalCloseBtn.addEventListener('click', closeModal);
+        els.modal.addEventListener('click', (event) => { 
+            if (event.target === els.modal) { 
+                closeModal(); 
+            } 
+        });
+        
+        els.guideModalCloseBtn.addEventListener('click', closeGuideModal);
+        els.guideModal.addEventListener('click', (event) => { 
+            if (event.target === els.guideModal) { 
+                closeGuideModal(); 
+            } 
+        });
+            window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && els.guideModal.style.display === 'flex') {
+                closeGuideModal();
+            }
+        });
     }
 
-    // --- INICIALIZACIÓN ---
     async function inicializarApp() {
         showSkeletonLoader();
         
-        let rawData;
         try {
-            // *** CAMBIO: Cargar datos desde data.json ***
+            // *** CAMBIO AQUÍ ***
+            // Carga los datos desde el archivo data.json
             const response = await fetch('data.json');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            rawData = await response.json();
+            if (!response.ok) {
+                throw new Error(`Error HTTP! estado: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            // Procesa los datos (igual que antes)
+            brakePadsData = data.map(item => { const partes = item.medidas.split('x').map(s => parseFloat(s.trim())); return { ...item, anchoNum: partes[0] || 0, altoNum: partes[1] || 0 }; });
+            
+            const getAllApplicationValues = (key) => { const allValues = new Set(); brakePadsData.forEach(item => { item.aplicaciones.forEach(app => { const prop = (key === 'modelo') ? 'serie' : key; if (app[prop]) allValues.add(app[prop]); }); }); return [...allValues].sort(); };
+            fillDatalist(els.datalistMarca, getAllApplicationValues('marca')); 
+            fillDatalist(els.datalistModelo, getAllApplicationValues('modelo')); 
+            fillDatalist(els.datalistAnio, getAllApplicationValues('año'));
 
-        } catch (error) {
-            console.error("Error al cargar o parsear data.json:", error);
-            els.results.innerHTML = `<div class="no-results-container"><p>Error al cargar datos</p><span>${error.message}</span></div>`;
-            return; // Detener si no se pueden cargar los datos
-        }
+            const allOems = [...new Set(brakePadsData.flatMap(i => i.oem || []))].filter(Boolean).sort();
+            const allFmsis = [...new Set(brakePadsData.flatMap(i => i.fmsi || []))].filter(Boolean).sort();
+            fillDatalist(els.datalistOem, allOems);
+            fillDatalist(els.datalistFmsi, allFmsis);
 
-        // Procesar datos (añadir anchoNum, altoNum)
-        brakePadsData = rawData.map(item => { 
-            const medidas = (item.medidas || '').split('x').map(s => parseFloat(s.trim())); 
-            return { 
-                ...item, 
-                anchoNum: medidas[0] || 0, 
-                altoNum: medidas[1] || 0 
-            }; 
-        });
-        
-        // Rellenar Datalists
-        const getAllValues = (key, isApp = false) => {
-            const values = new Set();
-            brakePadsData.forEach(item => {
-                if (isApp) {
-                    (item.aplicaciones || []).forEach(app => { if (app[key]) values.add(app[key]); });
-                } else {
-                    if (Array.isArray(item[key])) { item[key].forEach(v => { if(v) values.add(v); }); } 
-                    else if (item[key]) { values.add(item[key]); }
-                }
+            const allBrandsList = brakePadsData.flatMap(item => item.aplicaciones.map(app => app.marca)).filter(Boolean);
+            const brandFrequencies = allBrandsList.reduce((counts, brand) => {
+                counts[brand] = (counts[brand] || 0) + 1;
+                return counts;
+            }, {});
+            const sortedBrands = Object.entries(brandFrequencies)
+                .sort(([, countA], [, countB]) => countB - countA)
+                .slice(0, 10)
+                .map(([brand]) => brand); 
+
+            // Mapa de marcas a colores
+            const brandColors = [
+                '--brand-color-1', '--brand-color-2', '--brand-color-3', '--brand-color-4', '--brand-color-5', 
+                '--brand-color-6', '--brand-color-7', '--brand-color-8', '--brand-color-9', '--brand-color-10'
+            ];
+            brandColorMap = {}; 
+            sortedBrands.forEach((brand, index) => {
+                brandColorMap[brand] = brandColors[index % brandColors.length]; 
             });
-            return [...values].sort();
-        };
-        fillDatalist(els.datalistMarca, getAllValues('marca', true)); 
-        fillDatalist(els.datalistModelo, getAllValues('serie', true)); 
-        fillDatalist(els.datalistAnio, getAllValues('año', true));
-        fillDatalist(els.datalistOem, getAllValues('oem'));
-        fillDatalist(els.datalistFmsi, getAllValues('fmsi'));
 
-        // Generar Tags de Marca Populares
-        const brandFrequencies = brakePadsData.flatMap(item => item.aplicaciones?.map(app => app.marca) || []).filter(Boolean)
-            .reduce((counts, brand) => { counts[brand] = (counts[brand] || 0) + 1; return counts; }, {});
-        const sortedBrands = Object.entries(brandFrequencies).sort(([, a], [, b]) => b - a).slice(0, 10).map(([b]) => b); 
-        const brandColors = ['--brand-color-1','--brand-color-2','--brand-color-3','--brand-color-4','--brand-color-5','--brand-color-6','--brand-color-7','--brand-color-8','--brand-color-9','--brand-color-10'];
-        brandColorMap = sortedBrands.reduce((map, brand, i) => { map[brand] = brandColors[i % brandColors.length]; return map; }, {});
-        if (els.brandTagsContainer) els.brandTagsContainer.innerHTML = sortedBrands.map(brand => `<button class="brand-tag" data-brand="${brand}">${brand}</button>`).join('');
+            if (els.brandTagsContainer) { 
+                els.brandTagsContainer.innerHTML = sortedBrands.map(brand => 
+                    `<button class="brand-tag" data-brand="${brand}">${brand}</button>`
+                ).join('');
+            }
 
-        // Aplicar filtros iniciales (de URL) y renderizar
-        applyFiltersFromURL(); 
-        filterData(); // Esto llamará a renderCurrentPage
+            applyFiltersFromURL(); 
+            filterData();
+            
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+            // Muestra un error en la UI si el fetch falla
+            els.results.innerHTML = `
+                <div class="no-results-container">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                        <line x1="12" y1="2" x2="12" y2="12"></line>
+                        <line x1="12" y1="22" x2="12" y2="22"></line>
+                    </svg>
+                    <p>Error al cargar datos</p>
+                    <span>No se pudo conectar con la base de datos.</span>
+                </div>`;
+            els.countContainer.innerHTML = "Error";
+        }
     }
 
-    // Iniciar la aplicación
     setupEventListeners(); 
     inicializarApp();
 });
