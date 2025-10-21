@@ -1,24 +1,24 @@
 [
   {
     "ref": [
-      "001INC 001BP K0001"
+      "001INC - 001BP - K0001"
     ],
     "oem": [],
     "fmsi": [
       "D001"
     ],
     "posición": "Delantera",
-    "medidas": "104,4 x 56,3",
+    "medidas": "104.4 x 56.3",
     "imagenes": [
       "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
     ],
     "aplicaciones": [
       {
-        "marca": "Chevrtolet",
+        "marca": "Chevrolet",
         "serie": "Monza",
         "litros": "1.8 2.0",
         "año": "1985-1992",
-        "especificacion": ""
+        "especificacion": "Holis"
       },
       {
         "marca": "Fiat",
