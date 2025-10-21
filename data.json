@@ -86,5 +86,28 @@
         "especificacion": ""
       }
     ]
+  },
+  {
+    "ref": [
+      "003"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D003"
+    ],
+    "posición": "Delantera",
+    "medidas": "93.4 x 56.3",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Renault",
+        "serie": "R6 Girling",
+        "litros": "",
+        "año": "1984",
+        "especificacion": ""
+      }
+    ]
   }
 ]
