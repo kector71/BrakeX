@@ -109,5 +109,212 @@
         "especificacion": ""
       }
     ]
+  },
+  {
+    "ref": [
+      "005INC 7261BP K0005 FDB393 P205-306"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D005",
+      "D371"
+    ],
+    "posición": "Delantera",
+    "medidas": "105 x 54",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Renault",
+        "serie": "9",
+        "litros": "",
+        "año": "1983-1999",
+        "especificacion": "aplica inyección"
+      },
+      {
+        "marca": "Renault",
+        "serie": "18",
+        "litros": "",
+        "año": "1983-1987",
+        "especificacion": ""
+      },
+      {
+        "marca": "Renault",
+        "serie": "19",
+        "litros": "",
+        "año": "1983-2001",
+        "especificacion": ""
+      },
+      {
+        "marca": "Renault",
+        "serie": "21 RS",
+        "litros": "1.6",
+        "año": "1983-1990",
+        "especificacion": ""
+      },
+      {
+        "marca": "Renault",
+        "serie": "Clio I",
+        "litros": "",
+        "año": "1983-2004",
+        "especificacion": ""
+      },
+      {
+        "marca": "Renault",
+        "serie": "Twingo",
+        "litros": "1.2 8v",
+        "año": "1995-2006",
+        "especificacion": ""
+      },
+      {
+        "marca": "Renault",
+        "serie": "Megane I",
+        "litros": "",
+        "año": "2000-2004",
+        "especificacion": "aplica inyección"
+      },
+      {
+        "marca": "Peugeot",
+        "serie": "106",
+        "litros": "1.4",
+        "año": "1991-2001",
+        "especificacion": ""
+      },
+      {
+        "marca": "Peugeot",
+        "serie": "205",
+        "litros": "",
+        "año": "1993-1998",
+        "especificacion": ""
+      },
+      {
+        "marca": "Peugeot",
+        "serie": "306",
+        "litros": "1.1 - 1.4",
+        "año": "1993-2000",
+        "especificacion": ""
+      },
+      {
+        "marca": "Peugeot",
+        "serie": "405",
+        "litros": "",
+        "año": "",
+        "especificacion": ""
+      },
+      {
+        "marca": "Citroen",
+        "serie": "Saxo",
+        "litros": "1.4",
+        "año": "1993-1998",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "006INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D006"
+    ],
+    "posición": "Delantera",
+    "medidas": "142.2 x 53.4",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Nissan",
+        "serie": "Patrol",
+        "litros": "",
+        "año": "1981-1992",
+        "especificacion": ""
+      },
+      {
+        "marca": "Nissan",
+        "serie": "Samurai",
+        "litros": "",
+        "año": "1981-1987",
+        "especificacion": ""
+      },
+      {
+        "marca": "Nissan",
+        "serie": "Y60",
+        "litros": "",
+        "año": "1990-1992",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "007INC 7244BP"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D007"
+    ],
+    "posición": "Delantera",
+    "medidas": "122.7 x 48.4",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Renault",
+        "serie": "21 RX-GTX",
+        "litros": "",
+        "año": "1987-1990",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "010INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D010"
+    ],
+    "posición": "Delantera",
+    "medidas": "277 x 104.3",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Volvo",
+        "serie": "Cargador",
+        "litros": "",
+        "año": "",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "014INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D014"
+    ],
+    "posición": "Delantera",
+    "medidas": "129.8 x 52.4",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Mazda",
+        "serie": "626 Asahi",
+        "litros": "",
+        "año": "1989-1995",
+        "especificacion": ""
+      }
+    ]
   }
 ]
