@@ -17,28 +17,28 @@
         "marca": "Chevrtolet",
         "serie": "Monza",
         "litros": "1.8 2.0",
-        "año": "1985-1992",
+        "año": "85-92",
         "especificacion": ""
       },
       {
         "marca": "Fiat",
         "serie": "Tempra",
         "litros": "",
-        "año": "1996",
+        "año": "96",
         "especificacion": ""
       },
       {
         "marca": "Fiat",
         "serie": "Uno",
         "litros": "",
-        "año": "1992",
+        "año": "92",
         "especificacion": ""
       },
       {
         "marca": "Fiat",
         "serie": "Premio",
         "litros": "1.3",
-        "año": "1990-1997",
+        "año": "90-97",
         "especificacion": ""
       },
       {
@@ -75,14 +75,14 @@
         "marca": "Fiat",
         "serie": "125 argentino",
         "litros": "",
-        "año": "1996",
+        "año": "96",
         "especificacion": ""
       },
       {
         "marca": "Fiat",
         "serie": "128 argentino",
         "litros": "",
-        "año": "1976",
+        "año": "76",
         "especificacion": ""
       }
     ]
@@ -105,7 +105,7 @@
         "marca": "Renault",
         "serie": "R6 Girling",
         "litros": "",
-        "año": "1984",
+        "año": "84",
         "especificacion": ""
       }
     ]
@@ -129,70 +129,70 @@
         "marca": "Renault",
         "serie": "9",
         "litros": "",
-        "año": "1983-1999",
+        "año": "83-99",
         "especificacion": "aplica inyección"
       },
       {
         "marca": "Renault",
         "serie": "18",
         "litros": "",
-        "año": "1983-1987",
+        "año": "83-87",
         "especificacion": ""
       },
       {
         "marca": "Renault",
         "serie": "19",
         "litros": "",
-        "año": "1983-2001",
+        "año": "83-01",
         "especificacion": ""
       },
       {
         "marca": "Renault",
         "serie": "21 RS",
         "litros": "1.6",
-        "año": "1983-1990",
+        "año": "83-90",
         "especificacion": ""
       },
       {
         "marca": "Renault",
         "serie": "Clio I",
         "litros": "",
-        "año": "1983-2004",
+        "año": "83-04",
         "especificacion": ""
       },
       {
         "marca": "Renault",
         "serie": "Twingo",
         "litros": "1.2 8v",
-        "año": "1995-2006",
+        "año": "95-06",
         "especificacion": ""
       },
       {
         "marca": "Renault",
         "serie": "Megane I",
         "litros": "",
-        "año": "2000-2004",
+        "año": "00-04",
         "especificacion": "aplica inyección"
       },
       {
         "marca": "Peugeot",
         "serie": "106",
         "litros": "1.4",
-        "año": "1991-2001",
+        "año": "91-01",
         "especificacion": ""
       },
       {
         "marca": "Peugeot",
         "serie": "205",
         "litros": "",
-        "año": "1993-1998",
+        "año": "93-98",
         "especificacion": ""
       },
       {
         "marca": "Peugeot",
         "serie": "306",
         "litros": "1.1 - 1.4",
-        "año": "1993-2000",
+        "año": "93-00",
         "especificacion": ""
       },
       {
@@ -206,7 +206,7 @@
         "marca": "Citroen",
         "serie": "Saxo",
         "litros": "1.4",
-        "año": "1993-1998",
+        "año": "93-98",
         "especificacion": ""
       }
     ]
@@ -229,21 +229,21 @@
         "marca": "Nissan",
         "serie": "Patrol",
         "litros": "",
-        "año": "1981-1992",
+        "año": "81-92",
         "especificacion": ""
       },
       {
         "marca": "Nissan",
         "serie": "Samurai",
         "litros": "",
-        "año": "1981-1987",
+        "año": "81-87",
         "especificacion": ""
       },
       {
         "marca": "Nissan",
         "serie": "Y60",
         "litros": "",
-        "año": "1990-1992",
+        "año": "90-92",
         "especificacion": ""
       }
     ]
@@ -266,7 +266,7 @@
         "marca": "Renault",
         "serie": "21 RX-GTX",
         "litros": "",
-        "año": "1987-1990",
+        "año": "87-90",
         "especificacion": ""
       }
     ]
@@ -312,14 +312,14 @@
         "marca": "Mazda",
         "serie": "626 Asahi",
         "litros": "",
-        "año": "1989-1995",
+        "año": "89-95",
         "especificacion": ""
       }
     ]
   },
   {
     "ref": [
-      "017"
+      "017INC"
     ],
     "oem": [],
     "fmsi": [
@@ -336,6 +336,98 @@
         "serie": "2104,2105,2106,2107",
         "litros": "",
         "año": "92-95",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "018INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D018"
+    ],
+    "posición": "Delantera",
+    "medidas": "104 x 62.3",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Lada",
+        "serie": "Samada",
+        "litros": "",
+        "año": "92",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "021INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D021"
+    ],
+    "posición": "Delantera",
+    "medidas": "93 x 50.5",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Tavria",
+        "serie": "Tavria Coupe",
+        "litros": "",
+        "año": "92-93",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "022INC - 3546BP"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D022"
+    ],
+    "posición": "Delantera",
+    "medidas": "133.3 x 47.2",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Chevrolet",
+        "serie": "WFR",
+        "litros": "",
+        "año": "92",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "023INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D023 1/0"
+    ],
+    "posición": "Delantera",
+    "medidas": "133.2 x 52",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Kia",
+        "serie": "Besta",
+        "litros": "",
+        "año": "92",
         "especificacion": ""
       }
     ]
