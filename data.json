@@ -316,5 +316,28 @@
         "especificacion": ""
       }
     ]
+  },
+  {
+    "ref": [
+      "017"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D017"
+    ],
+    "posición": "Delantera",
+    "medidas": "84 x 60",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Lada",
+        "serie": "2104,2105,2106,2107",
+        "litros": "",
+        "año": "92-95",
+        "especificacion": ""
+      }
+    ]
   }
 ]
