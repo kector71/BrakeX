@@ -461,24 +461,204 @@
         "especificacion": ""
       },
       {
-        "marca": "Dodge",
+        "marca": "Porshe",
         "serie": "924",
         "litros": "",
         "año": "79-84",
         "especificacion": ""
       },
       {
-        "marca": "Dodge",
+        "marca": "Porshe",
         "serie": "928",
         "litros": "",
         "año": "",
         "especificacion": ""
       },
       {
-        "marca": "Dodge",
+        "marca": "Porshe",
         "serie": "944",
         "litros": "",
         "año": "",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "025INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D25"
+    ],
+    "posición": "Delantera",
+    "medidas": "125.7 x 45",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Lada",
+        "serie": "Campero 2121 Niva",
+        "litros": "",
+        "año": "79-92",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "026"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D97"
+    ],
+    "posición": "Delantera",
+    "medidas": "108.8 x 47.8",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Fiat",
+        "serie": "Panorama 131",
+        "litros": "",
+        "año": "80-83",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "028INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D028"
+    ],
+    "posición": "Delantera",
+    "medidas": "89.7 x 57.5",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Fiat",
+        "serie": "147",
+        "litros": "",
+        "año": "80-82",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "029INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D029"
+    ],
+    "posición": "Delantera",
+    "medidas": "99.2 x 64",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Renault",
+        "serie": "R12 Auto Girlind",
+        "litros": "",
+        "año": "73-81",
+        "especificacion": ""
+      },
+      {
+        "marca": "Renault",
+        "serie": "R18 Tl, GTl, Girling",
+        "litros": "",
+        "año": "81-84",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "035INC 7540BP"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D035"
+    ],
+    "posición": "Delantera",
+    "medidas": "110.8 x 41.4",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Chevrolet",
+        "serie": "Jimmy",
+        "litros": "",
+        "año": "99-10",
+        "especificacion": ""
+      },
+      {
+        "marca": "Chevrolet",
+        "serie": "Samurai",
+        "litros": "",
+        "año": "97-03",
+        "especificacion": ""
+      },
+      {
+        "marca": "Suzuki",
+        "serie": "Samurai",
+        "litros": "",
+        "año": "88-95",
+        "especificacion": ""
+      },
+      {
+        "marca": "Suzuki",
+        "serie": "SJ-410",
+        "litros": "",
+        "año": "80-90",
+        "especificacion": ""
+      },
+      {
+        "marca": "Suzuki",
+        "serie": "JIMNY AT",
+        "litros": "",
+        "año": "21",
+        "especificacion": ""
+      }
+    ]
+  },
+  {
+    "ref": [
+      "046INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D046"
+    ],
+    "posición": "Delantera",
+    "medidas": "109.4 x 43.9",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Chevrolet",
+        "serie": "Steem",
+        "litros": "1.3",
+        "año": "92-97",
+        "especificacion": ""
+      },
+      {
+        "marca": "Chevrolet",
+        "serie": "SWIFT",
+        "litros": "1.0",
+        "año": "83-93",
         "especificacion": ""
       }
     ]
