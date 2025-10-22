@@ -662,5 +662,42 @@
         "especificacion": ""
       }
     ]
+  },
+  {
+    "ref": [
+      "047INC"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D047"
+    ],
+    "posición": "Delantera",
+    "medidas": "154.4 x 63.4",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Asia",
+        "serie": "Hi Topic",
+        "litros": "",
+        "año": "93",
+        "especificacion": ""
+      },
+      {
+        "marca": "Kia",
+        "serie": "K2500",
+        "litros": "2.5",
+        "año": "07-09",
+        "especificacion": ""
+      },
+      {
+        "marca": "Kia",
+        "serie": "K2700",
+        "litros": "2.7 FURGON DIESEL 4X2",
+        "año": "00-12",
+        "especificacion": ""
+      }
+    ]
   }
 ]
