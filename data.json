@@ -431,5 +431,56 @@
         "especificacion": ""
       }
     ]
+  },
+  {
+    "ref": [
+      "024INC 7045BP"
+    ],
+    "oem": [],
+    "fmsi": [
+      "D24"
+    ],
+    "posición": "Delantera",
+    "medidas": "76.8 x 58.6",
+    "imagenes": [
+      "https://via.placeholder.com/300x200.png?text=Sin+Imagen"
+    ],
+    "aplicaciones": [
+      {
+        "marca": "Dodge",
+        "serie": "100",
+        "litros": "",
+        "año": "75-77",
+        "especificacion": ""
+      },
+      {
+        "marca": "Dodge",
+        "serie": "Alpine",
+        "litros": "",
+        "año": "78-82",
+        "especificacion": ""
+      },
+      {
+        "marca": "Dodge",
+        "serie": "924",
+        "litros": "",
+        "año": "79-84",
+        "especificacion": ""
+      },
+      {
+        "marca": "Dodge",
+        "serie": "928",
+        "litros": "",
+        "año": "",
+        "especificacion": ""
+      },
+      {
+        "marca": "Dodge",
+        "serie": "944",
+        "litros": "",
+        "año": "",
+        "especificacion": ""
+      }
+    ]
   }
 ]
