@@ -239,8 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const iconAnimation = (iconToShow, iconToHide) => {
             if (!iconToShow) return;
             
-            // ***** ESTA ES LA CORRECCIÓN CLAVE *****
-            // Añadir 'translate(-50%, -50%)' a todos los transforms
+            // Corrección clave: Añadir 'translate(-50%, -50%)' para mantener el centrado
             const showKeyframes = [
                 { opacity: 0, transform: 'translate(-50%, -50%) scale(0.6) rotate(-90deg)' }, 
                 { opacity: 1, transform: 'translate(-50%, -50%) scale(1) rotate(0deg)' }
@@ -249,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 { opacity: 1, transform: 'translate(-50%, -50%) scale(1) rotate(0deg)' }, 
                 { opacity: 0, transform: 'translate(-50%, -50%) scale(0.6) rotate(90deg)' }
             ];
-            // ***** FIN DE LA CORRECCIÓN CLAVE *****
             
             const options = { duration: 400, fill: 'forwards', easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' };
             
@@ -298,18 +296,38 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('themePreference', 'netlify');
         };
 
+        // ===== INICIO DE LA MODIFICACIÓN (ANIMACIÓN) =====
         if(els.netlifyBtn) {
             els.netlifyBtn.addEventListener('click', () => {
+                // Lógica de tema original
                 const isCurrentlyNetlify = els.body.classList.contains('netlify-dark');
                 if (isCurrentlyNetlify) {
                     applyOriginalTheme('light');
                 } else {
                     applyNetlifyTheme();
                 }
+                
+                // Animación del header original
                  els.headerX.style.animation = 'bounceHeader 0.6s cubic-bezier(0.68,-0.55,0.27,1.55)';
                  setTimeout(() => { els.headerX.style.animation = ''; }, 600);
+                 
+                // Nueva Animación para el icono de la paleta
+                const themeIcon = els.netlifyBtn.querySelector('.lp-icon-palette');
+                if (themeIcon) {
+                    themeIcon.animate([
+                        // Usamos translate(-50%, -50%) para mantenerlo centrado
+                        { transform: 'translate(-50%, -50%) scale(0.8) rotate(0deg)', opacity: 0.7 },
+                        { transform: 'translate(-50%, -50%) scale(1.2) rotate(30deg)', opacity: 1 },
+                        { transform: 'translate(-50%, -50%) scale(1) rotate(0deg)', opacity: 1 }
+                    ], {
+                        duration: 400,
+                        easing: 'ease-out'
+                    });
+                }
             });
         }
+        // ===== FIN DE LA MODIFICACIÓN =====
+
 
         // --- Aplicar Tema Guardado al Cargar ---
         const savedTheme = localStorage.getItem('themePreference');
