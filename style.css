@@ -40,6 +40,9 @@
     --brand-color-4: #ffc107; --brand-color-5: #17a2b8; --brand-color-6: #fd7e14;
     --brand-color-7: #6f42c1; --brand-color-8: #e83e8c; --brand-color-9: #6c757d;
     --brand-color-10: #343a40;
+    --material-surface-light-rgb: 255, 255, 255;
+    --badge-menta-bg: #98FB98; /* Verde Menta Claro */
+    --badge-menta-text: #006400; /* Verde Oscuro */
 }
 
 /* === MODO OSCURO AMOLED === */
@@ -78,10 +81,11 @@ body.lp-dark {
     --brand-color-4: #ffca2c; --brand-color-5: #20c997; --brand-color-6: #fd7e14;
     --brand-color-7: #6f42c1; --brand-color-8: #d63384; --brand-color-9: #6c757d;
     --brand-color-10: #495057;
+    --material-surface-light-rgb: 17, 17, 17;
 }
 
-/* === MODO OSCURO NETLIFY === */
-body.netlify-dark {
+/* === MODO ORBITAL === */
+body.modo-orbital {
     --bg-color: #0f172a;
     --text-color: #cbd5e1;
     --material-surface-light: #1e293b;
@@ -123,6 +127,9 @@ body.netlify-dark {
     --brand-color-4: #ffca2c; --brand-color-5: #20c997; --brand-color-6: #fd7e14;
     --brand-color-7: #6f42c1; --brand-color-8: #d63384; --brand-color-9: #6c757d;
     --brand-color-10: #495057;
+
+    --arrow-glow-animation: arrow-glow;
+    --material-surface-light-rgb: 30, 41, 59;
 }
 
 .lp-icon-palette { stroke: var(--icon-palette-stroke); }
@@ -163,7 +170,7 @@ header h1 {
     border-left: none; padding-left: 12px;
     transition: color 0.5s ease, opacity 0.3s ease;
 }
-body.lp-dark .header-subtitle, body.netlify-dark .header-subtitle { opacity: 0.85; }
+body.lp-dark .header-subtitle, body.modo-orbital .header-subtitle { opacity: 0.85; }
 header .header-x {
     height: 1.1em;
     width: auto; display: inline-block; vertical-align: middle;
@@ -177,16 +184,16 @@ header .header-x path {
 /* ================== ESTILOS DE BOTONES (CORREGIDO) ================== */
 
 /* Botón base: SIN display:flex */
-.material-btn { 
-    position: relative; 
-    width: 40px; height: 40px; border-radius: 50%; 
-    background-color: var(--material-surface-light); 
-    color: var(--text-color); 
-    box-shadow: var(--elevation-2); 
-    cursor: pointer; overflow: hidden; 
-    transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease; 
-    border: 1px solid var(--material-surface-border); 
-    outline:none; 
+.material-btn {
+    position: relative;
+    width: 40px; height: 40px; border-radius: 50%;
+    background-color: var(--material-surface-light);
+    color: var(--text-color);
+    box-shadow: var(--elevation-2);
+    cursor: pointer; overflow: hidden;
+    transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease;
+    border: 1px solid var(--material-surface-border);
+    outline:none;
     padding: 0; /* Asegurar que no haya padding */
 }
 .material-btn:hover { box-shadow: var(--elevation-4); }
@@ -216,7 +223,7 @@ header .header-x path {
 
 .floating-buttons-container .material-btn > svg {
     width: 20px; height: 20px; fill: none; stroke-width: 2;
-    position: absolute; top: 50%; left: 50%; 
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%); /* Centrado absoluto */
     transition: opacity 0.4s, transform 0.4s, stroke 0.4s, filter 0.4s;
 }
@@ -247,13 +254,13 @@ header .header-x path {
 /* ================== FILTROS Y TARJETAS ================== */
 .glass { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius:1rem; padding: 0.75rem 1rem; box-shadow: var(--elevation-1); transition: box-shadow 0.3s ease, border-color 0.5s ease, background-color 0.5s ease; }
 .filter-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; padding-bottom: 0; border-bottom: none; text-align: left; display: flex; align-items: center; gap: 8px; transition: color 0.5s ease; color: var(--text-color); }
-body.lp-dark .filter-title, body.netlify-dark .filter-title { color: #f1f5f9; }
+body.lp-dark .filter-title, body.modo-orbital .filter-title { color: var(--text-color); opacity: 0.9; }
 
 .form-input { width: 100%; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--material-surface-border); background-color: var(--input-bg); color: var(--text-color); font-size: 0.9rem; transition: all 0.3s ease; box-sizing: border-box; box-shadow: none; margin-bottom: 0.3rem; }
 .form-input:last-of-type { margin-bottom: 0; }
 .form-input:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px rgba(var(--input-focus-border-rgb, 37, 99, 235), 0.3); }
 .form-input::placeholder { color: var(--text-color); opacity: 0.6; }
-body.lp-dark .form-input::placeholder, body.netlify-dark .form-input::placeholder { color: #94a3b8; }
+body.lp-dark .form-input::placeholder, body.modo-orbital .form-input::placeholder { color: var(--text-color); opacity: 0.7; }
 
 .search-container { position: relative; margin-bottom: 0.3rem; }
 #busquedaRapida { padding-left: 36px; }
@@ -266,9 +273,9 @@ body.lp-dark .form-input::placeholder, body.netlify-dark .form-input::placeholde
 .position-btn:hover { background-color: var(--btn-google-hover-bg); }
 #positionDelantera.active { background-color: var(--badge-delantera-bg); border-color: var(--badge-delantera-bg); color: var(--badge-delantera-text); }
 #positionTrasera.active { background-color: var(--badge-trasera-bg); border-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
-body.lp-dark .position-btn { border-color: rgba(255, 255, 255, 0.3); color: rgba(255, 255, 255, 0.9); }
-body.lp-dark .position-btn:hover { background-color: rgba(255, 255, 255, 0.08); color: #fff; }
-body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { color: #fff; }
+body.lp-dark .position-btn { border-color: var(--material-surface-border); color: var(--text-color); opacity: 0.9; }
+body.lp-dark .position-btn:hover { background-color: var(--btn-google-hover-bg); color: var(--text-color); opacity: 1; }
+body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { color: #fff; opacity: 1;}
 
 
 .input-group-horizontal { display:flex; gap: 0.3rem; margin-bottom: 0.3rem; }
@@ -287,7 +294,31 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 .no-results-container span { font-size: 0.9rem; }
 .no-results-container svg { width: 60px; height: 60px; stroke: var(--text-color); opacity: 0.5; transition: stroke 0.5s ease, opacity 0.5s ease; }
 
-.clear-filters-btn { position: relative; width: 100%; height: auto; padding: 8px 16px; border-radius: 0.75rem; margin-top: 0.8rem; background-color: var(--btn-primary-bg); color: var(--btn-primary-text); box-shadow: var(--btn-primary-shadow); display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: none; outline: none; font-size: 0.9rem; font-weight: 600; transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease; min-height: 40px; }
+/* ===== INICIO CORRECCIÓN BOTÓN BORRAR ===== */
+.clear-filters-btn {
+    position: relative; /* Necesario para contener el ripple */
+    overflow: hidden;   /* <-- ESTA ES LA CORRECCIÓN */
+    width: 100%;
+    height: auto;
+    padding: 8px 16px;
+    border-radius: 0.75rem;
+    margin-top: 0.8rem;
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    box-shadow: var(--btn-primary-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+    min-height: 40px;
+}
+/* ===== FIN CORRECCIÓN BOTÓN BORRAR ===== */
 .clear-filters-btn:hover { background-color: var(--btn-primary-hover-bg); box-shadow: var(--elevation-4); }
 .clear-filters-btn svg { width: 20px; height: 20px; stroke: var(--btn-primary-text); stroke-width: 2; fill: none; position: static; transition: none; }
 
@@ -316,37 +347,120 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 
 @keyframes fadeInUpCard { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .results-wrapper { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-.result-card { display: flex; flex-direction: column; background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius:0.5rem; padding: 0.6rem; box-shadow: var(--elevation-1); opacity: 0; animation: fadeInUpCard 0.5s cubic-bezier(0.2, 0.5, 0.1, 1) forwards; overflow: hidden; cursor: pointer; transition: box-shadow 0.2s ease, border-color 0.5s ease, background-color 0.5s ease, flex-direction 0.3s ease; width: 100%; }
-.result-card:hover, .result-card:focus { box-shadow: var(--elevation-2); }
-.card-thumbnail { width: 100%; aspect-ratio: 4 / 3; margin-bottom: 0.5rem; border-radius: 0.3rem; overflow: hidden; background-color: var(--skeleton-bg); transition: background-color 0.5s ease; }
-.result-image { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ===== INICIO DE LA MODIFICACIÓN (Animación Tarjeta Completa - Zoom Aumentado) ===== */
+.result-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--material-surface-light);
+    border: 1px solid var(--material-surface-border);
+    border-radius: 0.5rem;
+    padding: 0.6rem;
+    box-shadow: var(--elevation-1);
+    opacity: 0;
+    animation: fadeInUpCard 0.5s cubic-bezier(0.2, 0.5, 0.1, 1) forwards;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, border-color 0.5s ease, background-color 0.5s ease, flex-direction 0.3s ease, transform 0.2s ease-out;
+    width: 100%;
+}
+.result-card:hover, .result-card:focus {
+    box-shadow: var(--elevation-4);
+    transform: translateY(-6px) scale(1.05); /* Sube 6px Y aplica zoom 5% a TODA la tarjeta */
+}
+/* ===== FIN DE LA MODIFICACIÓN ===== */
+
+.card-thumbnail {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    margin-bottom: 0.5rem;
+    border-radius: 0.3rem;
+    overflow: hidden;
+    background-color: var(--skeleton-bg);
+    transition: background-color 0.5s ease;
+}
+.result-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Ya no necesita transición aquí */
+}
 .card-content-wrapper { flex: 1; }
-.card-details { display: flex; flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.3rem; }
-.card-ref { font-weight: 600; color: var(--text-color); white-space: nowrap; font-size: 0.9rem; line-height: 1.2; transition: color 0.5s ease; }
-body.lp-dark .card-ref, body.netlify-dark .card-ref { color: #f1f5f9; }
-.position-badge { padding: 0.1rem 0.4rem; border-radius: 50px; font-weight: 500; font-size: 0.65rem; transition: background-color 0.5s ease, color 0.5s ease; }
+.card-details {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start; /* Alinea los items (refs y posición) al inicio */
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+}
+.card-ref-container { /* Nuevo contenedor para las etiquetas ref */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.2rem; /* Pequeño espacio si envuelven */
+    flex-grow: 1; /* Permite que ocupe espacio disponible */
+    margin-right: 0.5rem; /* Espacio antes del badge de posición */
+}
+
+/* ===== INICIO CORRECCIÓN TAMAÑO FUENTE TARJETA ===== */
+.ref-badge { /* Estilo base para etiquetas de referencia */
+    padding: 0.15rem 0.5rem; /* Aumentar padding */
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.75rem; /* Aumentar tamaño de fuente */
+    white-space: nowrap;
+    line-height: 1.3;
+    display: inline-block;
+    border: none;
+}
+.ref-badge-na { /* Etiqueta N/A */
+    background-color: var(--badge-menta-bg);
+    color: var(--badge-menta-text);
+}
+.position-badge { /* Estilo base para etiquetas de posición */
+    padding: 0.1rem 0.4rem;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 0.65rem;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
 .position-badge.delantera { background-color: var(--badge-delantera-bg); color: var(--badge-delantera-text); }
 .position-badge.trasera { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
+
 .card-app-summary {
-    font-size: 0.7rem; line-height: 1.3; color: var(--text-color); opacity: 0.7;
-    max-height: 2.6em; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.65rem; /* Reducir tamaño de fuente */
+    line-height: 1.3;
+    color: var(--text-color);
+    opacity: 0.7;
+    max-height: 2.6em; /* 2 líneas */
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
-    line-clamp: 2; /* Propiedad estándar para VSC */
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     transition: color 0.5s ease, opacity 0.5s ease;
 }
-body.lp-dark .card-app-summary, body.netlify-dark .card-app-summary { opacity: 0.8; color: #cbd5e1; }
+/* ===== FIN CORRECCIÓN TAMAÑO FUENTE TARJETA ===== */
+
+body.lp-dark .card-app-summary, body.modo-orbital .card-app-summary { opacity: 0.8; color: var(--text-color); }
 
 .results-wrapper.list-view { grid-template-columns: 1fr; gap: 0.5rem; }
 .results-wrapper.list-view .result-card { flex-direction: row; align-items: center; gap: 1rem; padding: 0.8rem; }
 .results-wrapper.list-view .card-thumbnail { flex: 0 0 100px; margin-bottom: 0; }
-.results-wrapper.list-view .card-details { flex-wrap: nowrap; gap: 0.8rem; margin-bottom: 0.5rem; }
+.results-wrapper.list-view .card-details { align-items: center; flex-wrap: nowrap; gap: 0.8rem; margin-bottom: 0.5rem; }
+.results-wrapper.list-view .card-ref-container { margin-bottom: 0; flex-grow: 0; } /* Ajuste para vista lista */
 .results-wrapper.list-view .card-app-summary {
     -webkit-line-clamp: 1;
     line-clamp: 1; /* Propiedad estándar para VSC */
     max-height: 1.3em;
 }
+
 
 .pagination-container { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
 .page-btn { font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 6px 12px; min-width: 36px; text-align: center; border-radius: 8px; border: 1px solid var(--material-surface-border); background-color: var(--material-surface-light); color: var(--text-color); cursor: pointer; transition: background-color 0.2s ease, color 0.5s ease, box-shadow 0.2s, border-color 0.5s ease; }
@@ -356,12 +470,65 @@ body.lp-dark .card-app-summary, body.netlify-dark .card-app-summary { opacity: 0
 
 .applications-list-container { margin-top: 0; padding-top: 0; }
 .app-brand-header { font-weight: 700; font-size: 0.85rem; padding: 3px 0; margin-top: 6px; color: var(--text-color); opacity: 0.9; border-bottom: 1px solid var(--material-surface-border); text-transform: uppercase; transition: color 0.5s ease, border-color 0.5s ease, opacity 0.5s ease; }
-.app-detail-row { display: grid; grid-template-columns: 2fr 1fr 1fr; font-size: 0.85rem; line-height: 1.2; padding: 4px 0; border-bottom: 1px dotted var(--material-surface-border); color: var(--text-color); opacity: 0.85; align-items: center; transition: color 0.5s ease, opacity 0.5s ease, border-color 0.5s ease; }
-.app-detail-row > div:last-child { text-align: right; }
-.app-detail-row:last-child { border-bottom: none; }
+
+/* ================== ESTILOS CORREGIDOS MODAL (Specs layout) ================== */
+
+/* Grid para alinear Labels y Values en Specs */
+.modal-apps-specs .spec-details-grid {
+    display: grid; /* Asegurar que es grid */
+    grid-template-columns: auto 1fr; /* Label auto, Value el resto */
+    gap: 0.6rem 0.8rem; /* Espacio vertical y horizontal */
+    align-items: baseline; /* Alinea texto con la primera línea de badges/texto */
+    padding: 5px 0; /* Aumenta un poco el padding vertical */
+}
+.modal-apps-specs .spec-label {
+    font-weight: 600; /* Label en negrita */
+    white-space: nowrap;
+    text-align: left; /* Asegurar alineación */
+    padding-top: 0.15rem; /* Ajuste para alinear con badges */
+}
+.modal-apps-specs .spec-details-grid .spec-value {
+    text-align: left; /* Valor alineado a la izquierda */
+    word-break: break-word; /* Permite que textos largos (OEM) se partan */
+}
+/* Borde inferior para todas las filas de spec-grid, excepto la última */
+.modal-apps-specs .spec-details-grid > div {
+    border-bottom: 1px dotted var(--material-surface-border);
+    padding-bottom: 0.6rem;
+}
+.modal-apps-specs .spec-details-grid > .spec-label:nth-last-of-type(2),
+.modal-apps-specs .spec-details-grid > .spec-value:last-of-type {
+    border-bottom: none; /* Quitar borde a la última fila */
+}
+
+
+/* Estilos específicos para la fila de Aplicaciones (mantienen 3 columnas) */
+.applications-list-container .app-detail-row {
+     display: grid; /* Asegurar que es grid */
+     grid-template-columns: 2fr 1fr 1fr;
+     align-items: center; /* Centrar verticalmente */
+     gap: 0.2rem 0.5rem; /* Reducir gap */
+     padding: 4px 0; /* Padding original */
+     border-bottom: 1px dotted var(--material-surface-border);
+     color: var(--text-color);
+     opacity: 0.85;
+     transition: color 0.5s ease, opacity 0.5s ease, border-color 0.5s ease;
+}
+.applications-list-container .app-detail-row:last-child {
+    border-bottom: none;
+}
+.applications-list-container .app-detail-row > div:first-child {
+    font-weight: normal; /* Asegurar que no esté en negrita */
+}
+.applications-list-container .app-detail-row > div:last-child {
+    text-align: right;
+}
+/* ================== FIN ESTILOS SPECS MODAL ================== */
+
+
 .card-model, .app-header-row { display: none; }
-body.lp-dark .app-brand-header, body.netlify-dark .app-brand-header { color: #f1f5f9; opacity: 1; }
-body.lp-dark .app-detail-row, body.netlify-dark .app-detail-row { color: #cbd5e1; opacity: 0.9; }
+body.lp-dark .app-brand-header, body.modo-orbital .app-brand-header { color: var(--text-color); opacity: 1; }
+body.lp-dark .app-detail-row, body.modo-orbital .app-detail-row { color: var(--text-color); opacity: 0.9; }
 
 /* ================== ESTILOS DEL MODAL ================== */
 @keyframes modal-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
@@ -382,16 +549,46 @@ body.lp-dark .app-detail-row, body.netlify-dark .app-detail-row { color: #cbd5e1
 .modal-image-carousel .carousel-nav-btn:hover { opacity: 1; background: rgba(0, 0, 0, 0.5); animation: none; }
 .modal-details-content-wrapper { display: flex; flex-direction: column; position: relative; min-height: 0; flex-grow: 1; }
 .modal-details-content { display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; padding-right: 8px; margin-top: 0.5rem; flex-grow: 1; min-height: 0; max-height: 100%; }
-:root { --material-surface-light-rgb: 255, 255, 255; } body.lp-dark { --material-surface-light-rgb: 17, 17, 17; } body.netlify-dark { --material-surface-light-rgb: 30, 41, 59; }
+:root { --material-surface-light-rgb: 255, 255, 255; }
+body.lp-dark { --material-surface-light-rgb: 17, 17, 17; }
+body.modo-orbital { --material-surface-light-rgb: 30, 41, 59; }
 .modal-scroll-indicator { position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to top, var(--material-surface-light), rgba(var(--material-surface-light-rgb), 0)); pointer-events: none; opacity: 0; transition: opacity 0.3s ease, background 0.5s ease; }
 .modal-details-content-wrapper.scrollable .modal-scroll-indicator { opacity: 1; }
-.modal-ref { font-size: 1.5rem; font-weight: 700; margin-bottom: 0rem; line-height: 1.2; transition: color 0.5s ease; color: var(--text-color); }
-body.lp-dark .modal-ref, body.netlify-dark .modal-ref { color: #f1f5f9; }
+
+/* Estilos para el encabezado del modal (H2) */
+.modal-ref {
+    font-weight: 700;
+    line-height: 1; /* Resetear line-height */
+    transition: color 0.5s ease;
+    color: var(--text-color);
+    margin-bottom: 0; /* Quitar margen default */
+    padding-bottom: 0;
+}
+.modal-header-ref-container { /* Contenedor DIV DENTRO del H2 */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem; /* Espacio entre etiquetas en header */
+    justify-content: flex-start; /* Alinea a la izquierda por defecto */
+    margin-bottom: 0.3rem; /* Espacio antes de la posición */
+    padding-top: 2px; /* Pequeño ajuste si es necesario */
+}
+/* Badges dentro del header */
+.modal-ref .header-ref-badge {
+    font-size: 0.9rem; /* Tamaño más grande para el header */
+    padding: 0.2rem 0.6rem;
+    line-height: 1.4; /* Mantener altura consistente */
+}
+.modal-ref .header-ref-badge.ref-badge-na { /* Ajuste padding N/A en header */
+     padding: 0.2rem 0.6rem;
+}
+
+body.lp-dark .modal-ref, body.modo-orbital .modal-ref { color: var(--text-color); }
+.modal-position { margin-top: 0.5rem; margin-bottom: 0.5rem; } /* Añadir margen inferior */
 .modal-position .position-badge { font-size: 0.8rem; padding: 0.2rem 0.6rem; }
-.modal-apps-specs { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; }
-.modal-apps-specs .app-brand-header { font-size: 1rem; margin-top: 10px; margin-bottom: 4px; padding-bottom: 5px; border-bottom-width: 2px; color: var(--text-color); font-weight: 700; opacity: 1; border-color: var(--material-surface-border); transition: color 0.5s ease, border-color 0.5s ease; }
-body.lp-dark .modal-apps-specs .app-brand-header, body.netlify-dark .modal-apps-specs .app-brand-header { color: #f1f5f9; }
-.modal-counter-wrapper { width: 100%; text-align: right; font-size: 0.8rem; color: var(--text-color); opacity: 0.7; padding-top: 0.25rem; flex-shrink: 0; transition: color 0.5s ease, opacity 0.5s ease; }
+.modal-apps-specs { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; } /* Aumentar margen superior */
+.modal-apps-specs .app-brand-header { font-size: 1rem; margin-top: 0; margin-bottom: 0.8rem; padding-bottom: 5px; border-bottom-width: 2px; color: var(--text-color); font-weight: 700; opacity: 1; border-color: var(--material-surface-border); transition: color 0.5s ease, border-color 0.5s ease; }
+body.lp-dark .modal-apps-specs .app-brand-header, body.modo-orbital .modal-apps-specs .app-brand-header { color: var(--text-color); }
+.modal-counter-wrapper { width: 100%; text-align: right; font-size: 0.8rem; color: var(--text-color); opacity: 0.7; padding-top: 0.5rem; flex-shrink: 0; transition: color 0.5s ease, opacity 0.5s ease; border-top: 1px solid var(--material-surface-border);} /* Separador arriba */
 .modal-counter-wrapper .carousel-counter { display: inline-block; background-color: var(--input-bg); padding: 3px 9px; border-radius: 6px; font-weight: 500; transition: background-color 0.5s ease; }
 #guide-modal .modal-content { max-width: 800px; }
 #guide-modal .usage-guide-content { font-size: 0.9rem; line-height: 1.6; opacity: 0.9; padding-left: 5px; border-top: none; padding-top: 0; flex-grow: 1; overflow-y: auto; min-height: 0; padding-right: 8px; color: var(--text-color); transition: color 0.5s ease, opacity 0.5s ease; }
@@ -400,33 +597,35 @@ body.lp-dark .modal-apps-specs .app-brand-header, body.netlify-dark .modal-apps-
 #guide-modal .usage-guide-content li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; }
 #guide-modal .usage-guide-content li::before { content: '✅'; position: absolute; left: 0; top: 1px; font-size: 1em; }
 #guide-modal .usage-guide-content strong { font-weight: 600; color: var(--text-color); transition: color 0.5s ease; }
-body.lp-dark #guide-modal .usage-guide-content strong, body.netlify-dark #guide-modal .usage-guide-content strong { color: #f1f5f9; }
-@media (max-width: 650px) { .modal-content { max-width: 90vw; max-height: 85vh; padding: 1rem; } .modal-layout-wrapper { grid-template-columns: 1fr; gap: 1rem; } .modal-close-btn { font-size: 1.5rem; top: 0.3rem; right: 0.3rem; } .modal-ref { font-size: 1.3rem; } .modal-image-carousel { order: -1; margin-bottom: 0; } .modal-counter-wrapper { order: 2; } }
+body.lp-dark #guide-modal .usage-guide-content strong, body.modo-orbital #guide-modal .usage-guide-content strong { color: var(--text-color); }
+@media (max-width: 650px) { .modal-content { max-width: 90vw; max-height: 85vh; padding: 1rem; } .modal-layout-wrapper { grid-template-columns: 1fr; gap: 1rem; } .modal-close-btn { font-size: 1.5rem; top: 0.3rem; right: 0.3rem; } .modal-ref .header-ref-badge { font-size: 0.8rem; } .modal-image-carousel { order: -1; margin-bottom: 0; } .modal-counter-wrapper { order: 2; } }
 
 /* Animaciones */
-@keyframes bounce { 0%{transform:scale(1)}30%{transform:scale(1.03)}50%{transform:scale(.98)}100%{transform:scale(1)} }
+/* @keyframes bounce { 0%{transform:scale(1)}30%{transform:scale(1.03)}50%{transform:scale(.98)}100%{transform:scale(1)} } -- ELIMINADO */
 @keyframes open-lid { 0%{transform:rotate(0deg) translateY(0px) translateX(0px)}30%{transform:rotate(-25deg) translateY(-4px) translateX(-2px)}70%{transform:rotate(-25deg) translateY(-4px) translateX(-2px)}100%{transform:rotate(0deg) translateY(0px) translateX(0px)} }
 @keyframes shake-body { 0%,100%{transform:translateX(0)}25%{transform:translateX(-1px)}75%{transform:translateX(1px)} }
 @keyframes spark-fade-out { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)) scale(0.5); } }
 .spark { position: absolute; border-radius: 50%; opacity: 0; animation: spark-fade-out 0.6s ease-out forwards; box-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
-.animate-button { animation: bounce 0.4s ease-in-out; } .animate-lid { animation: open-lid 0.8s ease-in-out; } .animate-body { animation: shake-body 0.2s ease-in-out 3; animation-delay: 0.1s; }
+/* .animate-button { animation: bounce 0.4s ease-in-out; } -- ELIMINADO */
+.animate-lid { animation: open-lid 0.8s ease-in-out; }
+.animate-body { animation: shake-body 0.2s ease-in-out 3; animation-delay: 0.1s; }
 
 /* ================== BOTONES FLOTANTES ================== */
 .floating-buttons-container { position: fixed; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
 .floating-buttons-container.left { left: 18px; bottom: 18px; }
 .floating-buttons-container.right { right: 18px; bottom: 18px; }
 
-.material-btn { 
-    position: relative; 
-    width: 40px; height: 40px; border-radius: 50%; 
-    background-color: var(--material-surface-light); 
-    color: var(--text-color); 
-    box-shadow: var(--elevation-2); 
+.material-btn {
+    position: relative;
+    width: 40px; height: 40px; border-radius: 50%;
+    background-color: var(--material-surface-light);
+    color: var(--text-color);
+    box-shadow: var(--elevation-2);
     /* display: flex, etc. removido de la base */
-    cursor: pointer; overflow: hidden; 
-    transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease; 
-    border: 1px solid var(--material-surface-border); 
-    outline:none; 
+    cursor: pointer; overflow: hidden;
+    transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease;
+    border: 1px solid var(--material-surface-border);
+    outline:none;
     padding: 0;
 }
 .material-btn:hover { box-shadow: var(--elevation-4); }
@@ -452,16 +651,28 @@ body.lp-dark #guide-modal .usage-guide-content strong, body.netlify-dark #guide-
 /* 3. Botones FLOTANTES (Subir, Sol/Luna) SÍ usan position: absolute */
 .floating-buttons-container .material-btn > svg {
     width: 20px; height: 20px; fill: none; stroke-width: 2;
-    position: absolute; top: 50%; left: 50%; 
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%); /* Centrado absoluto */
     transition: opacity 0.4s, transform 0.4s, stroke 0.4s, filter 0.4s;
 }
 /* --- FIN CORRECCIÓN --- */
 
 
-.ripple { position: absolute; border-radius: 50%; transform: scale(0); animation: ripple-effect 0.6s linear; }
-body:not(.lp-dark):not(.netlify-dark) .ripple { background-color: var(--material-ripple-light); }
-body.lp-dark .ripple, body.netlify-dark .ripple { background-color: var(--material-ripple-dark); }
+/* Ripple claro por defecto */
+body:not(.lp-dark):not(.modo-orbital) .ripple { background-color: var(--material-ripple-light); }
+/* Ripple oscuro para los temas oscuros restantes */
+body.lp-dark .ripple, body.modo-orbital .ripple { background-color: var(--material-ripple-dark); }
+
+/* ===== INICIO CORRECCIÓN RIPPLE ===== */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-effect 0.6s linear;
+    pointer-events: none; /* Impide que el ripple interfiera con el clic */
+}
+/* ===== FIN CORRECCIÓN RIPPLE ===== */
+
 @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
 
 .lp-icon-sun { stroke: var(--icon-sun-stroke); }
@@ -477,7 +688,7 @@ body.lp-dark .ripple, body.netlify-dark .ripple { background-color: var(--materi
 .side-menu.open { left: 0; }
 .side-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--material-surface-border); flex-shrink: 0; transition: border-color 0.5s ease; }
 .side-menu-header h2 { font-size: 1.1rem; font-weight: 600; margin: 0; color: var(--text-color); transition: color 0.5s ease; }
-body.lp-dark .side-menu-header h2, body.netlify-dark .side-menu-header h2 { color: #f1f5f9; }
+body.lp-dark .side-menu-header h2, body.modo-orbital .side-menu-header h2 { color: var(--text-color); }
 .menu-close-btn { background: none; border: none; font-size: 1.8rem; line-height: 1; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; transition: opacity 0.2s ease, color 0.5s ease; }
 .menu-close-btn:hover { opacity: 1; }
 .side-menu-list { list-style: none; padding: 0.75rem 0; margin: 0; overflow-y: auto; flex-grow: 1; }
@@ -492,8 +703,8 @@ body.lp-dark .side-menu-header h2, body.netlify-dark .side-menu-header h2 { colo
 @keyframes bounceHeader { 0%{transform:scale(1)}30%{transform:scale(1.15)}50%{transform:scale(.95)}70%{transform:scale(1.1)}100%{transform:scale(1)} }
 @keyframes arrow-glow { 0%{filter:drop-shadow(0 0 2px rgba(0,122,255,.4))}50%{filter:drop-shadow(0 0 6px rgba(0,122,255,.8))}100%{filter:drop-shadow(0 0 2px rgba(0,122,255,.4))} }
 @keyframes arrow-glow-dark { 0%{filter:drop-shadow(0 0 2px rgba(255,59,48,.4))}50%{filter:drop-shadow(0 0 6px rgba(255,59,48,.8))}100%{filter:drop-shadow(0 0 2px rgba(255,59,48,.4))} }
-body.netlify-dark { --arrow-glow-animation: arrow-glow; }
-body.lp-dark { --arrow-glow-animation: arrow-glow-dark; }
+body.modo-orbital { --arrow-glow-animation: arrow-glow; } /* Orbital usa azul */
+body.lp-dark { --arrow-glow-animation: arrow-glow-dark; } /* AMOLED usa rojo */
 @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
 
 /* ================== AJUSTES RESPONSIVE ================== */
@@ -509,16 +720,42 @@ body.lp-dark { --arrow-glow-animation: arrow-glow-dark; }
     header { padding: 0.5rem 0.5rem; }
     .header-menu-btn { left: 0.5rem; width: 36px; height: 36px;}
     .header-menu-btn svg { width: 18px; height: 18px; }
-    
+
     .header-left-controls { gap: 8px; }
-    
+
     header h1 { font-size: 1rem; gap: 0px; flex-direction: column; padding-left: 0; padding-right: 0; justify-content: center; flex-grow: 1; }
     .header-subtitle { font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 0; opacity: 0.7; }
     .header-spacer { min-width: 36px; }
 
-    .modal-layout-wrapper .app-detail-row { grid-template-columns: 2fr 1fr; }
-    .modal-layout-wrapper .app-detail-row > div:nth-child(2) { display: none; }
-         .card-ref { font-size: 0.8rem; }
+    /* Ajuste modal responsive para spec rows */
+    .spec-details-grid { /* Usar spec-details-grid ahora */
+        grid-template-columns: auto 1fr;
+        gap: 0.5rem 0.8rem; /* Reducir gap un poco */
+    }
+     .spec-value {
+        text-align: left;
+    }
+     /* Ajustar filas de aplicaciones en móvil */
+    .applications-list-container .app-detail-row {
+        grid-template-columns: 2fr 1fr; /* Ocultar litros (col 2) */
+        gap: 0.1rem 0.4rem;
+    }
+     .applications-list-container .app-detail-row > div:nth-child(2) {
+        display: none;
+    }
+     .applications-list-container .app-detail-row > div:last-child {
+        text-align: right; /* Años a la derecha */
+    }
+     /* Reducir tamaño header badges en móvil */
+     .modal-ref .header-ref-badge {
+        font-size: 0.75rem;
+        padding: 0.15rem 0.5rem;
+    }
+    .modal-ref .header-ref-badge.ref-badge-na { /* Ajuste N/A en móvil */
+         padding: 0.15rem 0.5rem;
+    }
+
+         .card-ref-container .ref-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem;} /* Ajustar tamaño de ref badges */
          .position-badge { font-size: 0.6rem; padding: 0.1rem 0.35rem;}
          .pagination-container { gap: 0.3rem; }
          .page-btn { padding: 5px 10px; min-width: 32px; font-size: 0.85rem;}
@@ -530,16 +767,61 @@ body.lp-dark { --arrow-glow-animation: arrow-glow-dark; }
     #guide-modal .modal-content { max-width: 800px; }
 }
 
-/* ===== INICIO DEL CAMBIO ===== */
-/* Estilo para el botón Netlify activo (más llamativo) */
-#netlifyBtn.active {
+/* ===== ESTILOS BOTÓN ORBITAL ACTIVO ===== */
+#orbitalBtn.active {
     background-color: var(--brand-color-3); /* Color magenta/rosa */
     border-color: var(--brand-color-3);     /* Borde del mismo color */
     box-shadow: 0 4px 6px rgba(232, 62, 140, 0.4); /* Sombra a juego (opcional) */
 }
-
-/* Ajuste opcional para asegurar contraste del icono en modo claro */
-body:not(.lp-dark):not(.netlify-dark) #netlifyBtn.active .lp-icon-palette {
+/* Contraste del icono en modo claro */
+body:not(.lp-dark):not(.modo-orbital) #orbitalBtn.active .lp-icon-palette {
     stroke: #ffffff; /* Cambia el icono a blanco sobre fondo magenta */
 }
-/* ===== FIN DEL CAMBIO ===== */
+
+/* ================== ESTILOS ETIQUETAS DE REFERENCIA ================== */
+
+/* Colores específicos */
+.ref-inc { background-color: #0d47a1; color: #FFFFFF; } /* Azul Oscuro */
+.ref-bp { background-color: #6c757d; color: #FFFFFF; } /* Gris */
+.ref-k { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); } /* Rojo (reutiliza variable) */
+.ref-bex { background-color: #64b5f6; color: #000000; } /* Azul Claro (texto negro) */
+.ref-default { /* Verde Menta */
+    background-color: var(--badge-menta-bg);
+    color: var(--badge-menta-text);
+}
+.ref-badge-na { /* Estilo N/A */
+    background-color: var(--badge-menta-bg);
+    color: var(--badge-menta-text);
+    border: none;
+}
+/* Ajustes para temas oscuros (si el contraste verde menta no es bueno) */
+/*
+body.lp-dark .ref-default, body.lp-dark .ref-badge-na,
+body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
+    background-color: #004D40; 
+    color: #B2DFDB; 
+}
+*/
+
+
+/* ================== ESTILOS CORREGIDOS MODAL (Ref badges & Specs layout) ================== */
+
+/* Contenedor para etiquetas DENTRO de Specs */
+.modal-apps-specs .modal-ref-container { /* Estilos específicos para este contenedor */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: flex-start; /* Alinea a la izquierda */
+    text-align: left;
+}
+
+
+/* Badges dentro de Specs */
+.modal-apps-specs .spec-ref-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    line-height: 1.3;
+}
+.modal-apps-specs .spec-ref-badge.ref-badge-na {
+    padding: 0.15rem 0.5rem; /* Ajustar padding para que coincida sin borde */
+}
