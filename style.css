@@ -407,10 +407,10 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 
 /* ===== INICIO CORRECCIÓN TAMAÑO FUENTE TARJETA ===== */
 .ref-badge { /* Estilo base para etiquetas de referencia */
-    padding: 0.15rem 0.5rem; /* Aumentar padding */
+    padding: 0.15rem 0.5rem;
     border-radius: 50px;
     font-weight: 600;
-    font-size: 0.75rem; /* Aumentar tamaño de fuente */
+    font-size: 0.75rem;
     white-space: nowrap;
     line-height: 1.3;
     display: inline-block;
@@ -421,10 +421,10 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     color: var(--badge-menta-text);
 }
 .position-badge { /* Estilo base para etiquetas de posición */
-    padding: 0.1rem 0.4rem;
+    padding: 0.15rem 0.5rem; /* <-- MODIFICACIÓN */
     border-radius: 50px;
     font-weight: 500;
-    font-size: 0.65rem;
+    font-size: 0.75rem; /* <-- MODIFICACIÓN */
     transition: background-color 0.5s ease, color 0.5s ease;
     white-space: nowrap;
     flex-shrink: 0;
@@ -433,7 +433,7 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 .position-badge.trasera { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
 
 .card-app-summary {
-    font-size: 0.65rem; /* Reducir tamaño de fuente */
+    font-size: 0.65rem;
     line-height: 1.3;
     color: var(--text-color);
     opacity: 0.7;
@@ -480,6 +480,7 @@ body.lp-dark .card-app-summary, body.modo-orbital .card-app-summary { opacity: 0
     gap: 0.6rem 0.8rem; /* Espacio vertical y horizontal */
     align-items: baseline; /* Alinea texto con la primera línea de badges/texto */
     padding: 5px 0; /* Aumenta un poco el padding vertical */
+    font-size: 0.78125rem; /* <-- ¡MODIFICACIÓN! */
 }
 .modal-apps-specs .spec-label {
     font-weight: 600; /* Label en negrita */
@@ -513,6 +514,7 @@ body.lp-dark .card-app-summary, body.modo-orbital .card-app-summary { opacity: 0
      color: var(--text-color);
      opacity: 0.85;
      transition: color 0.5s ease, opacity 0.5s ease, border-color 0.5s ease;
+     font-size: 0.78125rem; /* <-- ¡MODIFICACIÓN! */
 }
 .applications-list-container .app-detail-row:last-child {
     border-bottom: none;
@@ -584,9 +586,9 @@ body.modo-orbital { --material-surface-light-rgb: 30, 41, 59; }
 
 body.lp-dark .modal-ref, body.modo-orbital .modal-ref { color: var(--text-color); }
 .modal-position { margin-top: 0.5rem; margin-bottom: 0.5rem; } /* Añadir margen inferior */
-.modal-position .position-badge { font-size: 0.8rem; padding: 0.2rem 0.6rem; }
+.modal-position .position-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem; } /* <-- MODIFICACIÓN */
 .modal-apps-specs { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; } /* Aumentar margen superior */
-.modal-apps-specs .app-brand-header { font-size: 1rem; margin-top: 0; margin-bottom: 0.8rem; padding-bottom: 5px; border-bottom-width: 2px; color: var(--text-color); font-weight: 700; opacity: 1; border-color: var(--material-surface-border); transition: color 0.5s ease, border-color 0.5s ease; }
+.modal-apps-specs .app-brand-header { font-size: 0.78125rem; margin-top: 0; margin-bottom: 0.8rem; padding-bottom: 5px; border-bottom-width: 2px; color: var(--text-color); font-weight: 700; opacity: 1; border-color: var(--material-surface-border); transition: color 0.5s ease, border-color 0.5s ease; } /* <-- ¡MODIFICACIÓN! */
 body.lp-dark .modal-apps-specs .app-brand-header, body.modo-orbital .modal-apps-specs .app-brand-header { color: var(--text-color); }
 .modal-counter-wrapper { width: 100%; text-align: right; font-size: 0.8rem; color: var(--text-color); opacity: 0.7; padding-top: 0.5rem; flex-shrink: 0; transition: color 0.5s ease, opacity 0.5s ease; border-top: 1px solid var(--material-surface-border);} /* Separador arriba */
 .modal-counter-wrapper .carousel-counter { display: inline-block; background-color: var(--input-bg); padding: 3px 9px; border-radius: 6px; font-weight: 500; transition: background-color 0.5s ease; }
@@ -611,52 +613,7 @@ body.lp-dark #guide-modal .usage-guide-content strong, body.modo-orbital #guide-
 .animate-body { animation: shake-body 0.2s ease-in-out 3; animation-delay: 0.1s; }
 
 /* ================== BOTONES FLOTANTES ================== */
-.floating-buttons-container { position: fixed; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-.floating-buttons-container.left { left: 18px; bottom: 18px; }
-.floating-buttons-container.right { right: 18px; bottom: 18px; }
-
-.material-btn {
-    position: relative;
-    width: 40px; height: 40px; border-radius: 50%;
-    background-color: var(--material-surface-light);
-    color: var(--text-color);
-    box-shadow: var(--elevation-2);
-    /* display: flex, etc. removido de la base */
-    cursor: pointer; overflow: hidden;
-    transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease;
-    border: 1px solid var(--material-surface-border);
-    outline:none;
-    padding: 0;
-}
-.material-btn:hover { box-shadow: var(--elevation-4); }
-
-/* --- CORRECCIÓN DE ICONOS --- */
-
-/* 1. Botón de MENÚ (Header) SÍ usa flex */
-.header-menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.header-menu-btn svg {
-    width: 20px; height: 20px;
-    stroke: var(--icon-menu-stroke);
-    position: static; /* No absoluto */
-    transform: none;
-    transition: stroke 0.5s ease;
-}
-
-/* 2. Botón de PALETA (Header) - REGLAS ELIMINADAS */
-
-/* 3. Botones FLOTANTES (Subir, Sol/Luna) SÍ usan position: absolute */
-.floating-buttons-container .material-btn > svg {
-    width: 20px; height: 20px; fill: none; stroke-width: 2;
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%); /* Centrado absoluto */
-    transition: opacity 0.4s, transform 0.4s, stroke 0.4s, filter 0.4s;
-}
-/* --- FIN CORRECCIÓN --- */
-
+/* (Este bloque fue eliminado por ser duplicado) */
 
 /* Ripple claro por defecto */
 body:not(.lp-dark):not(.modo-orbital) .ripple { background-color: var(--material-ripple-light); }
@@ -756,7 +713,7 @@ body.lp-dark { --arrow-glow-animation: arrow-glow-dark; } /* AMOLED usa rojo */
     }
 
          .card-ref-container .ref-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem;} /* Ajustar tamaño de ref badges */
-         .position-badge { font-size: 0.6rem; padding: 0.1rem 0.35rem;}
+         .position-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem;} /* Ajustar tamaño igual a ref badge */
          .pagination-container { gap: 0.3rem; }
          .page-btn { padding: 5px 10px; min-width: 32px; font-size: 0.85rem;}
          .side-menu { width: 250px; left: -270px; }
