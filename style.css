@@ -632,7 +632,26 @@ body.lp-dark .modal-ref, body.modo-orbital .modal-ref { color: var(--text-color)
 .modal-position { margin-top: 0.5rem; margin-bottom: 0.5rem; } /* Añadir margen inferior */
 .modal-position .position-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem; } /* <-- MODIFICACIÓN */
 .modal-apps-specs { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; } /* Aumentar margen superior */
-.modal-apps-specs .app-brand-header { font-size: 0.78125rem; margin-top: 0; margin-bottom: 0.8rem; padding-bottom: 5px; border-bottom-width: 2px; color: var(--text-color); font-weight: 700; opacity: 1; border-color: var(--material-surface-border); transition: color 0.5s ease, border-color 0.5s ease; } /* <-- ¡MODIFICACIÓN! */
+
+/* ===== INICIO DE LA CORRECCIÓN MODAL ===== */
+.modal-apps-specs .app-brand-header {
+    font-size: 0.78125rem;
+    margin-top: 1.25rem; /* <-- MODIFICADO: Añade espacio superior */
+    margin-bottom: 0.8rem;
+    padding-bottom: 5px;
+    border-bottom-width: 2px;
+    color: var(--text-color);
+    font-weight: 700;
+    opacity: 1;
+    border-color: var(--material-surface-border);
+    transition: color 0.5s ease, border-color 0.5s ease;
+}
+/* NUEVA REGLA: Quita el margen solo al primer subtítulo */
+.modal-apps-specs .applications-list-container > .app-brand-header:first-child {
+    margin-top: 0;
+}
+/* ===== FIN DE LA CORRECCIÓN MODAL ===== */
+
 body.lp-dark .modal-apps-specs .app-brand-header, body.modo-orbital .modal-apps-specs .app-brand-header { color: var(--text-color); }
 .modal-counter-wrapper { width: 100%; text-align: right; font-size: 0.8rem; color: var(--text-color); opacity: 0.7; padding-top: 0.5rem; flex-shrink: 0; transition: color 0.5s ease, opacity 0.5s ease; border-top: 1px solid var(--material-surface-border);} /* Separador arriba */
 .modal-counter-wrapper .carousel-counter { display: inline-block; background-color: var(--input-bg); padding: 3px 9px; border-radius: 6px; font-weight: 500; transition: background-color 0.5s ease; }
@@ -734,23 +753,23 @@ body.lp-dark { --arrow-glow-animation: arrow-glow-dark; } /* AMOLED usa rojo */
         gap: 0.5rem 0.8rem; /* Reducir gap un poco */
     }
      .spec-value {
-        text-align: left;
+         text-align: left;
     }
      /* Ajustar filas de aplicaciones en móvil */
     .applications-list-container .app-detail-row {
-        grid-template-columns: 2fr 1fr; /* Ocultar litros (col 2) */
-        gap: 0.1rem 0.4rem;
+         grid-template-columns: 2fr 1fr; /* Ocultar litros (col 2) */
+         gap: 0.1rem 0.4rem;
     }
      .applications-list-container .app-detail-row > div:nth-child(2) {
-        display: none;
+         display: none;
     }
      .applications-list-container .app-detail-row > div:last-child {
-        text-align: right; /* Años a la derecha */
+         text-align: right; /* Años a la derecha */
     }
      /* Reducir tamaño header badges en móvil */
      .modal-ref .header-ref-badge {
-        font-size: 0.75rem;
-        padding: 0.15rem 0.5rem;
+         font-size: 0.75rem;
+         padding: 0.15rem 0.5rem;
     }
     .modal-ref .header-ref-badge.ref-badge-na { /* Ajuste N/A en móvil */
          padding: 0.15rem 0.5rem;
@@ -813,7 +832,7 @@ body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
     flex-wrap: wrap;
     gap: 0.3rem;
     justify-content: flex-start; /* Alinea a la izquierda */
-    text-align: left;
+  s text-align: left;
 }
 
 
