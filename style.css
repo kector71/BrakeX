@@ -43,9 +43,6 @@
     --material-surface-light-rgb: 255, 255, 255;
     --badge-menta-bg: #98FB98; /* Verde Menta Claro */
     --badge-menta-text: #006400; /* Verde Oscuro */
-
-    /* Color de la marca de agua (método máscara) */
-    --watermark-mask-color: rgba(0, 0, 0, 0.1); /* Negro muy tenue para claro */
 }
 
 /* === MODO OSCURO AMOLED === */
@@ -85,9 +82,6 @@ body.lp-dark {
     --brand-color-7: #6f42c1; --brand-color-8: #d63384; --brand-color-9: #6c757d;
     --brand-color-10: #495057;
     --material-surface-light-rgb: 17, 17, 17;
-
-    /* Color de la marca de agua (método máscara) */
-    --watermark-mask-color: rgba(255, 255, 255, 0.12); /* Blanco un poco más visible */
 }
 
 /* === MODO ORBITAL === */
@@ -136,9 +130,6 @@ body.modo-orbital {
 
     --arrow-glow-animation: arrow-glow;
     --material-surface-light-rgb: 30, 41, 59;
-
-    /* Color de la marca de agua (método máscara) */
-     --watermark-mask-color: rgba(203, 213, 225, 0.12); /* Color texto orbital un poco más visible */
 }
 
 .lp-icon-palette { stroke: var(--icon-palette-stroke); }
@@ -412,11 +403,7 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     box-shadow: var(--elevation-1);
     opacity: 0;
     animation: fadeInUpCard 0.5s cubic-bezier(0.2, 0.5, 0.1, 1) forwards;
-    
-    /* REVISADO: Overflow: hidden es necesario para border-radius */
     overflow: hidden;
-    position: relative; /* Necesario para el ::after de la marca de agua */
-    
     cursor: pointer;
     transition: box-shadow 0.2s ease, border-color 0.5s ease, background-color 0.5s ease, flex-direction 0.3s ease, transform 0.2s ease-out;
     width: 100%;
@@ -477,18 +464,14 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     background-color: var(--badge-menta-bg);
     color: var(--badge-menta-text);
 }
-.position-badge { /* Estilo base para etiquetas de posición - ¡RESTAURADO! */
-    padding: 0.15rem 0.5rem;
+.position-badge { /* Estilo base para etiquetas de posición */
+    padding: 0.15rem 0.5rem; /* <-- MODIFICACIÓN */
     border-radius: 50px;
-    font-weight: 500;
-    font-size: 0.75rem;
+    font-weight: 500; /* Se mantiene 500 para diferenciar de ref(600) */
+    font-size: 0.75rem; /* <-- MODIFICACIÓN */
     transition: background-color 0.5s ease, color 0.5s ease;
     white-space: nowrap;
     flex-shrink: 0;
-    position: static; /* Asegura posición normal */
-    transform: none;
-    border: none;
-    box-shadow: none;
 }
 .position-badge.delantera { background-color: var(--badge-delantera-bg); color: var(--badge-delantera-text); }
 .position-badge.trasera { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
@@ -520,29 +503,6 @@ body.lp-dark .card-app-summary, body.modo-orbital .card-app-summary { opacity: 0
     -webkit-line-clamp: 1;
     line-clamp: 1; /* Propiedad estándar para VSC */
     max-height: 1.3em;
-}
-
-/* Estilos originales para .modal-position (restaurado) */
-.modal-position {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    text-align: left; /* O como estuviera originalmente */
-    height: auto;
-    position: static;
-    z-index: auto;
-}
-/* Estilos originales para .modal-position .position-badge (restaurado) */
-.modal-position .position-badge {
-    display: inline-block; /* O como estuviera originalmente */
-    position: static;
-    transform: none;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.15rem 0.5rem;
-    border: none;
-    box-shadow: none;
-    margin-bottom: 0;
 }
 
 
@@ -620,33 +580,10 @@ body.lp-dark .app-detail-row, body.modo-orbital .app-detail-row { color: var(--t
 @keyframes modal-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes modal-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } }
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1rem; cursor: pointer; transition: background-color 0.3s ease, opacity 0.3s ease; }
-.modal-content {
-    background-color: var(--material-surface-light);
-    color: var(--text-color);
-    border-radius: 0.8rem;
-    box-shadow: var(--elevation-4);
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 700px;
-    max-height: 90vh;
-    overflow: hidden; /* Mantenemos hidden por el scroll */
-    cursor: default;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
-    animation: modal-in 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-    border: 1px solid var(--material-surface-border);
-    position: relative; /* Contexto para la pestaña (aunque ya no se use) */
-    z-index: 10001; /* Asegura que esté por encima del overlay */
-}
+.modal-content { background-color: var(--material-surface-light); color: var(--text-color); border-radius: 0.8rem; box-shadow: var(--elevation-4); padding: 1.5rem; width: 100%; max-width: 700px; max-height: 90vh; overflow: hidden; cursor: default; display: flex; flex-direction: column; gap: 0.5rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease; animation: modal-in 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; border: 1px solid var(--material-surface-border); }
 .modal-content.closing { animation: modal-out 0.2s cubic-bezier(0.44, 0.05, 0.55, 0.95) forwards; }
 .modal-layout-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex-grow: 1; min-height: 0; overflow: hidden; }
-.modal-close-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; font-size: 1.8rem; line-height: 1; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; transition: color 0.5s ease, opacity 0.2s ease; z-index: 10003; }
+.modal-close-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; font-size: 1.8rem; line-height: 1; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; transition: color 0.5s ease, opacity 0.2s ease; z-index: 10001; }
 .modal-close-btn:hover { opacity: 1; }
 .modal-image-carousel { width: 100%; aspect-ratio: 4 / 3; border-radius: 0.5rem; overflow: hidden; position: relative; background-color: var(--skeleton-bg); height: fit-content; transition: background-color 0.5s ease; }
 .modal-image-carousel .image-track { display: flex; transition: transform 0.3s ease-in-out; }
@@ -664,16 +601,14 @@ body.modo-orbital { --material-surface-light-rgb: 30, 41, 59; }
 .modal-scroll-indicator { position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to top, var(--material-surface-light), rgba(var(--material-surface-light-rgb), 0)); pointer-events: none; opacity: 0; transition: opacity 0.3s ease, background 0.5s ease; }
 .modal-details-content-wrapper.scrollable .modal-scroll-indicator { opacity: 1; }
 
-/* Estilos para el encabezado del modal (H2) - Restaurado */
+/* Estilos para el encabezado del modal (H2) */
 .modal-ref {
     font-weight: 700;
-    line-height: 1;
+    line-height: 1; /* Resetear line-height */
     transition: color 0.5s ease;
     color: var(--text-color);
-    margin-bottom: 0;
+    margin-bottom: 0; /* Quitar margen default */
     padding-bottom: 0;
-    padding-top: 0; /* Restaurado */
-    margin-top: 0; /* Restaurado */
 }
 .modal-header-ref-container { /* Contenedor DIV DENTRO del H2 */
     display: flex;
@@ -694,9 +629,11 @@ body.modo-orbital { --material-surface-light-rgb: 30, 41, 59; }
 }
 
 body.lp-dark .modal-ref, body.modo-orbital .modal-ref { color: var(--text-color); }
-.modal-apps-specs { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; }
+.modal-position { margin-top: 0.5rem; margin-bottom: 0.5rem; } /* Añadir margen inferior */
+.modal-position .position-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem; } /* <-- MODIFICACIÓN */
+.modal-apps-specs { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; } /* Aumentar margen superior */
 
-/*===== INICIO DE LA CORRECCIÓN MODAL ===== */
+/* ===== INICIO DE LA CORRECCIÓN MODAL ===== */
 .modal-apps-specs .app-brand-header {
     font-size: 0.78125rem;
     margin-top: 1.25rem; /* <-- MODIFICADO: Añade espacio superior */
@@ -867,7 +804,7 @@ body:not(.lp-dark):not(.modo-orbital) #orbitalBtn.active .lp-icon-palette {
 .ref-inc { background-color: #0d47a1; color: #FFFFFF; } /* Azul Oscuro */
 .ref-bp { background-color: #6c757d; color: #FFFFFF; } /* Gris */
 .ref-k { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); } /* Rojo (reutiliza variable) */
-.ref-bex { background-color: #64b5f6; color: #000000; } /* Azul Claro (texto negro) <-- CORRECCIÓN ACCESIBILIDAD */
+.ref-bex { background-color: #64b5f6; color: #FFFFFF; } /* Azul Claro (texto blanco) <-- MODIFICACIÓN */
 .ref-default { /* Verde Menta */
     background-color: var(--badge-menta-bg);
     color: var(--badge-menta-text);
@@ -895,7 +832,7 @@ body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
     flex-wrap: wrap;
     gap: 0.3rem;
     justify-content: flex-start; /* Alinea a la izquierda */
-    text-align: left;
+  s text-align: left;
 }
 
 
@@ -908,55 +845,3 @@ body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
 .modal-apps-specs .spec-ref-badge.ref-badge-na {
     padding: 0.15rem 0.5rem; /* Ajustar padding para que coincida sin borde */
 }
-
-/* ================== MARCA DE AGUA (SVG con Filtro por Tema - Revisado) ================== */
-
-/* Asegura que los contenedores puedan posicionar la marca de agua */
-.card-thumbnail,
-.modal-image-carousel {
-  position: relative; /* Necesario para posicionar ::after */
-  overflow: hidden; /* Mantiene la marca de agua dentro */
-}
-
-/* Estilo de la marca de agua (Base para tema claro) */
-.card-thumbnail::after,
-.modal-image-carousel::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  
-  opacity: 0.1; /* Opacidad base (más sutil para claro) */
-  
-  pointer-events: none; 
-  z-index: 1; 
-
-  background-image: url('../favicon-x.svg'); /* Revisa esta ruta */
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain; 
-  
-  width: 60%; 
-  height: 60%;
-  
-  /* Filtro aplicado a través de variable CSS (definida en :root, body.lp-dark, body.modo-orbital) */
-  filter: var(--watermark-svg-filter); 
-  transition: opacity 0.5s ease, filter 0.5s ease; /* Transición suave */
-}
-
-/* Ajustes específicos de OPACIDAD para Temas Oscuros */
-body.lp-dark .card-thumbnail::after,
-body.lp-dark .modal-image-carousel::after,
-body.modo-orbital .card-thumbnail::after,
-body.modo-orbital .modal-image-carousel::after {
-   /* Aumentamos la opacidad */
-   opacity: 0.15; 
-   /* El filtro ya se aplica mediante la variable --watermark-svg-filter */
-}
-
-/* Asegura que los botones de navegación del modal estén sobre la marca de agua */
-.modal-image-carousel .carousel-nav-btn {
-  z-index: 2; 
-}
-/* ================== FIN MARCA DE AGUA ================== */
