@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const getPositionFilter = () => { const activePositions = []; if (els.posDel.classList.contains('active')) activePositions.push('Delantera'); if (els.posTras.classList.contains('active')) activePositions.push('Trasera'); return activePositions; };
     const hasVehicleFilters = () => { return els.busqueda.value.trim() !== '' || els.marca.value.trim() !== '' || els.modelo.value.trim() !== '' || els.anio.value.trim() !== '' || getPositionFilter().length > 0 || els.oem.value.trim() !== '' || els.fmsi.value.trim() !== '' || els.medidasAncho.value.trim() !== '' || els.medidasAlto.value.trim() !== ''; };
 
-     // --- FunciÃ³n para obtener la clase CSS de la referencia ---
+     // --- Función para obtener la clase CSS de la referencia ---
     const getRefBadgeClass = (ref) => {
         if (typeof ref !== 'string') {
             return 'ref-default';
@@ -74,18 +74,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const filters = { busqueda: fbusq(els.busqueda.value), marca: fbusq(els.marca.value), modelo: fbusq(els.modelo.value), anio: fbusq(els.anio.value), oem: fbusq(els.oem.value), fmsi: fbusq(els.fmsi.value), ancho: parseFloat(els.medidasAncho.value), alto: parseFloat(els.medidasAlto.value), pos: activePos };
 
         const filtered = brakePadsData.filter(item => {
-            const itemVehicles = item.aplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.aÃ±o} ${app.especificacion}`).join(' ').toLowerCase();
-            const itemPosicion = item.posiciÃ³n;
+            const itemVehicles = item.aplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
+            const itemPosicion = item.posición;
 
-            // --- LÃ³gica de BÃºsqueda Actualizada (busca en partes de la ref) ---
+            // --- Lógica de Búsqueda Actualizada (busca en partes de la ref) ---
             const busqMatch = !filters.busqueda ||
                 (Array.isArray(item.ref) && item.ref.some(rString => typeof rString === 'string' && rString.toLowerCase().includes(filters.busqueda))) || // Busca en el string completo
                 (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.busqueda))) ||
                 (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.busqueda))) ||
                 itemVehicles.includes(filters.busqueda);
-            // --- Fin LÃ³gica de BÃºsqueda ---
+            // --- Fin Lógica de Búsqueda ---
 
-            const appMatch = !filters.marca && !filters.modelo && !filters.anio || item.aplicaciones.some(app => (!filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca))) && (!filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo))) && (!filters.anio || (app.aÃ±o && String(app.aÃ±o).toLowerCase().includes(filters.anio))));
+            const appMatch = !filters.marca && !filters.modelo && !filters.anio || item.aplicaciones.some(app => (!filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca))) && (!filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo))) && (!filters.anio || (app.año && String(app.año).toLowerCase().includes(filters.anio))));
             const oemMatch = !filters.oem || (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.oem)));
             const fmsiMatch = !filters.fmsi || (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.fmsi)));
             let posMatch = true; if (filters.pos.length > 0) { posMatch = filters.pos.includes(itemPosicion); }
@@ -115,16 +115,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (counter) counter.textContent = `${newIndex + 1}/${totalImages}`;
     }
 
-    const renderApplicationsList = (aplicaciones) => { const groupedApps = aplicaciones.reduce((acc, app) => { const marca = app.marca || 'N/A'; if (!acc[marca]) { acc[marca] = []; } acc[marca].push(app); return acc; }, {}); Object.keys(groupedApps).forEach(marca => { groupedApps[marca].sort((a, b) => { const serieA = a.serie || ''; const serieB = b.serie || ''; if (serieA < serieB) return -1; if (serieA > serieB) return 1; const anioA = a.aÃ±o || ''; const anioB = b.aÃ±o || ''; if (anioA < anioB) return -1; if (anioA > anioB) return 1; return 0; }); }); let appListHTML = ''; for (const marca in groupedApps) { appListHTML += `<div class="app-brand-header">${marca.toUpperCase()}</div>`; groupedApps[marca].forEach(app => { appListHTML += `<div class="app-detail-row"><div>${app.serie || ''}</div><div>${app.litros || ''}</div><div>${app.aÃ±o || ''}</div></div>`; }); } return appListHTML; };
+    const renderApplicationsList = (aplicaciones) => { const groupedApps = aplicaciones.reduce((acc, app) => { const marca = app.marca || 'N/A'; if (!acc[marca]) { acc[marca] = []; } acc[marca].push(app); return acc; }, {}); Object.keys(groupedApps).forEach(marca => { groupedApps[marca].sort((a, b) => { const serieA = a.serie || ''; const serieB = b.serie || ''; if (serieA < serieB) return -1; if (serieA > serieB) return 1; const anioA = a.año || ''; const anioB = b.año || ''; if (anioA < anioB) return -1; if (anioA > anioB) return 1; return 0; }); }); let appListHTML = ''; for (const marca in groupedApps) { appListHTML += `<div class="app-brand-header">${marca.toUpperCase()}</div>`; groupedApps[marca].forEach(app => { appListHTML += `<div class="app-detail-row"><div>${app.serie || ''}</div><div>${app.litros || ''}</div><div>${app.año || ''}</div></div>`; }); } return appListHTML; };
 
-    // --- FunciÃ³n renderSpecs ACTUALIZADA (Combina Ancho/Alto) ---
+    // --- Función renderSpecs ACTUALIZADA (Combina Ancho/Alto) ---
     const renderSpecs = (item) => {
-        let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`; // Encabezado de secciÃ³n
+        let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`; // Encabezado de sección
 
         // Contenedor general para todas las filas de especificaciones
         specsHTML += `<div class="spec-details-grid">`;
 
-        // --- Generar HTML para las referencias DENTRO de la secciÃ³n Specs ---
+        // --- Generar HTML para las referencias DENTRO de la sección Specs ---
         const refsSpecsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
             ? item.ref.flatMap(refString => String(refString).split(' '))
                   .map(part => `<span class="ref-badge spec-ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
@@ -142,13 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const fmsiText = (Array.isArray(item.fmsi) && item.fmsi.length > 0 ? item.fmsi.join(', ') : 'N/A');
         specsHTML += `<div class="spec-label"><strong>Platina FMSI</strong></div><div class="spec-value">${fmsiText}</div>`;
 
-        // --- NUEVA LÃNEA COMBINADA para Medidas ---
+        // --- NUEVA LÍNEA COMBINADA para Medidas ---
         const anchoVal = item.anchoNum || 'N/A';
         const altoVal = item.altoNum || 'N/A';
         specsHTML += `<div class="spec-label"><strong>Medidas (mm)</strong></div><div class="spec-value">Ancho: ${anchoVal} / Alto: ${altoVal}</div>`;
-        // --- FIN NUEVA LÃNEA ---
+        // --- FIN NUEVA LÍNEA ---
 
-        // (Se eliminaron las lÃ­neas separadas para Ancho y Alto)
+        // (Se eliminaron las líneas separadas para Ancho y Alto)
 
         specsHTML += `</div>`; // Cierre de spec-details-grid
 
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         els.paginationContainer.innerHTML = paginationHTML;
     }
 
-     // --- FunciÃ³n renderCurrentPage ACTUALIZADA ---
+     // --- Función renderCurrentPage ACTUALIZADA ---
     const renderCurrentPage = () => {
         const totalResults = filteredDataCache.length;
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -189,17 +189,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const startNum = totalResults === 0 ? 0 : startIndex + 1;
         const endNum = Math.min(endIndex, totalResults);
-        els.countContainer.innerHTML = `Mostrando <strong>${startNum}â€“${endNum}</strong> de <strong>${totalResults}</strong> resultados`;
+        els.countContainer.innerHTML = `Mostrando <strong>${startNum}–${endNum}</strong> de <strong>${totalResults}</strong> resultados`;
 
         if (totalResults === 0) {
-            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"></path><path d="M21 21L16.65 16.65"></path><path d="M11 8V11L13 13"></path></svg><p>No se encontraron pastillas</p><span>Intenta ajustar tus filtros de bÃºsqueda.</span></div>`;
+            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"></path><path d="M21 21L16.65 16.65"></path><path d="M11 8V11L13 13"></path></svg><p>No se encontraron pastillas</p><span>Intenta ajustar tus filtros de búsqueda.</span></div>`;
             els.paginationContainer.innerHTML = '';
             return;
         }
 
         els.results.innerHTML = paginatedData.map((item, index) => {
-            const posBadgeClass = item.posiciÃ³n === 'Delantera' ? 'delantera' : 'trasera';
-            const posBadge = `<span class="position-badge ${posBadgeClass}">${item.posiciÃ³n}</span>`;
+            const posBadgeClass = item.posición === 'Delantera' ? 'delantera' : 'trasera';
+            const posBadge = `<span class="position-badge ${posBadgeClass}">${item.posición}</span>`;
 
             // --- Generar HTML para las referencias en la tarjeta ---
              const refsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
@@ -242,13 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
         setupPagination(totalResults);
     };
 
-    // --- FunciÃ³n handleCardClick ACTUALIZADA ---
+    // --- Función handleCardClick ACTUALIZADA ---
     function handleCardClick(event) {
          const card = event.target.closest('.result-card');
          if (card) {
-             const itemId = card.dataset.id; // <-- CORRECCIÃ“N: Usar data-id
+             const itemId = card.dataset.id; // <-- CORRECCIÓN: Usar data-id
 
-             // <-- CORRECCIÃ“N: Buscar por _appId
+             // <-- CORRECCIÓN: Buscar por _appId
              const itemData = brakePadsData.find(item => item._appId == itemId);
 
              if (itemData) {
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateScrollIndicator = () => { const wrapper = els.modalDetailsWrapper; const content = els.modalDetailsContent; if (wrapper && content) { const isScrollable = content.scrollHeight > content.clientHeight; const isAtBottom = content.scrollTop + content.clientHeight >= content.scrollHeight - 5; if (isScrollable && !isAtBottom) { wrapper.classList.add('scrollable'); } else { wrapper.classList.remove('scrollable'); } } };
 
-    // --- FunciÃ³n openModal ACTUALIZADA ---
+    // --- Función openModal ACTUALIZADA ---
     function openModal(item) {
         // --- Generar HTML para las etiquetas en el ENCABEZADO del modal ---
         const refsHeaderHTML = (Array.isArray(item.ref) && item.ref.length > 0)
@@ -272,9 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         els.modalRef.innerHTML = `<div class="modal-header-ref-container">${refsHeaderHTML}</div>`;
 
-        // --- Resto del cÃ³digo de openModal ---
-        const posBadgeClass = item.posiciÃ³n === 'Delantera' ? 'delantera' : 'trasera';
-        els.modalPosition.innerHTML = `<span class="position-badge ${posBadgeClass}">${item.posiciÃ³n}</span>`;
+        // --- Resto del código de openModal ---
+        const posBadgeClass = item.posición === 'Delantera' ? 'delantera' : 'trasera';
+        els.modalPosition.innerHTML = `<span class="position-badge ${posBadgeClass}">${item.posición}</span>`;
 
         let images = [];
         if (item.imagenes && item.imagenes.length > 0) {
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
             imageTrackHTML += `<img src="${imgSrc}" alt="Referencia ${altRef} Vista ${i + 1}" class="result-image">`;
         });
 
-        els.modalCarousel.innerHTML = `<div class="image-track" style="display:flex;" data-current-index="0">${imageTrackHTML}</div> ${imageCount > 1 ? `<button class="carousel-nav-btn" data-direction="-1" aria-label="Imagen anterior">â€¹</button><button class="carousel-nav-btn" data-direction="1" aria-label="Siguiente imagen">â€º</button>` : ''}`;
+        els.modalCarousel.innerHTML = `<div class="image-track" style="display:flex;" data-current-index="0">${imageTrackHTML}</div> ${imageCount > 1 ? `<button class="carousel-nav-btn" data-direction="-1" aria-label="Imagen anterior">‹</button><button class="carousel-nav-btn" data-direction="1" aria-label="Siguiente imagen">›</button>` : ''}`;
 
         els.modalCarousel.querySelectorAll('.carousel-nav-btn').forEach(btn => { btn.onclick = (e) => { e.stopPropagation(); const direction = parseInt(e.currentTarget.dataset.direction); navigateCarousel(els.modalCarousel, direction); }; });
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) { setupSwipe(els.modalCarousel); }
@@ -347,17 +347,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (brandFromURL && els.brandTagsContainer) {
             const tagToActivate = els.brandTagsContainer.querySelector(`.brand-tag[data-brand="${brandFromURL}"]`);
             if (tagToActivate) {
-                tagToActivate.classList.add('active'); // Solo aÃ±adir clase, CSS se encarga del estilo
+                tagToActivate.classList.add('active'); // Solo añadir clase, CSS se encarga del estilo
             }
         }
     };
 
-    // --- SETUP EVENT LISTENERS (CON LÃ“GICA DE 3 TEMAS: Claro, AMOLED Dark, Orbital) ---
+    // --- SETUP EVENT LISTENERS (CON LÓGICA DE 3 TEMAS: Claro, AMOLED Dark, Orbital) ---
     function setupEventListeners() {
         // Aplicar ripple a todos los botones aplicables
         [els.darkBtn, els.upBtn, els.menuBtn, els.orbitalBtn, els.clearBtn].forEach(btn => btn?.addEventListener('click', createRippleEffect));
 
-        // --- LÃ³gica AnimaciÃ³n Iconos Sol/Luna ---
+        // --- Lógica Animación Iconos Sol/Luna ---
         const iconAnimation = (iconToShow, iconToHide) => {
             if (!iconToShow) return;
             const showKeyframes = [ { opacity: 0, transform: 'translate(-50%, -50%) scale(0.6) rotate(-90deg)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1) rotate(0deg)' } ];
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
          const applyAmoledDarkTheme = () => {
             els.body.classList.remove('modo-orbital'); // Solo quitar modo-orbital si estaba activo
-            els.body.classList.add('lp-dark'); // AÃ±adir lp-dark (AMOLED)
+            els.body.classList.add('lp-dark'); // Añadir lp-dark (AMOLED)
             iconAnimation(els.moonIcon, els.sunIcon);
             els.darkBtn.setAttribute('aria-pressed', 'true');
             els.darkBtn.setAttribute('aria-label', 'Activar modo claro');
@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 els.orbitalBtn.classList.add('active');
                 els.orbitalBtn.setAttribute('aria-pressed', 'true');
             }
-            // Resetear el botÃ³n darkBtn
+            // Resetear el botón darkBtn
             iconAnimation(els.sunIcon, els.moonIcon); // Mostrar sol en Orbital
             els.darkBtn.setAttribute('aria-pressed', 'false');
             els.darkBtn.setAttribute('aria-label', 'Activar modo claro'); // Salir de Orbital va a Claro
@@ -412,12 +412,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
 
-        // --- Event Listener BotÃ³n Sol/Luna (Ciclo simple Claro <-> AMOLED) ---
+        // --- Event Listener Botón Sol/Luna (Ciclo simple Claro <-> AMOLED) ---
         els.darkBtn.addEventListener('click', () => {
             els.headerX.style.animation = 'bounceHeader 0.6s cubic-bezier(0.68,-0.55,0.27,1.55)';
             setTimeout(() => { els.headerX.style.animation = ''; }, 600);
 
-            // Si estÃ¡ activo Orbital O AMOLED, el siguiente es Claro. Si no, es AMOLED.
+            // Si está activo Orbital O AMOLED, el siguiente es Claro. Si no, es AMOLED.
             if (els.body.classList.contains('modo-orbital') || els.body.classList.contains('lp-dark')) {
                  applyLightTheme();
             } else {
@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // --- Event Listener BotÃ³n Orbital ---
+        // --- Event Listener Botón Orbital ---
         if (els.orbitalBtn) {
             els.orbitalBtn.addEventListener('click', () => {
                 els.headerX.style.animation = 'bounceHeader 0.6s cubic-bezier(0.68,-0.55,0.27,1.55)';
@@ -530,11 +530,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const trashLid = els.clearBtn.querySelector('.trash-lid'); const trashBody = els.clearBtn.querySelector('.trash-body'); const NUM_SPARKS = 10; const SPARK_COLORS = ['#00ffff', '#ff00ff', '#00ff7f', '#ffc700', '#ff5722'];
         function createSparks(button) { for (let i = 0; i < NUM_SPARKS; i++) { const spark = document.createElement('div'); spark.classList.add('spark'); const size = Math.random() * 4 + 3; spark.style.width = `${size}px`; spark.style.height = `${size}px`; spark.style.backgroundColor = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)]; spark.style.left = `calc(50% + ${Math.random() * 20 - 10}px)`; spark.style.top = `calc(50% + ${Math.random() * 20 - 10}px)`; const angle = Math.random() * Math.PI * 2; const distance = Math.random() * 25 + 20; const sparkX = Math.cos(angle) * distance; const sparkY = Math.sin(angle) * distance; spark.style.setProperty('--spark-x', `${sparkX}px`); spark.style.setProperty('--spark-y', `${sparkY}px`); button.appendChild(spark); spark.addEventListener('animationend', () => spark.remove(), { once: true }); } }
 
-        // --- CORRECCIÃ“N BOTÃ“N BORRAR ---
+        // --- CORRECCIÓN BOTÓN BORRAR ---
         els.clearBtn.addEventListener('click', (e) => {
             if (els.clearBtn.disabled) return;
             els.clearBtn.disabled = true;
-            // El ripple se aÃ±ade desde el listener general
+            // El ripple se añade desde el listener general
             if (trashLid) trashLid.classList.add('animate-lid');
             if (trashBody) trashBody.classList.add('animate-body');
             createSparks(els.clearBtn);
@@ -545,9 +545,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 els.clearBtn.disabled = false;
             }, 900);
         });
-        // --- FIN CORRECCIÃ“N BOTÃ“N BORRAR ---
+        // --- FIN CORRECCIÓN BOTÓN BORRAR ---
 
-        // --- MODIFICACIÃ“N Listener Etiquetas Marca ---
+        // --- MODIFICACIÓN Listener Etiquetas Marca ---
         if (els.brandTagsContainer) {
             els.brandTagsContainer.addEventListener('click', (e) => {
                 const tag = e.target.closest('.brand-tag');
@@ -595,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             let data = await response.json();
 
-            data = data.map((item, index) => { // <-- CORRECCIÃ“N: AÃ±adir 'index'
+            data = data.map((item, index) => { // <-- CORRECCIÓN: Añadir 'index'
                 if (item.imagen && (!item.imagenes || item.imagenes.length === 0)) {
                     item.imagenes = [
                         item.imagen.replace("text=", `text=Vista+1+`),
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  const safeFmsis = Array.isArray(item.fmsi) ? item.fmsi.map(String) : [];
 
                 return { ...item,
-                         _appId: index, // <-- CORRECCIÃ“N: AÃ±adir ID Ãºnico
+                         _appId: index, // <-- CORRECCIÓN: Añadir ID único
                          ref: safeRefs,
                          oem: safeOems,
                          fmsi: safeFmsis,
@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const getAllApplicationValues = (key) => { const allValues = new Set(); brakePadsData.forEach(item => { item.aplicaciones.forEach(app => { const prop = (key === 'modelo') ? 'serie' : key; if (app[prop]) allValues.add(String(app[prop])); }); }); return [...allValues].sort(); }; // Ensure string conversion
             fillDatalist(els.datalistMarca, getAllApplicationValues('marca'));
             fillDatalist(els.datalistModelo, getAllApplicationValues('modelo'));
-            fillDatalist(els.datalistAnio, getAllApplicationValues('aÃ±o'));
+            fillDatalist(els.datalistAnio, getAllApplicationValues('año'));
             const allOems = [...new Set(brakePadsData.flatMap(i => i.oem || []))].filter(Boolean).sort();
             const allFmsis = [...new Set(brakePadsData.flatMap(i => i.fmsi || []))].filter(Boolean).sort();
             fillDatalist(els.datalistOem, allOems);
@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
             brandColorMap = {};
             sortedBrands.forEach((brand, index) => { brandColorMap[brand] = brandColors[index % brandColors.length]; });
 
-            // --- MODIFICACIÃ“N GeneraciÃ³n Etiquetas Marca ---
+            // --- MODIFICACIÓN Generación Etiquetas Marca ---
             if (els.brandTagsContainer) {
                 els.brandTagsContainer.innerHTML = sortedBrands.map(brand => {
                     const colorVar = brandColorMap[brand];
@@ -648,10 +648,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             applyFiltersFromURL();
             // El tema se aplica ANTES en setupEventListeners
-            filterData(); // Filtrar despuÃ©s de aplicar tema y filtros URL
+            filterData(); // Filtrar después de aplicar tema y filtros URL
         } catch (error) {
             console.error("Error al cargar los datos:", error);
-            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="22" x2="12" y2="22"></line></svg><p>Error al cargar datos</p><span>No se pudo conectar con la base de datos (data.json). AsegÃºrate que el archivo exista.</span></div>`;
+            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="22" x2="12" y2="22"></line></svg><p>Error al cargar datos</p><span>No se pudo conectar con la base de datos (data.json). Asegúrate que el archivo exista.</span></div>`;
             els.countContainer.innerHTML = "Error";
             els.paginationContainer.innerHTML = '';
         }
