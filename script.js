@@ -1,11 +1,73 @@
+// --- NUEVA FUNCIÓN AUXILIAR 1: Normalizar Años ---
+/**
+ * Convierte un string de año (ej. '95' o '2015') a un número de 4 dígitos.
+ * Asume que '30' es el corte: '29' -> 2029, '30' -> 1930
+ */
+const normalizeYear = (yearStr) => {
+    if (!yearStr) return NaN;
+    // Convertir a String primero, por si el dato es numérico (ej. 1998)
+    const num = parseInt(String(yearStr).trim());
+    if (isNaN(num)) return NaN;
+    
+    const strNum = String(num); // Usar el string limpio
+    
+    // Manejar años de 2 dígitos
+    if (strNum.length <= 2 && num >= 0 && num <= 99) {
+        if (num < 30) { // 0-29 -> 2000-2029 (ej. '15' -> 2015)
+            return 2000 + num;
+        } else { // 30-99 -> 1930-1999 (ej. '95' -> 1995)
+            return 1900 + num;
+        }
+    }
+    // Manejar años de 4 dígitos
+    if (strNum.length === 4) {
+        return num;
+    }
+    return num; // Fallback
+};
+
+// --- NUEVA FUNCIÓN AUXILIAR 2: Interpretar Filtro de Año ---
+/**
+ * Convierte el input del filtro (ej. '95-15' o '2005') 
+ * en un objeto de rango { start: 1995, end: 2015 }.
+ */
+const parseYearFilter = (filterString) => {
+    if (!filterString) return null; // No hay filtro
+    
+    const trimmedString = filterString.trim();
+    
+    // Buscar un rango (ej. '1995-2015' o '95-15')
+    if (trimmedString.includes('-')) {
+        const parts = trimmedString.split('-').map(s => s.trim());
+        // Asegurarse de que hay dos partes (ej. '2005-') no es válido
+        if (parts.length === 2 && parts[0] && parts[1]) {
+            const start = normalizeYear(parts[0]);
+            const end = normalizeYear(parts[1]);
+            
+            if (!isNaN(start) && !isNaN(end)) {
+                // Devolver { start: 1995, end: 2015 }
+                return { start: Math.min(start, end), end: Math.max(start, end) };
+            }
+        }
+    }
+    
+    // Si no es un rango válido, tratar como año único (ej. '2005' o '98')
+    const singleYear = normalizeYear(trimmedString);
+    if (!isNaN(singleYear)) {
+        return { start: singleYear, end: singleYear }; // Devuelve { start: 1998, end: 1998 }
+    }
+    
+    return null; // El filtro no es un año ni un rango válido
+};
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. ESTADO CENTRALIZADO ---
-    // Agrupamos variables clave en un solo objeto para mejor manejo.
     const appState = {
-        data: [],       // Reemplaza a brakePadsData
-        filtered: [],   // Reemplaza a filteredDataCache
-        currentPage: 1  // Reemplaza a currentPage
+        data: [],      // Reemplaza a brakePadsData
+        filtered: [],  // Reemplaza a filteredDataCache
+        currentPage: 1 // Reemplaza a currentPage
     };
 
     const itemsPerPage = 24; // Constante, puede quedar fuera del estado
@@ -75,11 +137,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filterData = () => {
         // --- 2. USANDO EL ESTADO ---
-        // Lee desde appState.data en lugar de brakePadsData
         if (!appState.data.length) return;
         
-        const fbusq = (val) => val.toLowerCase().trim(); const activePos = getPositionFilter();
-        const filters = { busqueda: fbusq(els.busqueda.value), marca: fbusq(els.marca.value), modelo: fbusq(els.modelo.value), anio: fbusq(els.anio.value), oem: fbusq(els.oem.value), fmsi: fbusq(els.fmsi.value), ancho: parseFloat(els.medidasAncho.value), alto: parseFloat(els.medidasAlto.value), pos: activePos };
+        const fbusq = (val) => val.toLowerCase().trim(); 
+        const activePos = getPositionFilter();
+
+        // --- MODIFICACIÓN 1: Parsear el filtro de año ---
+        // 'yearRange' es el FILTRO DEL USUARIO (ej. { start: 1995, end: 1995 })
+        const yearRange = parseYearFilter(els.anio.value); 
+        // --- FIN MODIFICACIÓN 1 ---
+
+        const filters = { 
+            busqueda: fbusq(els.busqueda.value), 
+            marca: fbusq(els.marca.value), 
+            modelo: fbusq(els.modelo.value), 
+            oem: fbusq(els.oem.value), 
+            fmsi: fbusq(els.fmsi.value), 
+            ancho: parseFloat(els.medidasAncho.value), 
+            alto: parseFloat(els.medidasAlto.value), 
+            pos: activePos 
+        };
 
         const filtered = appState.data.filter(item => {
             const itemVehicles = item.aplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
@@ -91,7 +168,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.busqueda))) ||
                 itemVehicles.includes(filters.busqueda);
 
-            const appMatch = !filters.marca && !filters.modelo && !filters.anio || item.aplicaciones.some(app => (!filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca))) && (!filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo))) && (!filters.anio || (app.año && String(app.año).toLowerCase().includes(filters.anio))));
+            
+            // --- MODIFICACIÓN 2: Lógica de appMatch con rango de año ---
+            const yearFilterActive = !!yearRange; // ¿Hay un filtro de año válido?
+
+            const appMatch = (!filters.marca && !filters.modelo && !yearFilterActive) || // true si no hay filtros de app
+                             item.aplicaciones.some(app => {
+                                 const marcaMatch = !filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca));
+                                 const modeloMatch = !filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo));
+                                 
+                                 // Lógica de AÑO (¡CORREGIDA!)
+                                 let anioMatch = true; // Asumir true si no hay filtro de año
+                                 if (yearFilterActive) {
+                                     // Parsear el RANGO DE AÑO DEL DATO (ej. '1992-2015')
+                                     // 'appYearRange' es el DATO de la pastilla (ej. { start: 1992, end: 2015 })
+                                     const appYearRange = parseYearFilter(app.año); 
+                                     
+                                     if (!appYearRange) { // Si app.año es "N/A" o inválido, appYearRange será null
+                                         anioMatch = false; // El dato no tiene año válido
+                                     } else {
+                                         // Comprobar si los rangos se solapan (overlap)
+                                         // [app.start, app.end] overlaps [filter.start, filter.end]
+                                         // Condición de solapamiento: app.start <= filter.end && app.end >= filter.start
+                                         anioMatch = appYearRange.start <= yearRange.end && appYearRange.end >= yearRange.start;
+                                     }
+                                 }
+                                 
+                                 return marcaMatch && modeloMatch && anioMatch;
+                             });
+            // --- FIN MODIFICACIÓN 2 ---
+
             const oemMatch = !filters.oem || (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.oem)));
             const fmsiMatch = !filters.fmsi || (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.fmsi)));
             let posMatch = true; if (filters.pos.length > 0) { posMatch = filters.pos.includes(itemPosicion); }
@@ -125,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderApplicationsList = (aplicaciones) => { const groupedApps = aplicaciones.reduce((acc, app) => { const marca = app.marca || 'N/A'; if (!acc[marca]) { acc[marca] = []; } acc[marca].push(app); return acc; }, {}); Object.keys(groupedApps).forEach(marca => { groupedApps[marca].sort((a, b) => { const serieA = a.serie || ''; const serieB = b.serie || ''; if (serieA < serieB) return -1; if (serieA > serieB) return 1; const anioA = a.año || ''; const anioB = b.año || ''; if (anioA < anioB) return -1; if (anioA > anioB) return 1; return 0; }); }); let appListHTML = ''; for (const marca in groupedApps) { appListHTML += `<div class="app-brand-header">${marca.toUpperCase()}</div>`; groupedApps[marca].forEach(app => { appListHTML += `<div class="app-detail-row"><div>${app.serie || ''}</div><div>${app.litros || ''}</div><div>${app.año || ''}</div></div>`; }); } return appListHTML; };
 
-    // --- Función renderSpecs ACTUALIZADA (Combina Ancho/Alto) ---
+    // --- Función renderSpecs ACTUALIZADA (Maneja "Sin información") ---
     const renderSpecs = (item) => {
         let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`; // Encabezado de sección
         specsHTML += `<div class="spec-details-grid">`;
@@ -145,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fmsiText = (Array.isArray(item.fmsi) && item.fmsi.length > 0 ? item.fmsi.join(', ') : 'N/A');
         specsHTML += `<div class="spec-label"><strong>Platina FMSI</strong></div><div class="spec-value">${fmsiText}</div>`;
 
-        // --- INICIO DE LA MODIFICACIÓN (Medidas Múltiples) ---
+        // --- INICIO DE LA MODIFICACIÓN (Medidas Múltiples y "Sin información") ---
         
         let medidasHTML = '';
         
@@ -165,9 +271,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
             // Código de fallback (si no es un array o está vacío, usa anchoNum/altoNum)
-            const anchoVal = item.anchoNum || 'N/A';
-            const altoVal = item.altoNum || 'N/A';
-            medidasHTML = `<div>Ancho: ${anchoVal} x Alto: ${altoVal}</div>`;
+            // Usar !isNaN() para verificar si son números válidos (incluyendo 0)
+            const anchoVal = !isNaN(item.anchoNum) ? item.anchoNum : null;
+            const altoVal = !isNaN(item.altoNum) ? item.altoNum : null;
+
+            if (anchoVal === null && altoVal === null) {
+                // Si ambos son null (porque eran NaN), muestra "Sin información"
+                medidasHTML = '<div>Sin información</div>';
+            } else {
+                // Si al menos uno tiene valor, mostrarlo. Usar 'N/A' para el que falte.
+                const anchoDisplay = anchoVal !== null ? anchoVal : 'N/A';
+                const altoDisplay = altoVal !== null ? altoVal : 'N/A';
+                medidasHTML = `<div>Ancho: ${anchoDisplay} x Alto: ${altoDisplay}</div>`;
+            }
         }
 
         // Añade el bloque completo al HTML
@@ -196,7 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalPages <= 1) return;
 
         // --- 2. USANDO EL ESTADO ---
-        // Lee appState.currentPage en lugar de currentPage
         let paginationHTML = '';
         paginationHTML += `<button class="page-btn" data-page="${appState.currentPage - 1}" ${appState.currentPage === 1 ? 'disabled' : ''}>Anterior</button>`;
         
@@ -238,8 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const refsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
                 ? item.ref.flatMap(refString => String(refString).split(' '))
-                        .map(part => `<span class="ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
-                        .join('')
+                    .map(part => `<span class="ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
+                    .join('')
                 : '<span class="ref-badge ref-badge-na">N/A</span>';
 
             let firstImageSrc = 'https://via.placeholder.com/300x200.png?text=No+Img';
@@ -280,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemId = card.dataset.id;
             
             // --- 2. LEYENDO DEL ESTADO ---
-            // Busca en appState.data en lugar de brakePadsData
             const itemData = appState.data.find(item => item._appId == itemId);
 
             if (itemData) {
@@ -635,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ];
                 }
 
-                // --- INICIO DE LA CORRECCIÓN PARA 'medidas' ---
+                // --- CORRECCIÓN PARA 'medidas' (usa NaN por defecto) ---
                 
                 // 1. Aseguramos que 'medidaString' sea un string o null
                 let medidaString = null;
@@ -649,7 +763,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 2. Ahora 'partes' se calcula de forma segura
                 // Se usa /x/i para que funcione con 'x' (minúscula) o 'X' (mayúscula)
-                const partes = medidaString ? medidaString.split(/x/i).map(s => parseFloat(s.trim())) : [0,0];
+                // ¡CAMBIO CLAVE: [NaN, NaN] en lugar de [0, 0] como valor por defecto!
+                const partes = medidaString ? medidaString.split(/x/i).map(s => parseFloat(s.trim())) : [NaN, NaN];
                 
                 // --- FIN DE LA CORRECCIÓN ---
 
@@ -663,8 +778,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         ref: safeRefs,
                         oem: safeOems,
                         fmsi: safeFmsis,
-                        anchoNum: partes[0] || 0,
-                        altoNum: partes[1] || 0 };
+                        anchoNum: partes[0], // Asigna el valor parseado (será NaN si no existe)
+                        altoNum: partes[1] }; // Asigna el valor parseado (será NaN si no existe)
             });
 
             // --- 2. ACTUALIZANDO EL ESTADO ---
@@ -678,7 +793,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fillDatalist(els.datalistAnio, getAllApplicationValues('año'));
             
             const allOems = [...new Set(appState.data.flatMap(i => i.oem || []))].filter(Boolean).sort();
+            
+            // --- CORRECCIÓN DEL TYPO DE LA ÚLTIMA VEZ ---
             const allFmsis = [...new Set(appState.data.flatMap(i => i.fmsi || []))].filter(Boolean).sort();
+            // --- FIN DE LA CORRECCIÓN DEL TYPO ---
+
             fillDatalist(els.datalistOem, allOems);
             fillDatalist(els.datalistFmsi, allFmsis);
             

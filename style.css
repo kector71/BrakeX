@@ -852,7 +852,7 @@ body.lp-dark { --arrow-glow-animation: arrow-glow-dark; } /* AMOLED usa rojo */
 /* ===== ESTILOS BOTÓN ORBITAL ACTIVO ===== */
 #orbitalBtn.active {
     background-color: var(--brand-color-3); /* Color magenta/rosa */
-    border-color: var(--brand-color-3);     /* Borde del mismo color */
+    border-color: var(--brand-color-3);      /* Borde del mismo color */
     box-shadow: 0 4px 6px rgba(232, 62, 140, 0.4); /* Sombra a juego (opcional) */
 }
 /* Contraste del icono en modo claro */
@@ -908,7 +908,7 @@ body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
     padding: 0.15rem 0.5rem; /* Ajustar padding para que coincida sin borde */
 }
 
-/* ================== MARCA DE AGUA (SVG con Filtro por Tema - Revisado) ================== */
+/* ================== MARCA DE AGUA (SVG con Máscara por Tema - Corregido) ================== */
 
 /* Asegura que los contenedores puedan posicionar la marca de agua */
 .card-thumbnail,
@@ -926,32 +926,32 @@ body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
   left: 50%;
   transform: translate(-50%, -50%) rotate(-30deg);
   
-  opacity: 0.1; /* Opacidad base (más sutil para claro) */
-  
   pointer-events: none; 
   z-index: 1; 
 
-  background-image: url('../favicon-x.svg'); /* Revisa esta ruta */
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain; 
+  /* --- INICIO DE LA CORRECCIÓN --- */
+  /* * BUG: La variable --watermark-svg-filter no estaba definida.
+   * FIX: Usamos 'mask-image' con la variable '--watermark-mask-color' 
+   * que SÍ está definida en todos los temas.
+  */
+  background-color: var(--watermark-mask-color); /* Color de la marca de agua */
+  -webkit-mask-image: url('../favicon-x.svg'); /* Ruta a tu SVG (ajusta si es necesario) */
+  mask-image: url('../favicon-x.svg');         /* Ruta a tu SVG (ajusta si es necesario) */
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  /* --- FIN DE LA CORRECCIÓN --- */
   
   width: 60%; 
   height: 60%;
   
-  /* Filtro aplicado a través de variable CSS (definida en :root, body.lp-dark, body.modo-orbital) */
-  filter: var(--watermark-svg-filter); 
-  transition: opacity 0.5s ease, filter 0.5s ease; /* Transición suave */
-}
-
-/* Ajustes específicos de OPACIDAD para Temas Oscuros */
-body.lp-dark .card-thumbnail::after,
-body.lp-dark .modal-image-carousel::after,
-body.modo-orbital .card-thumbnail::after,
-body.modo-orbital .modal-image-carousel::after {
-   /* Aumentamos la opacidad */
-   opacity: 0.15; 
-   /* El filtro ya se aplica mediante la variable --watermark-svg-filter */
+  /* Ajusta la opacidad base (el color ya viene de la variable) */
+  opacity: 0.8; 
+  
+  transition: background-color 0.5s ease; /* Transición suave */
 }
 
 /* Asegura que los botones de navegación del modal estén sobre la marca de agua */
