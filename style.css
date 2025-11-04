@@ -1,961 +1,207 @@
-/* ================== VARIABLES DE TEMA ================== */
-:root {
-    --bg-color: #f8f9fa;
-    --text-color: #000;
-    --header-border-color: rgba(0,0,0,0.1);
-    --header-x-fill: #000;
-    --material-surface-light: #ffffff;
-    --material-surface-border: rgba(0, 0, 0, 0.1);
-    --input-bg: #f3f4f6;
-    --input-focus-border: #2563eb;
-    --input-focus-border-rgb: 37, 99, 235; /* RGB for focus shadow */
-    --btn-primary-bg: #ef4444;
-    --btn-primary-text: #ffffff;
-    --btn-primary-hover-bg: #dc2626;
-    --btn-primary-shadow: 0 4px 6px rgba(239, 68, 68, 0.4);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brake X - Consulta de Pastillas</title>
 
-    --card-inset-highlight: inset 0 1px 1px rgba(255, 255, 255, 0.75);
-    --elevation-1: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.06), var(--card-inset-highlight);
-    --elevation-2: 0 4px 6px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.08), var(--card-inset-highlight);
-    --elevation-4: 0 10px 15px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.05), var(--card-inset-highlight);
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    --material-ripple-light: rgba(0, 0, 0, 0.15);
-    --icon-sun-stroke: #000;
-    --icon-moon-stroke: #fff;
-    --icon-palette-stroke: #000; /* Color inicial paleta */
-    --icon-arrow-stroke: #007AFF;
-    --icon-info-stroke: #000;
-    --icon-menu-stroke: #000;
-    --arrow-glow-animation: arrow-glow 1.5s ease-in-out infinite alternate;
-    --btn-google-border: #747775;
-    --btn-google-hover-bg: rgba(0, 0, 0, 0.05);
-    --badge-delantera-bg: #3b82f6;
-    --badge-delantera-text: #fff;
-    --badge-trasera-bg: #ef4444;
-    --badge-trasera-text: #fff;
-    --skeleton-bg: #e2e8f0;
-    --skeleton-highlight: #f1f5f9;
+    <link rel="stylesheet" href="style.css">
 
-    --brand-color-1: #007bff; --brand-color-2: #28a745; --brand-color-3: #dc3545;
-    --brand-color-4: #ffc107; --brand-color-5: #17a2b8; --brand-color-6: #fd7e14;
-    --brand-color-7: #6f42c1; --brand-color-8: #e83e8c; --brand-color-9: #6c757d;
-    --brand-color-10: #343a40;
-    --material-surface-light-rgb: 255, 255, 255;
-    --badge-menta-bg: #98FB98; /* Verde Menta Claro */
-    --badge-menta-text: #006400; /* Verde Oscuro */
+    <link rel="icon" type="image/svg+xml" href="favicon-x.svg">
 
-    /* Color de la marca de agua (método máscara) */
-    --watermark-mask-color: rgba(0, 0, 0, 0.1); /* Negro muy tenue para claro */
-}
+</head>
+<body>
 
-/* === MODO OSCURO AMOLED === */
-body.lp-dark {
-    --text-color: #fff;
-    --bg-color: #000000;
-    --header-border-color: rgba(255,255,255,0.1);
-    --header-x-fill: #fff;
-    --btn-primary-bg: #b91c1c;
-    --btn-primary-hover-bg: #991b1b;
-    --btn-primary-shadow: 0 4px 6px rgba(185, 28, 28, 0.6);
-    --material-surface-light: #111111;
-    --material-surface-border: rgba(255, 255, 255, 0.2);
-    --input-bg: #1f1f1f;
-    --input-focus-border: #60a5fa;
-    --input-focus-border-rgb: 96, 165, 250;
+    <header>
+        <div class="header-left-controls"> <button class="header-menu-btn material-btn" id="menuBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="side-menu">
+                <svg class="lp-icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+        </div>
 
-    --elevation-1: 0 1px 2px rgba(0,0,0,0.5), inset 0 1px 0px rgba(255, 255, 255, 0.05);
-    --elevation-2: 0 3px 6px rgba(0,0,0,0.4), inset 0 1px 0px rgba(255, 255, 255, 0.05);
-    --elevation-4: 0 8px 16px rgba(0,0,0,0.3), inset 0 1px 0px rgba(255, 255, 255, 0.05);
+        <h1>Brake <svg class="header-x" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
+                <path d="M8.98885921,23.8523026 C8.8942483,23.9435442 8.76801031,24 8.62933774,24 L2.03198365,24 C1.73814918,24 1.5,23.7482301 1.5,23.4380086 C1.5,23.2831829 1.55946972,23.1428989 1.65570253,23.0416777 L13.2166154,12.4291351 C13.3325814,12.3262031 13.4061076,12.1719477 13.4061076,11.999444 C13.4061076,11.8363496 13.3401502,11.6897927 13.2352673,11.587431 L1.68841087,0.990000249 C1.57298556,0.88706828 1.5,0.733668282 1.5,0.561734827 C1.5,0.251798399 1.73814918,0.000028513 2.03198365,0.000028513 L8.62933774,0.000028513 C8.76855094,0.000028513 8.89532956,0.0561991444 8.98994048,0.148296169 L21.4358709,11.5757407 C21.548593,11.6783875 21.6196864,11.8297916 21.6196864,11.999444 C21.6196864,12.1693815 21.5483227,12.3219261 21.4350599,12.4251432 L8.98885921,23.8523026 Z M26.5774333,23.8384453 L20.1765996,17.9616286 C20.060093,17.8578413 19.9865669,17.7038710 19.9865669,17.5310822 C19.9865669,17.3859509 20.0390083,17.2536506 20.1246988,17.153855 L23.4190508,14.1291948 C23.5163648,14.0165684 23.6569296,13.945571 23.8131728,13.945571 C23.9602252,13.945571 24.0929508,14.0082997 24.1894539,14.1092357 L33.861933,22.9913237 C33.9892522,23.0939706 34.0714286,23.2559245 34.0714286,23.4381226 C34.0714286,23.748059 33.8332794,23.9998289 33.5394449,23.9998289 L26.9504707,23.9998289 C26.8053105,23.9998289 26.6733958,23.9382408 26.5774333,23.8384453 Z M26.5774333,0.161098511 C26.6733958,0.0615881034 26.8053105,0 26.9504707,0 L33.5394449,0 C33.8332794,0 34.0714286,0.251769886 34.0714286,0.561706314 C34.0714286,0.743904453 33.9892522,0.905573224 33.861933,1.00822006 L24.1894539,9.89030807 C24.0929508,9.99152926 23.9602252,10.0542579 23.8131728,10.0542579 C23.6569296,10.0542579 23.5163648,9.98354562 23.4190508,9.87063409 L20.1246988,6.8459739 C20.0390083,6.74617837 19.9865669,6.613878 19.9865669,6.46874677 C20.060093,6.14198767 20.1765996,6.03848544 L26.5774333,0.161098511 Z"/>
+            </svg>
+            <span class="header-subtitle">Consulta rápida. Frenado seguro.</span>
+        </h1>
+        <div class="header-spacer"></div>
+    </header>
 
-    --material-ripple-dark: rgba(255, 255, 255, 0.1);
-    --icon-sun-stroke: #fff;
-    --icon-moon-stroke: #fff;
-    --icon-palette-stroke: #fff;
-    --icon-arrow-stroke: #FF3B30;
-    --icon-info-stroke: #fff;
-    --icon-menu-stroke: #fff;
-    --badge-delantera-bg: #2563eb;
-    --badge-trasera-bg: #b91c1c;
-    --skeleton-bg: #1a1a1a;
-    --skeleton-highlight: #2c2c2c;
-    --btn-google-hover-bg: rgba(255, 255, 255, 0.08);
+    <div class="main-layout">
+        <div class="filters-column">
+            <div class="glass">
+                <div class="filter-title">Búsqueda Rápida</div>
+                <div class="search-container" id="searchContainer">
+                    <label for="busquedaRapida" class="visually-hidden">Búsqueda Rápida por Marca, Serie, Referencia u OEM</label>
+                    <input type="text" id="busquedaRapida" placeholder="Marca, Serie, Ref, OEM..." class="form-input">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+                <div class="filter-group"> <div class="filter-title">Detalles del Vehículo</div>
+                    <label for="filtroMarca" class="visually-hidden">Filtrar por Marca</label>
+                    <input list="marcas" id="filtroMarca" class="form-input" placeholder="Marca"><datalist id="marcas"></datalist>
+                    <label for="filtroModelo" class="visually-hidden">Filtrar por Modelo o Serie</label>
+                    <input list="modelos" id="filtroModelo" class="form-input" placeholder="Modelo/Serie"><datalist id="modelos"></datalist>
+                    <label for="filtroAnio" class="visually-hidden">Filtrar por Año</label>
+                    <input list="anios" id="filtroAnio" class="form-input" placeholder="Año"><datalist id="anios"></datalist>
+                </div>
+                <div class="filter-group">
+                    <div class="filter-title">Posición</div>
+                    <div class="position-container">
+                        <button class="position-btn" id="positionDelantera">Delantera</button>
+                        <button class="position-btn" id="positionTrasera">Trasera</button>
+                    </div>
+                </div>
 
-    --brand-color-1: #0d6efd; --brand-color-2: #198754; --brand-color-3: #dc3545;
-    --brand-color-4: #ffca2c; --brand-color-5: #20c997; --brand-color-6: #fd7e14;
-    --brand-color-7: #6f42c1; --brand-color-8: #d63384; --brand-color-9: #6c757d;
-    --brand-color-10: #495057;
-    --material-surface-light-rgb: 17, 17, 17;
+                <!-- ===== INICIO: BLOQUE DE FAVORITOS (MODIFICADO) ===== -->
+                <div class="filter-group">
+                    <div class="filter-title">Guardados</div>
+                    <!-- Usamos la misma clase que 'Posición' para reusar estilos -->
+                    <div class="position-container"> 
+                        <button class="position-btn active" id="filtroTodos">Todos</button>
+                        <button class="position-btn" id="filtroFavoritos">Favoritos</button>
+                    </div>
+                </div>
+                <!-- ===== FIN: BLOQUE DE FAVORITOS (MODIFICADO) ===== -->
 
-    /* Color de la marca de agua (método máscara) */
-    --watermark-mask-color: rgba(255, 255, 255, 0.12); /* Blanco un poco más visible */
-}
+                <div class="filter-group">
+                    <div class="filter-title">Referencias</div>
+                    <div class="input-group-horizontal">
+                        <label for="filtroOem" class="visually-hidden">Filtrar por código OEM</label>
+                        <input list="oemList" id="filtroOem" class="form-input" placeholder="OEM"><datalist id="oemList"></datalist>
+                        <label for="filtroFmsi" class="visually-hidden">Filtrar por código FMSI</label>
+                        <input list="fmsiList" id="filtroFmsi" class="form-input" placeholder="Platina FMSI"><datalist id="fmsiList"></datalist>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <div class="filter-title">Medidas (mm)</div>
+                    <div class="input-group-horizontal">
+                        <label for="medidasAncho" class="visually-hidden">Filtrar por Ancho en milímetros</label>
+                        <input type="number" id="medidasAncho" placeholder="Ancho" class="form-input">
+                        <label for="medidasAlto" class="visually-hidden">Filtrar por Alto en milímetros</label>
+                        <input type="number" id="medidasAlto" placeholder="Alto" class="form-input">
+                    </div>
+                </div>
+                <button class="clear-filters-btn" id="clearFiltersBtn" aria-label="Borrar filtros">
+                    <svg id="trashIcon" viewBox="0 0 24 24"><g class="trash-body"><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></g><g class="trash-lid"><polyline points="3 6 5 6 21 6"></polyline><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path></g></svg>
+                    Borrar Filtros
+                </button>
+            </div>
+            <div class="brand-tags-container" id="brand-tags-container"></div>
+        </div>
+        <div class="results-panel">
+            <div class="glass results-header-card" id="results-header-card">
+                <div class="results-header">
+                    <div class="result-count-container" id="result-count-container" aria-live="polite" aria-atomic="true">0 resultados</div>
+                    <div class="view-toggle-buttons" role="radiogroup" aria-label="Modo de vista">
+                        <button class="view-btn active" id="viewGridBtn" role="radio" aria-checked="true" aria-label="Vista de cuadrícula"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
+                        <button class="view-btn" id="viewListBtn" role="radio" aria-checked="false" aria-label="Vista de lista"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
+                    </div>
+                </div>
+            </div>
+            <div class="results-wrapper" id="results-container" role="status"></div>
+            <div class="pagination-container" id="pagination-container"></div>
+        </div>
+    </div>
 
-/* === MODO ORBITAL === */
-body.modo-orbital {
-    --bg-color: #0f172a;
-    --text-color: #cbd5e1;
-    --material-surface-light: #1e293b;
-    --material-surface-border: #334155;
-    --input-bg: #334155;
-    --header-x-fill: #f1f5f9;
-    --header-border-color: #334155;
+    <footer class="footer-banner" id="footerBanner">
+        <div class="footer-content">
+            <div class="footer-links">
+                
+            </div>
+            <div class="footer-tools">
+                <span>Impulsado por:</span>
+                <a href="https://github.com/" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg class="tool-logo" id="github-logo" fill="#FFFFFF" viewBox="0 0 16 16" height="20"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.22.82 1.22.82.71 1.21 1.87.86 2.33.66.07-.52.28-.86.51-1.06-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+                <a href="https://gemini.google.com/" target="_blank" rel="noopener noreferrer" aria-label="Gemini"><svg class="tool-logo" viewBox="0 0 288 65" fill="currentColor"><path d="M283.015 17.039C281.649 17.039 280.465 16.5673 279.464 15.6239C278.508 14.6357 278.029 13.4677 278.029 12.1201C278.029 10.7725 278.508 9.62698 279.464 8.68363C280.465 7.74029 281.649 7.26862 283.015 7.26862C284.381 7.26862 285.542 7.74029 286.498 8.68363C287.499 9.62698 288 10.7725 288 12.1201C288 13.4677 287.499 14.6357 286.498 15.6239C285.542 16.5673 284.381 17.039 283.015 17.039ZM279.327 56.4572V22.0926H286.702V56.4572H279.327Z"></path><path d="M242.922 56.4572V22.0926H249.888V26.8093H250.298C251.299 25.1472 252.779 23.7771 254.737 22.699C256.74 21.576 258.925 21.0145 261.293 21.0145C265.572 21.0145 268.782 22.2723 270.922 24.7878C273.062 27.3034 274.132 30.6276 274.132 34.7603V56.4572H266.824V35.7037C266.824 32.9186 266.119 30.8971 264.707 29.6393C263.296 28.3366 261.452 27.6853 259.176 27.6853C257.4 27.6853 255.852 28.1794 254.532 29.1677C253.212 30.111 252.164 31.3688 251.39 32.941C250.662 34.5133 250.298 36.1978 250.298 37.9946V56.4572H242.922Z"></path><path d="M233.84 17.039C232.474 17.039 231.29 16.5673 230.288 15.6239C229.332 14.6357 228.854 13.4677 228.854 12.1201C228.854 10.7725 229.332 9.62698 230.288 8.68363C231.29 7.74029 232.474 7.26862 233.84 7.26862C235.205 7.26862 236.366 7.74029 237.322 8.68363C238.324 9.62698 238.825 10.7725 238.825 12.1201C238.825 13.4677 238.324 14.6357 237.322 15.6239C236.366 16.5673 235.205 17.039 233.84 17.039ZM230.152 56.4572V22.0926H237.527V56.4572H230.152Z"></path><path d="M172.473 56.4572V22.0926H179.439V26.8093H179.848C180.85 25.1472 182.307 23.7771 184.219 22.699C186.131 21.576 188.248 21.0145 190.57 21.0145C193.165 21.0145 195.373 21.6209 197.194 22.8338C199.015 24.0466 200.313 25.574 201.087 27.4157C202.225 25.6189 203.773 24.114 205.731 22.9012C207.688 21.6434 210.079 21.0145 212.901 21.0145C216.999 21.0145 220.049 22.2498 222.052 24.7205C224.056 27.1462 225.057 30.3805 225.057 34.4234V56.4572H217.75V35.6363C217.75 32.8961 217.135 30.8971 215.906 29.6393C214.722 28.3366 213.061 27.6853 210.921 27.6853C209.236 27.6853 207.757 28.1569 206.482 29.1003C205.207 29.9987 204.206 31.234 203.477 32.8063C202.794 34.3785 202.453 36.1304 202.453 38.062V56.4572H195.146V35.6363C195.146 32.8961 194.531 30.8971 193.302 29.6393C192.072 28.3366 190.342 27.6853 188.112 27.6853C186.473 27.6853 185.038 28.1569 183.809 29.1003C182.58 30.0436 181.601 31.3014 180.873 32.8736C180.19 34.4459 179.848 36.1978 179.848 38.1294V56.4572H172.473Z"></path><path d="M151.836 57.5353C148.421 57.5353 145.371 56.7492 142.684 55.177C139.998 53.6047 137.881 51.4485 136.333 48.7083C134.831 45.9681 134.08 42.8461 134.08 39.3423C134.08 36.063 134.808 33.0309 136.265 30.2458C137.722 27.4606 139.748 25.2371 142.343 23.575C144.984 21.868 148.011 21.0145 151.426 21.0145C155.022 21.0145 158.073 21.7781 160.577 23.3054C163.126 24.8328 165.061 26.9216 166.382 29.5719C167.702 32.2223 168.362 35.2095 168.362 38.5337C168.362 39.0278 168.339 39.477 168.294 39.8813C168.294 40.2856 168.271 40.6001 168.225 40.8247H141.319C141.683 44.2387 142.889 46.7992 144.938 48.5062C147.032 50.2132 149.4 51.0667 152.04 51.0667C154.408 51.0667 156.366 50.5501 157.913 49.5169C159.461 48.4388 160.691 47.1136 161.601 45.5414L167.679 48.4388C166.177 51.1341 164.128 53.3352 161.533 55.0422C158.938 56.7043 155.705 57.5353 151.836 57.5353ZM151.494 27.2136C149.036 27.2136 146.941 27.9548 145.211 29.4372C143.481 30.9196 142.32 32.8961 141.728 35.3668H161.055C160.964 34.1988 160.577 32.9859 159.894 31.7282C159.211 30.4704 158.164 29.4147 156.753 28.5612C155.387 27.6628 153.634 27.2136 151.494 27.2136Z"></path><path d="M106.73 57.5353C103.224 57.5353 99.9233 56.9064 96.8274 55.6486C93.777 54.3909 91.0681 52.6389 88.7007 50.3929C86.3333 48.1019 84.4666 45.4291 83.1008 42.3745C81.7805 39.2749 81.1204 35.9283 81.1204 32.3346C81.1204 28.7409 81.7805 25.4167 83.1008 22.3621C84.4666 19.2625 86.3105 16.5897 88.6324 14.3437C90.9998 12.0527 93.7315 10.2783 96.8274 9.02054C99.9233 7.76275 103.224 7.13385 106.73 7.13385C110.463 7.13385 113.9 7.78521 117.042 9.08792C120.229 10.3906 122.892 12.2099 125.032 14.5458L119.842 19.5995C118.248 17.8475 116.336 16.4999 114.105 15.5566C111.92 14.6132 109.461 14.1415 106.73 14.1415C103.497 14.1415 100.515 14.9052 97.7835 16.4325C95.0518 17.9149 92.8437 20.0262 91.1592 22.7664C89.5202 25.4617 88.7007 28.6511 88.7007 32.3346C88.7007 36.0181 89.543 39.23 91.2275 41.9702C92.912 44.6654 95.1201 46.7767 97.8517 48.304C100.583 49.7864 103.565 50.5276 106.798 50.5276C109.757 50.5276 112.443 49.9886 114.856 48.9105C117.269 47.7874 119.204 46.2152 120.661 44.1938C122.163 42.1723 123.074 39.7466 123.393 36.9165H106.661V30.3805H130.427C130.7 31.5934 130.836 32.8736 130.836 34.2213V34.2887C130.836 38.9605 129.789 43.0483 127.695 46.5521C125.646 50.011 122.801 52.7063 119.159 54.6379C115.516 56.5695 111.373 57.5353 106.73 57.5353Z"></path><path d="M57.8647 29.0109C52.865 26.8587 48.4905 23.9061 44.7393 20.1567C40.99 16.4074 38.0373 12.031 35.8851 7.03132C35.0589 5.11516 34.395 3.14552 33.886 1.12608C33.72 0.465846 33.128 0.00109863 32.4475 0.00109863C31.7669 0.00109863 31.1749 0.465846 31.009 1.12608C30.4999 3.14552 29.836 5.11332 29.0098 7.03132C26.8576 12.031 23.905 16.4074 20.1556 20.1567C16.4063 23.9061 12.0299 26.8587 7.03022 29.0109C5.11406 29.8371 3.14442 30.501 1.12498 31.0101C0.464747 31.176 0 31.768 0 32.4486C0 33.1291 0.464747 33.7211 1.12498 33.8871C3.14442 34.3961 5.11222 35.06 7.03022 35.8862C12.0299 38.0384 16.4045 40.9911 20.1556 44.7404C23.9068 48.4897 26.8576 52.8661 29.0098 57.8658C29.836 59.782 30.4999 61.7516 31.009 63.771C31.1749 64.4313 31.7669 64.896 32.4475 64.896C33.128 64.896 33.72 64.4313 33.886 63.771C34.395 61.7516 35.0589 59.7838 35.8851 57.8658C38.0373 52.8661 40.99 48.4916 44.7393 44.7404C48.4886 40.9911 52.865 38.0384 57.8647 35.8862C59.7809 35.06 61.7505 34.3961 63.7699 33.8871C64.4302 33.7211 64.8949 33.1291 64.8949 32.4486C64.8949 31.768 64.4302 31.176 63.7699 31.0101C61.7505 30.501 59.7827 29.8371 57.8647 29.0109Z" fill="url(#paint0_linear_10859_4895_footer)"></path><defs><linearGradient id="paint0_linear_10859_4895_footer" x1="18.4474" y1="43.4202" x2="52.1528" y2="15.0035" gradientUnits="userSpaceOnUse"><stop stop-color="#4893FC"></stop><stop offset="0.27" stop-color="#4893FC"></stop><stop offset="0.776981" stop-color="#969DFF"></stop><stop offset="1" stop-color="#BD99FE"></stop></linearGradient></defs></svg></a>
+            </div>
+            <div class="footer-copyright">&copy; 2026 Brake X. Todos los derechos reservados.</div>
+        </div>
+    </footer>
 
-    --btn-primary-bg: #EF4444;
-    --btn-primary-hover-bg: #DC2626;
-    --btn-primary-text: #ffffff;
-    --btn-primary-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+    <div class="floating-buttons-container left">
+        <button class="material-btn" id="upBtn" aria-label="Subir al inicio de la página"><svg class="lp-icon-arrow" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="5,12 12,5 19,12"></polyline></svg></button>
+    </div>
 
-    --badge-delantera-bg: #3b82f6;
-    --badge-delantera-text: #ffffff;
-    --badge-trasera-bg: #ef4444;
-    --badge-trasera-text: #ffffff;
+    <div class="floating-buttons-container right">
 
-    --skeleton-bg: #1e293b;
-    --skeleton-highlight: #334155;
+        <button class="material-btn" id="orbitalBtn" aria-label="Activar Modo Orbital" aria-pressed="false">
+            <svg class="lp-icon-palette" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3C12 7.97056 16.0294 12 21 12C16.0294 12 12 16.0294 12 21C12 16.0294 7.97056 12 3 12C7.97056 12 12 7.97056 12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            </button>
 
-    --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --elevation-2: 0 3px 6px rgba(0, 0, 0, 0.4);
-    --elevation-4: 0 8px 16px rgba(0, 0, 0, 0.5);
-
-    --icon-sun-stroke: #cbd5e1;
-    --icon-moon-stroke: #cbd5e1;
-    --icon-palette-stroke: #cbd5e1;
-    --icon-arrow-stroke: #3b82f6;
-    --icon-info-stroke: #cbd5e1;
-    --icon-menu-stroke: #cbd5e1;
-
-    --material-ripple-dark: rgba(255, 255, 255, 0.08);
-    --btn-google-hover-bg: rgba(255, 255, 255, 0.06);
-    --input-focus-border: #3b82f6;
-    --input-focus-border-rgb: 59, 130, 246;
-
-    --brand-color-1: #0d6efd; --brand-color-2: #198754; --brand-color-3: #dc3545;
-    --brand-color-4: #ffca2c; --brand-color-5: #20c997; --brand-color-6: #fd7e14;
-    --brand-color-7: #6f42c1; --brand-color-8: #d63384; --brand-color-9: #526e86;
-    --brand-color-10: #ff0000;
-
-    --arrow-glow-animation: arrow-glow;
-    --material-surface-light-rgb: 30, 41, 59;
-
-    /* Color de la marca de agua (método máscara) */
-     --watermark-mask-color: rgba(203, 213, 225, 0.12); /* Color texto orbital un poco más visible */
-}
-
-.lp-icon-palette { stroke: var(--icon-palette-stroke); }
-
-/* ================ CLASE DE ACCESIBILIDAD ================ */
-.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
-
-/* ================== GENERAL Y BODY ================== */
-* { box-sizing: border-box; margin:0; padding:0; }
-html { height:100%; scroll-behavior: smooth; }
-body {
-    background: var(--bg-color);
-    transition: background 0.5s ease, color 0.5s ease;
-    color: var(--text-color);
-    padding-top: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    font-family: 'Inter', sans-serif;
-}
-
-/* ================== ENCABEZADO ================== */
-header {
-    width: 100%; margin: 0 auto 1rem auto; background-color: transparent;
-    border-bottom: none; box-shadow: none; padding: 0.5rem 1rem;
-    display: flex; align-items: center; justify-content: space-between;
-}
-header h1 {
-    font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 700;
-    letter-spacing: 1px; color: inherit; display: flex; align-items: center;
-    justify-content: center; gap: 12px;
-    flex-wrap: wrap; opacity: 1;
-    animation: fadeDown 1s ease 0.3s forwards;
-    text-align: center; flex-grow: 1; margin: 0; padding: 0 10px;
-}
-.header-subtitle {
-    font-size: 0.9rem; font-weight: 500; color: var(--text-color); opacity: 0.6;
-    border-left: none; padding-left: 12px;
-    transition: color 0.5s ease, opacity 0.3s ease;
-}
-body.lp-dark .header-subtitle, body.modo-orbital .header-subtitle { opacity: 0.85; }
-header .header-x {
-    height: 1.1em;
-    width: auto; display: inline-block; vertical-align: middle;
-    transition: transform 0.6s ease;
-}
-header .header-x path {
-    fill: var(--header-x-fill);
-    transition: fill 0.5s ease;
-}
-
-/* ================== ESTILOS DE BOTONES (CORREGIDO) ================== */
-
-/* Botón base: SIN display:flex */
-.material-btn {
-    position: relative;
-    width: 40px; height: 40px; border-radius: 50%;
-    background-color: var(--material-surface-light);
-    color: var(--text-color);
-    box-shadow: var(--elevation-2);
-    cursor: pointer; overflow: hidden;
-    transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease;
-    border: 1px solid var(--material-surface-border);
-    outline:none;
-    padding: 0; /* Asegurar que no haya padding */
-}
-.material-btn:hover { box-shadow: var(--elevation-4); }
-
-/* 1. Botón de MENÚ (Header) SÍ usa flex */
-.header-menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.header-menu-btn svg {
-    width: 20px; height: 20px;
-    stroke: var(--icon-menu-stroke);
-    position: static; /* No absoluto */
-    transform: none;
-    transition: stroke 0.5s ease;
-}
-
-/* 2. Botón de PALETA (Header) - REGLAS ELIMINADAS */
-.header-left-controls { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        <button class="material-btn" id="darkBtn" aria-label="Cambiar modo oscuro" aria-pressed="false">
+            <svg class="lp-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"></line><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"></line><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"></line></svg>
+            <svg class="lp-icon-moon" viewBox="0 0 24 24" style="opacity:0;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+     </div>
 
 
-/* 3. Botones FLOTANTES (Subir, Sol/Luna) SÍ usan position: absolute */
-.floating-buttons-container { position: fixed; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
-.floating-buttons-container.left { left: 18px; bottom: 18px; }
-.floating-buttons-container.right { right: 18px; bottom: 18px; }
-
-.floating-buttons-container .material-btn > svg {
-    width: 20px; height: 20px; fill: none; stroke-width: 2;
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%); /* Centrado absoluto */
-    transition: opacity 0.4s, transform 0.4s, stroke 0.4s, filter 0.4s;
-}
-/* --- FIN CORRECCIÓN --- */
-
-
-.header-spacer { width: auto; min-width: 40px; height: 1px; flex-shrink: 0; visibility: hidden; }
-
-/* ================== PIE DE PÁGINA ================== */
-.footer-banner { width: 100%; margin-top: auto; background-color: #000; color: #f1f1f1; padding: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); box-shadow: none; z-index: 100; font-size: 0.8rem; text-align: center; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-.footer-content { margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.footer-links { display: flex; justify-content: center; align-items: center; margin-bottom: 0.75rem; }
-.footer-links a { color: #f1f1f1; opacity: 0.8; text-decoration: none; margin: 0 0.5rem; transition: opacity 0.2s, color 0.3s ease; }
-.footer-links a:hover { opacity: 1; }
-.footer-tools { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.75rem; color: #f1f1f1; }
-.footer-tools span { font-size: 0.8rem; opacity: 0.7; }
-.footer-tools a { color: #fff; opacity: 0.8; transition: opacity 0.2s ease; display: inline-flex; align-items: center; }
-.footer-tools a:hover { opacity: 1; }
-.tool-logo { height: 20px; width: auto; fill: currentColor; }
-#gemini-logo-star { height: 18px; }
-.footer-copyright { margin-top: 0; opacity: 0.6; font-size: 0.75rem; transition: opacity 0.3s ease, color 0.3s ease; }
-
-/* ================== ESTRUCTURA PRINCIPAL ================== */
-.main-layout { margin: 0 auto; display: flex; gap: 1rem; align-items: flex-start; width: 100%; flex-grow: 1; padding: 0 0.5rem 1rem; }
-.filters-column { flex: 0 0 262px; display: flex; flex-direction: column; gap: 1rem; }
-.results-panel { flex: 1; }
-
-/* ================== FILTROS Y TARJETAS ================== */
-.glass { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius:1rem; padding: 0.75rem 1rem; box-shadow: var(--elevation-1); transition: box-shadow 0.3s ease, border-color 0.5s ease, background-color 0.5s ease; }
-.filter-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; padding-bottom: 0; border-bottom: none; text-align: left; display: flex; align-items: center; gap: 8px; transition: color 0.5s ease; color: var(--text-color); }
-body.lp-dark .filter-title, body.modo-orbital .filter-title { color: var(--text-color); opacity: 0.9; }
-
-.form-input { width: 100%; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--material-surface-border); background-color: var(--input-bg); color: var(--text-color); font-size: 0.9rem; transition: all 0.3s ease; box-sizing: border-box; box-shadow: none; margin-bottom: 0.3rem; }
-.form-input:last-of-type { margin-bottom: 0; }
-.form-input:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px rgba(var(--input-focus-border-rgb, 37, 99, 235), 0.3); }
-.form-input::placeholder { color: var(--text-color); opacity: 0.6; }
-body.lp-dark .form-input::placeholder, body.modo-orbital .form-input::placeholder { color: var(--text-color); opacity: 0.7; }
-
-.search-container { position: relative; margin-bottom: 0.3rem; }
-#busquedaRapida { padding-left: 36px; }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; stroke: var(--text-color); fill: none; stroke-width: 2; opacity: 0.5; transition: opacity 0.3s ease, transform 0.3s ease, stroke 0.5s ease; }
-@keyframes magnify { 0% { transform: translateY(-50%) scale(1); opacity: 0.5; } 50% { transform: translateY(-50%) scale(1.15); opacity: 0.8; } 100% { transform: translateY(-50%) scale(1); opacity: 0.6; } }
-.search-container.active .search-icon { animation: magnify 0.6s ease-in-out infinite; opacity: 0.8; }
-
-.position-container { display:flex; gap: 0.4rem; }
-.position-btn { flex: 1; padding: 6px 4px; border-radius: 100px; cursor: pointer; font-size: 0.8rem; font-weight: 500; text-align: center; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; border: 1px solid var(--material-surface-border); background-color: transparent; color: var(--text-color); }
-.position-btn:hover { background-color: var(--btn-google-hover-bg); }
-#positionDelantera.active { background-color: var(--badge-delantera-bg); border-color: var(--badge-delantera-bg); color: var(--badge-delantera-text); }
-#positionTrasera.active { background-color: var(--badge-trasera-bg); border-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
-body.lp-dark .position-btn { border-color: var(--material-surface-border); color: var(--text-color); opacity: 0.9; }
-body.lp-dark .position-btn:hover { background-color: var(--btn-google-hover-bg); color: var(--text-color); opacity: 1; }
-body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { color: #fff; opacity: 1;}
-
-
-.input-group-horizontal { display:flex; gap: 0.3rem; margin-bottom: 0.3rem; }
-.input-group-horizontal .form-input { margin-bottom: 0; flex: 1; }
-.input-group-horizontal:last-of-type { margin-bottom: 0; }
-
-.result-count-container { font-size:0.85rem; color: var(--text-color); margin-top: 0; opacity: 0.8; transition: color 0.5s ease, opacity 0.5s ease; }
-.result-count-container strong { font-weight: 600; }
-
-.filter-group { margin-top: 0.8rem; border-top: 1px solid var(--material-surface-border); padding-top: 0.8rem; transition: border-color 0.5s ease; }
-.glass > .filter-group { margin-top: 0.8rem; }
-.glass > .filter-group:first-of-type { margin-top: 0.5rem; border-top: none; padding-top: 0; }
-
-.no-results-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1rem; color: var(--text-color); opacity: 0.6; width: 100%; border: 2px dashed var(--material-surface-border); border-radius: 1rem; margin-top: 1rem; grid-column: 1 / -1; transition: color 0.5s ease, opacity 0.5s ease, border-color 0.5s ease; }
-.no-results-container p { font-size: 1.1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.25rem; }
-.no-results-container span { font-size: 0.9rem; }
-.no-results-container svg { width: 60px; height: 60px; stroke: var(--text-color); opacity: 0.5; transition: stroke 0.5s ease, opacity 0.5s ease; }
-
-/* ===== INICIO CORRECCIÓN BOTÓN BORRAR ===== */
-.clear-filters-btn {
-    position: relative; /* Necesario para contener el ripple */
-    overflow: hidden;   /* <-- ESTA ES LA CORRECCIÓN */
-    width: 100%;
-    height: auto;
-    padding: 8px 16px;
-    border-radius: 0.75rem;
-    margin-top: 0.8rem;
-    background-color: var(--btn-primary-bg);
-    color: var(--btn-primary-text);
-    box-shadow: var(--btn-primary-shadow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
-    min-height: 40px;
-}
-/* ===== FIN CORRECCIÓN BOTÓN BORRAR ===== */
-.clear-filters-btn:hover { background-color: var(--btn-primary-hover-bg); box-shadow: var(--elevation-4); }
-.clear-filters-btn svg { width: 20px; height: 20px; stroke: var(--btn-primary-text); stroke-width: 2; fill: none; position: static; transition: none; }
-
-/* === ESTILOS ETIQUETAS MARCA CON COLOR === */
-.brand-tags-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.5rem 0;
-}
-.brand-tag {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 50px;
-    /* Usa la variable --tag-brand-color para borde y texto */
-    border: 1px solid var(--tag-brand-color, var(--material-surface-border));
-    color: var(--tag-brand-color, var(--text-color));
-    background-color: transparent; /* Fondo transparente por defecto */
-    opacity: 0.9; /* Un poco más visible */
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s, box-shadow 0.2s;
-    white-space: nowrap;
-}
-.brand-tag:hover {
-    opacity: 1;
-    background-color: var(--input-bg); /* Mantiene el hover genérico */
-}
-.brand-tag.active {
-    background-color: transparent; /* Sin relleno */
-    /* color: #000; */ /* <-- LÍNEA ELIMINADA */
-    border-color: var(--tag-brand-color); /* Borde de color */
-    border-width: 2px; /* Borde un poco más grueso */
-    padding: 3px 9px; /* Ajuste de padding */
-    box-shadow: none; /* Sin sombra */
-    opacity: 1;
-}
-@media (max-width: 767px) {
-    .brand-tags-container { display: none; }
-}
-/* === FIN ESTILOS ETIQUETAS MARCA === */
-
-@keyframes skeleton-pulse { 0%, 100% { background-color: var(--skeleton-bg); } 50% { background-color: var(--skeleton-highlight); } }
-.skeleton-card { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius: 0.75rem; padding: 0.75rem; box-shadow: var(--elevation-1); display: flex; flex-direction: column; gap: 0.8rem; transition: background-color 0.5s ease, border-color 0.5s ease; }
-.skeleton-line { height: 1rem; border-radius: 0.25rem; animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-.skeleton-box { width: 100%; aspect-ratio: 4 / 3; border-radius: 0.5rem; animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-.skeleton-line.short { width: 40%; } .skeleton-line.long { width: 80%; }
-
-.results-header-card { padding: 0.5rem 1rem; margin-bottom: 0.8rem; }
-.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; }
-.results-panel > .results-header-card { margin-top: 0; margin-bottom: 0.8rem; }
-
-.view-toggle-buttons { display: flex; gap: 0.5rem; }
-.view-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--material-surface-border); background-color: transparent; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.5s ease; }
-.view-btn svg { width: 20px; height: 20px; stroke: var(--text-color); opacity: 0.6; transition: opacity 0.2s ease, stroke 0.5s ease; }
-.view-btn:hover { background-color: var(--btn-google-hover-bg); }
-.view-btn.active { background-color: var(--input-bg); border-color: var(--material-surface-border); box-shadow: var(--elevation-1); }
-.view-btn.active svg { opacity: 1; }
-
-@keyframes fadeInUpCard { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.results-wrapper {
-    display: grid;
-    gap: 0.8rem;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    transition: opacity 0.3s ease; /* UX: Transición para estado de carga */
-}
-/* UX: Estado de carga/filtrado */
-.results-wrapper.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* ===== INICIO DE LA MODIFICACIÓN (Animación Tarjeta Completa - Zoom Aumentado) ===== */
-.result-card {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--material-surface-light);
-    border: 1px solid var(--material-surface-border);
-    border-radius: 0.5rem;
-    padding: 0.6rem;
-    box-shadow: var(--elevation-1);
-    opacity: 0;
-    animation: fadeInUpCard 0.5s cubic-bezier(0.2, 0.5, 0.1, 1) forwards;
+    <div id="card-modal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content" role="document">
+            <button class="modal-close-btn" aria-label="Cerrar">&times;</button>
+            <h2 id="modal-title" class="modal-ref"></h2>
+            <div class="modal-position"></div>
+            <div class="modal-layout-wrapper">
+                <div class="modal-details-content-wrapper" id="modalDetailsWrapper">
+                    <div class="modal-details-content" id="modalDetailsContent">
+                        <div class="modal-apps-specs"></div>
+                    </div>
+                    <div class="modal-scroll-indicator"></div>
+                </div>
+                <div class="modal-image-carousel"></div>
+            </div>
+            <div class="modal-counter-wrapper" id="modalCounterWrapper"></div>
+        </div>
+    </div>
+    <div id="guide-modal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title">
+        <div class="modal-content" role="document">
+            <button class="modal-close-btn" aria-label="Cerrar">&times;</button>
+            <h2 id="guide-modal-title" class="filter-title" style="margin-bottom: 0.5rem; border-bottom: 1px solid var(--material-surface-border); padding-bottom: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Guía Rápida de Uso
+            </h2>
+            <div class="usage-guide-content">
+                <p>¡Bienvenido a Brake X! Encuentra las pastillas de freno que necesitas fácilmente:</p>
+                <ul>
+                    <li><strong>🔍 Búsqueda Rápida:</strong> Escribe cualquier dato (Marca, Serie, Ref, OEM) en la barra principal para resultados instantáneos.</li>
+                    <li><strong>🚗 Filtros Detallados:</strong> Usa las secciones de abajo para refinar por Marca, Modelo/Serie, Año, Posición (Delantera/Trasera), Referencias (OEM/FMSI) o incluso Medidas (Ancho/Alto en mm).</li>
+                    <li><strong>🏷️ Etiquetas de Marca:</strong> Haz clic en una marca popular debajo de los filtros para aplicarla rápidamente (solo en pantallas grandes).</li>
+                    <li><strong>🧼 Borrar Filtros:</strong> Usa el botón rojo para limpiar todos los campos y empezar de nuevo.</li>
+                    <li><strong>📊 Vista de Resultados:</strong> Elige entre ver los resultados en cuadrícula (🔲) o en lista (☰) usando los botones sobre los resultados.</li>
+                    <li><strong>🖱️ Ver Detalles:</strong> Haz clic en cualquier tarjeta de resultado para abrir una ventana con más información, incluyendo todas las aplicaciones vehiculares y especificaciones.</li>
+                    <li><strong>↔️ Navegar Imágenes:</strong> Dentro de la ventana de detalles, usa las flechas (‹ ›) o desliza el dedo (en móviles) sobre la imagen para ver diferentes vistas de la pastilla.</li>
+                    <li><strong>📄 Paginación:</strong> Si hay muchos resultados, usa los botones numéricos (1, 2, 3...) en la parte inferior para navegar entre páginas.</li>
+                    <li><strong>☀️🌙💫 Temas:</strong> Cambia entre Claro/Oscuro AMOLED con el botón flotante (🌙) y activa/desactiva el Modo Orbital con el botón de paleta (🎨).</li>
+                    <li><strong>💾 Persistencia:</strong> Tus filtros, tema y modo de vista se guardan para tu próxima visita.</li>
+                </ul>
+            </div>
+            
+            
+        </div>
+    </div>
+    <div class="side-menu-overlay" id="side-menu-overlay" style="display: none;"></div>
+    <nav class="side-menu" id="side-menu" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="sideMenuTitle">
+        <div class="side-menu-header">
+            <h2 id="sideMenuTitle">Menú</h2>
+            <button class="menu-close-btn" id="menuCloseBtn" aria-label="Cerrar menú">&times;</button>
+        </div>
+        <ul class="side-menu-list">
+            <li><button class="side-menu-link" id="open-guide-link">Guía Rápida de Uso</button></li>
+        </ul>
+    </nav>
     
-    /* REVISADO: Overflow: hidden es necesario para border-radius */
-    overflow: hidden;
-    position: relative; /* Necesario para el ::after de la marca de agua */
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    cursor: pointer;
-    transition: box-shadow 0.2s ease, border-color 0.5s ease, background-color 0.5s ease, flex-direction 0.3s ease, transform 0.2s ease-out;
-    width: 100%;
-}
-.result-card:hover, .result-card:focus {
-    box-shadow: var(--elevation-4);
-    transform: translateY(-6px) scale(1.05); /* Sube 6px Y aplica zoom 5% a TODA la tarjeta */
-}
-/* ===== FIN DE LA MODIFICACIÓN ===== */
-
-.card-thumbnail {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    margin-bottom: 0.5rem;
-    border-radius: 0.3rem;
-    overflow: hidden;
-    background-color: var(--skeleton-bg);
-    transition: background-color 0.5s ease;
-}
-.result-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Ya no necesita transición aquí */
-}
-.card-content-wrapper { flex: 1; }
-.card-details {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start; /* Alinea los items (refs y posición) al inicio */
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 0.3rem;
-}
-.card-ref-container { /* Nuevo contenedor para las etiquetas ref */
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-bottom: 0.2rem; /* Pequeño espacio si envuelven */
-    flex-grow: 1; /* Permite que ocupe espacio disponible */
-    margin-right: 0.5rem; /* Espacio antes del badge de posición */
-}
-
-/* ===== INICIO CORRECCIÓN TAMAÑO FUENTE TARJETA ===== */
-.ref-badge { /* Estilo base para etiquetas de referencia */
-    padding: 0.15rem 0.5rem;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.75rem;
-    white-space: nowrap;
-    line-height: 1.3;
-    display: inline-block;
-    border: none;
-}
-.ref-badge-na { /* Etiqueta N/A */
-    background-color: var(--badge-menta-bg);
-    color: var(--badge-menta-text);
-}
-.position-badge { /* Estilo base para etiquetas de posición - ¡RESTAURADO! */
-    padding: 0.15rem 0.5rem;
-    border-radius: 50px;
-    font-weight: 500;
-    font-size: 0.75rem;
-    transition: background-color 0.5s ease, color 0.5s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-    position: static; /* Asegura posición normal */
-    transform: none;
-    border: none;
-    box-shadow: none;
-}
-.position-badge.delantera { background-color: var(--badge-delantera-bg); color: var(--badge-delantera-text); }
-.position-badge.trasera { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
-
-.card-app-summary {
-    font-size: 0.65rem;
-    line-height: 1.3;
-    color: var(--text-color);
-    opacity: 0.7;
-    max-height: 2.6em; /* 2 líneas */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    transition: color 0.5s ease, opacity 0.5s ease;
-}
-/* ===== FIN CORRECCIÓN TAMAÑO FUENTE TARJETA ===== */
-
-body.lp-dark .card-app-summary, body.modo-orbital .card-app-summary { opacity: 0.8; color: var(--text-color); }
-
-.results-wrapper.list-view { grid-template-columns: 1fr; gap: 0.5rem; }
-.results-wrapper.list-view .result-card { flex-direction: row; align-items: center; gap: 1rem; padding: 0.8rem; }
-.results-wrapper.list-view .card-thumbnail { flex: 0 0 100px; margin-bottom: 0; }
-.results-wrapper.list-view .card-details { align-items: center; flex-wrap: nowrap; gap: 0.8rem; margin-bottom: 0.5rem; }
-.results-wrapper.list-view .card-ref-container { margin-bottom: 0; flex-grow: 0; } /* Ajuste para vista lista */
-.results-wrapper.list-view .card-app-summary {
-    -webkit-line-clamp: 1;
-    line-clamp: 1; /* Propiedad estándar para VSC */
-    max-height: 1.3em;
-}
-
-/* Estilos originales para .modal-position (restaurado) */
-.modal-position {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    text-align: left; /* O como estuviera originalmente */
-    height: auto;
-    position: static;
-    z-index: auto;
-}
-/* Estilos originales para .modal-position .position-badge (restaurado) */
-.modal-position .position-badge {
-    display: inline-block; /* O como estuviera originalmente */
-    position: static;
-    transform: none;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.15rem 0.5rem;
-    border: none;
-    box-shadow: none;
-    margin-bottom: 0;
-}
-
-
-.pagination-container { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
-.page-btn { font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 6px 12px; min-width: 36px; text-align: center; border-radius: 8px; border: 1px solid var(--material-surface-border); background-color: var(--material-surface-light); color: var(--text-color); cursor: pointer; transition: background-color 0.2s ease, color 0.5s ease, box-shadow 0.2s, border-color 0.5s ease; }
-.page-btn:hover { background-color: var(--input-bg); }
-.page-btn.active { background-color: var(--btn-primary-bg); border-color: var(--btn-primary-bg); color: var(--btn-primary-text); box-shadow: var(--btn-primary-shadow); }
-.page-btn[disabled] { opacity: 0.5; cursor: not-allowed; background-color: var(--input-bg); }
-
-.applications-list-container { margin-top: 0; padding-top: 0; }
-.app-brand-header { font-weight: 700; font-size: 0.85rem; padding: 3px 0; margin-top: 6px; color: var(--text-color); opacity: 0.9; border-bottom: 1px solid var(--material-surface-border); text-transform: uppercase; transition: color 0.5s ease, border-color 0.5s ease, opacity 0.5s ease; }
-
-/* ================== ESTILOS CORREGIDOS MODAL (Specs layout) ================== */
-
-/* Grid para alinear Labels y Values en Specs */
-.modal-apps-specs .spec-details-grid {
-    display: grid; /* Asegurar que es grid */
-    grid-template-columns: auto 1fr; /* Label auto, Value el resto */
-    gap: 0.6rem 0.8rem; /* Espacio vertical y horizontal */
-    align-items: baseline; /* Alinea texto con la primera línea de badges/texto */
-    padding: 5px 0; /* Aumenta un poco el padding vertical */
-    font-size: 0.78125rem; /* <-- ¡MODIFICACIÓN! */
-}
-.modal-apps-specs .spec-label {
-    font-weight: 600; /* Label en negrita */
-    white-space: nowrap;
-    text-align: left; /* Asegurar alineación */
-    padding-top: 0.15rem; /* Ajuste para alinear con badges */
-}
-.modal-apps-specs .spec-details-grid .spec-value {
-    text-align: left; /* Valor alineado a la izquierda */
-    word-break: break-word; /* Permite que textos largos (OEM) se partan */
-}
-/* Borde inferior para todas las filas de spec-grid, excepto la última */
-.modal-apps-specs .spec-details-grid > div {
-    border-bottom: 1px dotted var(--material-surface-border);
-    padding-bottom: 0.6rem;
-}
-.modal-apps-specs .spec-details-grid > .spec-label:nth-last-of-type(2),
-.modal-apps-specs .spec-details-grid > .spec-value:last-of-type {
-    border-bottom: none; /* Quitar borde a la última fila */
-}
-
-
-/* Estilos específicos para la fila de Aplicaciones (mantienen 3 columnas) */
-.applications-list-container .app-detail-row {
-     display: grid; /* Asegurar que es grid */
-     grid-template-columns: 2fr 1fr 1fr;
-     align-items: center; /* Centrar verticalmente */
-     gap: 0.2rem 0.5rem; /* Reducir gap */
-     padding: 4px 0; /* Padding original */
-     border-bottom: 1px dotted var(--material-surface-border);
-     color: var(--text-color);
-     opacity: 0.85;
-     transition: color 0.5s ease, opacity 0.5s ease, border-color 0.5s ease;
-     font-size: 0.78125rem; /* <-- ¡MODIFICACIÓN! */
-}
-.applications-list-container .app-detail-row:last-child {
-    border-bottom: none;
-}
-.applications-list-container .app-detail-row > div:first-child {
-    font-weight: normal; /* Asegurar que no esté en negrita */
-}
-.applications-list-container .app-detail-row > div:last-child {
-    text-align: right;
-}
-/* ================== FIN ESTILOS SPECS MODAL ================== */
-
-
-.card-model, .app-header-row { display: none; }
-body.lp-dark .app-brand-header, body.modo-orbital .app-brand-header { color: var(--text-color); opacity: 1; }
-body.lp-dark .app-detail-row, body.modo-orbital .app-detail-row { color: var(--text-color); opacity: 0.9; }
-
-/* ================== ESTILOS DEL MODAL ================== */
-@keyframes modal-in { from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
-@keyframes modal-out { from { opacity: 1; transform: translate(-50%, -50%) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) scale(0.95); } }
-.modal-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1rem; cursor: pointer; transition: background-color 0.3s ease, opacity 0.3s ease; }
-.modal-content {
-    background-color: var(--material-surface-light);
-    color: var(--text-color);
-    border-radius: 0.8rem;
-    box-shadow: var(--elevation-4);
-    padding: 1.5rem;
-    width: 100%;
-    max-width: 700px;
-    max-height: 90vh;
-    overflow: hidden; /* Mantenemos hidden por el scroll */
-    cursor: default;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
-    animation: modal-in 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-    border: 1px solid var(--material-surface-border);
-    z-index: 10001; /* Asegura que esté por encima del overlay */
-}
-.modal-content.closing { animation: modal-out 0.2s cubic-bezier(0.44, 0.05, 0.55, 0.95) forwards; }
-.modal-layout-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex-grow: 1; min-height: 0; overflow: hidden; }
-.modal-close-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; font-size: 1.8rem; line-height: 1; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; transition: color 0.5s ease, opacity 0.2s ease; z-index: 10003; }
-.modal-close-btn:hover { opacity: 1; }
-.modal-image-carousel { width: 100%; aspect-ratio: 4 / 3; border-radius: 0.5rem; overflow: hidden; position: relative; background-color: var(--skeleton-bg); height: fit-content; transition: background-color 0.5s ease; }
-.modal-image-carousel .image-track { display: flex; transition: transform 0.3s ease-in-out; }
-.modal-image-carousel .result-image { flex-shrink: 0; width: 100%; height: auto; object-fit: cover; }
-@keyframes bounce-arrow { 0%, 100% { transform: translateY(-50%) translateX(0); } 50% { transform: translateY(-50%) translateX(3px); } }
-.modal-image-carousel .carousel-nav-btn { z-index: 10001; position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.3); border: none; color: white; padding: 8px 12px; font-size: 1.2rem; cursor: pointer; opacity: 0.8; transition: opacity 0.2s, background 0.2s; line-height: 1; }
-.modal-image-carousel .carousel-nav-btn[data-direction="-1"] { left: 0; border-radius: 0 50px 50px 0; animation: bounce-arrow 1.5s infinite 0.5s; animation-direction: alternate-reverse; }
-.modal-image-carousel .carousel-nav-btn[data-direction="1"] { right: 0; border-radius: 50px 0 0 50px; animation: bounce-arrow 1.5s infinite 0.5s; }
-.modal-image-carousel .carousel-nav-btn:hover { opacity: 1; background: rgba(0, 0, 0, 0.5); animation: none; }
-.modal-details-content-wrapper { display: flex; flex-direction: column; position: relative; min-height: 0; flex-grow: 1; }
-.modal-details-content { display: flex; flex-direction: column; gap: 0.8rem; overflow-y: auto; padding-right: 8px; margin-top: 0.5rem; flex-grow: 1; min-height: 0; max-height: 100%; }
-:root { --material-surface-light-rgb: 255, 255, 255; }
-body.lp-dark { --material-surface-light-rgb: 17, 17, 17; }
-body.modo-orbital { --material-surface-light-rgb: 30, 41, 59; }
-.modal-scroll-indicator { position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(to top, var(--material-surface-light), rgba(var(--material-surface-light-rgb), 0)); pointer-events: none; opacity: 0; transition: opacity 0.3s ease, background 0.5s ease; }
-.modal-details-content-wrapper.scrollable .modal-scroll-indicator { opacity: 1; }
-
-/* Estilos para el encabezado del modal (H2) - Restaurado */
-.modal-ref {
-    font-weight: 700;
-    line-height: 1;
-    transition: color 0.5s ease;
-    color: var(--text-color);
-    margin-bottom: 0;
-    padding-bottom: 0;
-    padding-top: 0; /* Restaurado */
-    margin-top: 0; /* Restaurado */
-}
-.modal-header-ref-container { /* Contenedor DIV DENTRO del H2 */
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem; /* Espacio entre etiquetas en header */
-    justify-content: flex-start; /* Alinea a la izquierda por defecto */
-    margin-bottom: 0.3rem; /* Espacio antes de la posición */
-    padding-top: 2px; /* Pequeño ajuste si es necesario */
-}
-/* Badges dentro del header */
-.modal-ref .header-ref-badge {
-    font-size: 0.9rem; /* Tamaño más grande para el header */
-    padding: 0.2rem 0.6rem;
-    line-height: 1.4; /* Mantener altura consistente */
-}
-.modal-ref .header-ref-badge.ref-badge-na { /* Ajuste padding N/A en header */
-     padding: 0.2rem 0.6rem;
-}
-
-body.lp-dark .modal-ref, body.modo-orbital .modal-ref { color: var(--text-color); }
-.modal-apps-specs { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--material-surface-border); transition: border-color 0.5s ease; }
-
-/*===== INICIO DE LA CORRECCIÓN MODAL ===== */
-.modal-apps-specs .app-brand-header {
-    font-size: 0.78125rem;
-    margin-top: 1.25rem; /* <-- MODIFICADO: Añade espacio superior */
-    margin-bottom: 0.8rem;
-    padding-bottom: 5px;
-    border-bottom-width: 2px;
-    color: var(--text-color);
-    font-weight: 700;
-    opacity: 1;
-    border-color: var(--material-surface-border);
-    transition: color 0.5s ease, border-color 0.5s ease;
-}
-/* NUEVA REGLA: Quita el margen solo al primer subtítulo */
-.modal-apps-specs .applications-list-container > .app-brand-header:first-child {
-    margin-top: 0;
-}
-/* ===== FIN DE LA CORRECCIÓN MODAL ===== */
-
-body.lp-dark .modal-apps-specs .app-brand-header, body.modo-orbital .modal-apps-specs .app-brand-header { color: var(--text-color); }
-.modal-counter-wrapper { width: 100%; text-align: right; font-size: 0.8rem; color: var(--text-color); opacity: 0.7; padding-top: 0.5rem; flex-shrink: 0; transition: color 0.5s ease, opacity 0.5s ease; border-top: 1px solid var(--material-surface-border);} /* Separador arriba */
-.modal-counter-wrapper .carousel-counter { display: inline-block; background-color: var(--input-bg); padding: 3px 9px; border-radius: 6px; font-weight: 500; transition: background-color 0.5s ease; }
-#guide-modal .modal-content { max-width: 800px; }
-#guide-modal .usage-guide-content { font-size: 0.9rem; line-height: 1.6; opacity: 0.9; padding-left: 5px; border-top: none; padding-top: 0; flex-grow: 1; overflow-y: auto; min-height: 0; padding-right: 8px; color: var(--text-color); transition: color 0.5s ease, opacity 0.5s ease; }
-#guide-modal .usage-guide-content p { margin-bottom: 0.75rem; }
-#guide-modal .usage-guide-content ul { list-style: none; padding-left: 0; }
-#guide-modal .usage-guide-content li { margin-bottom: 0.6rem; padding-left: 1.5rem; position: relative; }
-#guide-modal .usage-guide-content li::before { content: '✅'; position: absolute; left: 0; top: 1px; font-size: 1em; }
-#guide-modal .usage-guide-content strong { font-weight: 600; color: var(--text-color); transition: color 0.5s ease; }
-body.lp-dark #guide-modal .usage-guide-content strong, body.modo-orbital #guide-modal .usage-guide-content strong { color: var(--text-color); }
-@media (max-width: 650px) { .modal-content { max-width: 90vw; max-height: 85vh; padding: 1rem; } .modal-layout-wrapper { grid-template-columns: 1fr; gap: 1rem; } .modal-close-btn { font-size: 1.5rem; top: 0.3rem; right: 0.3rem; } .modal-ref .header-ref-badge { font-size: 0.8rem; } .modal-image-carousel { order: -1; margin-bottom: 0; } .modal-counter-wrapper { order: 2; } }
-
-/* Animaciones */
-/* @keyframes bounce { 0%{transform:scale(1)}30%{transform:scale(1.03)}50%{transform:scale(.98)}100%{transform:scale(1)} } -- ELIMINADO */
-@keyframes open-lid { 0%{transform:rotate(0deg) translateY(0px) translateX(0px)}30%{transform:rotate(-25deg) translateY(-4px) translateX(-2px)}70%{transform:rotate(-25deg) translateY(-4px) translateX(-2px)}100%{transform:rotate(0deg) translateY(0px) translateX(0px)} }
-@keyframes shake-body { 0%,100%{transform:translateX(0)}25%{transform:translateX(-1px)}75%{transform:translateX(1px)} }
-@keyframes spark-fade-out { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)) scale(0.5); } }
-.spark { position: absolute; border-radius: 50%; opacity: 0; animation: spark-fade-out 0.6s ease-out forwards; box-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
-/* .animate-button { animation: bounce 0.4s ease-in-out; } -- ELIMINADO */
-.animate-lid { animation: open-lid 0.8s ease-in-out; }
-.animate-body { animation: shake-body 0.2s ease-in-out 3; animation-delay: 0.1s; }
-
-/* ================== BOTONES FLOTANTES ================== */
-/* (Este bloque fue eliminado por ser duplicado) */
-
-/* Ripple claro por defecto */
-body:not(.lp-dark):not(.modo-orbital) .ripple { background-color: var(--material-ripple-light); }
-/* Ripple oscuro para los temas oscuros restantes */
-body.lp-dark .ripple, body.modo-orbital .ripple { background-color: var(--material-ripple-dark); }
-
-/* ===== INICIO CORRECCIÓN RIPPLE ===== */
-.ripple {
-    position: absolute;
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple-effect 0.6s linear;
-    pointer-events: none; /* Impide que el ripple interfiera con el clic */
-}
-/* ===== FIN CORRECCIÓN RIPPLE ===== */
-
-@keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
-
-.lp-icon-sun { stroke: var(--icon-sun-stroke); }
-.lp-icon-moon { stroke: var(--icon-moon-stroke); }
-.lp-icon-palette { stroke: var(--icon-palette-stroke); }
-.lp-icon-arrow { stroke: var(--icon-arrow-stroke); animation: var(--arrow-glow-animation); }
-.lp-icon-info { stroke: var(--icon-info-stroke); }
-#upBtn { opacity: 0; transform: translateY(10px); pointer-events: none; }
-#upBtn.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
-
-/* ================== MENÚ LATERAL ================== */
-.side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background-color: var(--material-surface-light); border-right: 1px solid var(--material-surface-border); box-shadow: var(--elevation-4); z-index: 11000; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease, border-color 0.5s ease; display: flex; flex-direction: column; }
-.side-menu.open { left: 0; }
-.side-menu-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--material-surface-border); flex-shrink: 0; transition: border-color 0.5s ease; }
-.side-menu-header h2 { font-size: 1.1rem; font-weight: 600; margin: 0; color: var(--text-color); transition: color 0.5s ease; }
-body.lp-dark .side-menu-header h2, body.modo-orbital .side-menu-header h2 { color: var(--text-color); }
-.menu-close-btn { background: none; border: none; font-size: 1.8rem; line-height: 1; color: var(--text-color); opacity: 0.6; cursor: pointer; padding: 0.2rem; transition: opacity 0.2s ease, color 0.5s ease; }
-.menu-close-btn:hover { opacity: 1; }
-.side-menu-list { list-style: none; padding: 0.75rem 0; margin: 0; overflow-y: auto; flex-grow: 1; }
-.side-menu-list li { margin: 0; }
-.side-menu-link { display: block; width: 100%; text-align: left; padding: 0.75rem 1.5rem; font-size: 0.95rem; color: var(--text-color); background: none; border: none; cursor: pointer; transition: background-color 0.2s ease, color 0.5s ease; }
-.side-menu-link:hover { background-color: var(--btn-google-hover-bg); }
-.side-menu-overlay { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 10999; cursor: pointer; transition: opacity 0.3s ease; opacity: 0; display: none; }
-.side-menu-overlay.visible { opacity: 1; display: block; }
-
-/* ================== ANIMACIONES GENERALES ================== */
-@keyframes fadeDown { 0% { opacity:0; transform:translateY(-8px); } 100% { opacity:1; transform:translateY(0); } }
-@keyframes bounceHeader { 0%{transform:scale(1)}30%{transform:scale(1.15)}50%{transform:scale(.95)}70%{transform:scale(1.1)}100%{transform:scale(1)} }
-@keyframes arrow-glow { 0%{filter:drop-shadow(0 0 2px rgba(0,122,255,.4))}50%{filter:drop-shadow(0 0 6px rgba(0,122,255,.8))}100%{filter:drop-shadow(0 0 2px rgba(0,122,255,.4))} }
-@keyframes arrow-glow-dark { 0%{filter:drop-shadow(0 0 2px rgba(255,59,48,.4))}50%{filter:drop-shadow(0 0 6px rgba(255,59,48,.8))}100%{filter:drop-shadow(0 0 2px rgba(255,59,48,.4))} }
-body.modo-orbital { --arrow-glow-animation: arrow-glow; } /* Orbital usa azul */
-body.lp-dark { --arrow-glow-animation: arrow-glow-dark; } /* AMOLED usa rojo */
-@keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
-
-/* ================== AJUSTES RESPONSIVE ================== */
-@media (max-width: 767px) {
-    .main-layout { flex-direction: column; gap: 1rem; align-items: stretch; padding-bottom: 80px; } /* Padding inferior para espacio */
-    .filters-column { flex-basis: auto; width: 100%; }
-    .input-group-horizontal { flex-direction: column; gap: 0.3rem; }
-    .results-wrapper { grid-template-columns: 1fr; }
-    .results-header-card { margin-top: 1rem; }
-}
-@media (max-width: 600px) { .form-input, .position-btn { font-size: 1rem; padding: 0.75rem; } }
-@media (max-width: 480px) {
-    header { padding: 0.5rem 0.5rem; }
-    .header-menu-btn { left: 0.5rem; width: 36px; height: 36px;}
-    .header-menu-btn svg { width: 18px; height: 18px; }
-
-    .header-left-controls { gap: 8px; }
-
-    header h1 { font-size: 1rem; gap: 0px; flex-direction: column; padding-left: 0; padding-right: 0; justify-content: center; flex-grow: 1; }
-    .header-subtitle { font-size: 0.7rem; display: block; margin-top: 4px; padding-left: 0; opacity: 0.7; }
-    .header-spacer { min-width: 36px; }
-
-    /* Ajuste modal responsive para spec rows */
-    .spec-details-grid { /* Usar spec-details-grid ahora */
-        grid-template-columns: auto 1fr;
-        gap: 0.5rem 0.8rem; /* Reducir gap un poco */
-    }
-     .spec-value {
-         text-align: left;
-    }
-     /* Ajustar filas de aplicaciones en móvil */
-    .applications-list-container .app-detail-row {
-         grid-template-columns: 2fr 1fr; /* Ocultar litros (col 2) */
-         gap: 0.1rem 0.4rem;
-    }
-     .applications-list-container .app-detail-row > div:nth-child(2) {
-         display: none;
-    }
-     .applications-list-container .app-detail-row > div:last-child {
-         text-align: right; /* Años a la derecha */
-    }
-     /* Reducir tamaño header badges en móvil */
-     .modal-ref .header-ref-badge {
-         font-size: 0.75rem;
-         padding: 0.15rem 0.5rem;
-    }
-    .modal-ref .header-ref-badge.ref-badge-na { /* Ajuste N/A en móvil */
-         padding: 0.15rem 0.5rem;
-    }
-
-         .card-ref-container .ref-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem;} /* Ajustar tamaño de ref badges */
-         .position-badge { font-size: 0.75rem; padding: 0.15rem 0.5rem;} /* Ajustar tamaño igual a ref badge */
-         .pagination-container { gap: 0.3rem; }
-         .page-btn { padding: 5px 10px; min-width: 32px; font-size: 0.85rem;}
-         .side-menu { width: 250px; left: -270px; }
-}
-
-@media (min-width: 768px) {
-    .modal-content { max-width: 1100px; }
-    #guide-modal .modal-content { max-width: 800px; }
-}
-
-/* ===== ESTILOS BOTÓN ORBITAL ACTIVO ===== */
-#orbitalBtn.active {
-    background-color: var(--brand-color-3); /* Color magenta/rosa */
-    border-color: var(--brand-color-3);      /* Borde del mismo color */
-    box-shadow: 0 4px 6px rgba(232, 62, 140, 0.4); /* Sombra a juego (opcional) */
-}
-/* Contraste del icono en modo claro */
-body:not(.lp-dark):not(.modo-orbital) #orbitalBtn.active .lp-icon-palette {
-    stroke: #ffffff; /* Cambia el icono a blanco sobre fondo magenta */
-}
-
-/* ================== ESTILOS ETIQUETAS DE REFERENCIA ================== */
-
-/* Colores específicos */
-.ref-inc { background-color: #0d47a1; color: #FFFFFF; } /* Azul Oscuro */
-.ref-bp { background-color: #6c757d; color: #FFFFFF; } /* Gris */
-.ref-k { background-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); } /* Rojo (reutiliza variable) */
-.ref-bex { background-color: #64b5f6; color: #000000; } /* Azul Claro (texto negro) <-- CORRECCIÓN ACCESIBILIDAD */
-.ref-default { /* Verde Menta */
-    background-color: var(--badge-menta-bg);
-    color: var(--badge-menta-text);
-}
-.ref-badge-na { /* Estilo N/A */
-    background-color: var(--badge-menta-bg);
-    color: var(--badge-menta-text);
-    border: none;
-}
-/* Ajustes para temas oscuros (si el contraste verde menta no es bueno) */
-/*
-body.lp-dark .ref-default, body.lp-dark .ref-badge-na,
-body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
-    background-color: #004D40;
-    color: #B2DFDB;
-}
-*/
-
-
-/* ================== ESTILOS CORREGIDOS MODAL (Ref badges & Specs layout) ================== */
-
-/* Contenedor para etiquetas DENTRO de Specs */
-.modal-apps-specs .modal-ref-container { /* Estilos específicos para este contenedor */
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    justify-content: flex-start; /* Alinea a la izquierda */
-    text-align: left;
-}
-
-
-/* Badges dentro de Specs */
-.modal-apps-specs .spec-ref-badge {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    line-height: 1.3;
-}
-.modal-apps-specs .spec-ref-badge.ref-badge-na {
-    padding: 0.15rem 0.5rem; /* Ajustar padding para que coincida sin borde */
-}
-
-/* ================== MARCA DE AGUA (SVG con Máscara por Tema - Corregido) ================== */
-
-/* Asegura que los contenedores puedan posicionar la marca de agua */
-.card-thumbnail,
-.modal-image-carousel {
-  position: relative; /* Necesario para posicionar ::after */
-  overflow: hidden; /* Mantiene la marca de agua dentro */
-}
-
-/* Estilo de la marca de agua (Base para tema claro) */
-.card-thumbnail::after,
-.modal-image-carousel::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  
-  pointer-events: none; 
-  z-index: 1; 
-
-  /* --- INICIO DE LA CORRECCIÓN --- */
-  /* * BUG: La variable --watermark-svg-filter no estaba definida.
-   * FIX: Usamos 'mask-image' con la variable '--watermark-mask-color' 
-   * que SÍ está definida en todos los temas.
-  */
-  background-color: var(--watermark-mask-color); /* Color de la marca de agua */
-  -webkit-mask-image: url('favicon-x.svg'); /* Ruta a tu SVG (¡CORREGIDA!) */
-  mask-image: url('favicon-x.svg');         /* Ruta a tu SVG (¡CORREGIDA!) */
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  /* --- FIN DE LA CORRECCIÓN --- */
-  
-  width: 60%; 
-  height: 60%;
-  
-  /* Ajusta la opacidad base (el color ya viene de la variable) */
-  opacity: 0.8; 
-  
-  transition: background-color 0.5s ease; /* Transición suave */
-}
-
-/* Asegura que los botones de navegación del modal estén sobre la marca de agua */
-.modal-image-carousel .carousel-nav-btn {
-  z-index: 2; 
-}
-/* ================== FIN MARCA DE AGUA ================== */
+    <script src="script.js"></script>
+</body>
+</html>
