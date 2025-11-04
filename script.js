@@ -1,76 +1,39 @@
-// --- NUEVA FUNCIÓN AUXILIAR 1: Normalizar Años ---
-/**
- * Convierte un string de año (ej. '95' o '2015') a un número de 4 dígitos.
- * Asume que '30' es el corte: '29' -> 2029, '30' -> 1930
- */
-const normalizeYear = (yearStr) => {
-    if (!yearStr) return NaN;
-    // Convertir a String primero, por si el dato es numérico (ej. 1998)
-    const num = parseInt(String(yearStr).trim());
-    if (isNaN(num)) return NaN;
-    
-    const strNum = String(num); // Usar el string limpio
-    
-    // Manejar años de 2 dígitos
-    if (strNum.length <= 2 && num >= 0 && num <= 99) {
-        if (num < 30) { // 0-29 -> 2000-2029 (ej. '15' -> 2015)
-            return 2000 + num;
-        } else { // 30-99 -> 1930-1999 (ej. '95' -> 1995)
-            return 1900 + num;
-        }
-    }
-    // Manejar años de 4 dígitos
-    if (strNum.length === 4) {
-        return num;
-    }
-    return num; // Fallback
-};
-
-// --- NUEVA FUNCIÓN AUXILIAR 2: Interpretar Filtro de Año ---
-/**
- * Convierte el input del filtro (ej. '95-15' o '2005') 
- * en un objeto de rango { start: 1995, end: 2015 }.
- */
-const parseYearFilter = (filterString) => {
-    if (!filterString) return null; // No hay filtro
-    
-    const trimmedString = filterString.trim();
-    
-    // Buscar un rango (ej. '1995-2015' o '95-15')
-    if (trimmedString.includes('-')) {
-        const parts = trimmedString.split('-').map(s => s.trim());
-        // Asegurarse de que hay dos partes (ej. '2005-') no es válido
-        if (parts.length === 2 && parts[0] && parts[1]) {
-            const start = normalizeYear(parts[0]);
-            const end = normalizeYear(parts[1]);
-            
-            if (!isNaN(start) && !isNaN(end)) {
-                // Devolver { start: 1995, end: 2015 }
-                return { start: Math.min(start, end), end: Math.max(start, end) };
-            }
-        }
-    }
-    
-    // Si no es un rango válido, tratar como año único (ej. '2005' o '98')
-    const singleYear = normalizeYear(trimmedString);
-    if (!isNaN(singleYear)) {
-        return { start: singleYear, end: singleYear }; // Devuelve { start: 1998, end: 1998 }
-    }
-    
-    return null; // El filtro no es un año ni un rango válido
-};
-
-
 document.addEventListener('DOMContentLoaded', () => {
+
+    // ===================================================================
+    //  ¡CORRECCIÓN HECHA!
+    // ===================================================================
+    // He pegado la configuración que me diste.
+    // Ahora SÍ se conectará a tu proyecto "brakexadmin".
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyBms6_ujBJeVOcMbnxCxS9_7R6xQSpAOI8",
+      authDomain: "brakexadmin.firebaseapp.com",
+      projectId: "brakexadmin",
+      storageBucket: "brakexadmin.firebasestorage.app",
+      messagingSenderId: "799264562947",
+      appId: "1:799264562947:web:52d860ae41a5c4b8f75336"
+    };
+    // ===================================================================
+    //  FIN DE LA CORRECCIÓN
+    // ===================================================================
+
+
+    // --- 2. INICIALIZA FIREBASE ---
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore(); // ¡Usamos firestore()!
+
 
     // --- 1. ESTADO CENTRALIZADO ---
     const appState = {
-        data: [],      // Reemplaza a brakePadsData
-        filtered: [],  // Reemplaza a filteredDataCache
-        currentPage: 1 // Reemplaza a currentPage
+        data: [],
+        filtered: [],
+        currentPage: 1,
+        favorites: new Set(), // Guardará los _appId
+        isFavoritesMode: false // Controla el filtro de favoritos
     };
 
-    const itemsPerPage = 24; // Constante, puede quedar fuera del estado
+    const itemsPerPage = 24;
     let brandColorMap = {};
 
     const els = {
@@ -104,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalContent: document.querySelector('#card-modal .modal-content'),
         modalCloseBtn: document.querySelector('#card-modal .modal-close-btn'),
         modalCarousel: document.querySelector('#card-modal .modal-image-carousel'),
-        modalRef: document.querySelector('#card-modal .modal-ref'), // Este es el H2 para el header
+        modalRef: document.querySelector('#card-modal .modal-ref'),
         modalPosition: document.querySelector('#card-modal .modal-position'),
         searchContainer: document.getElementById('searchContainer'),
         modalAppsSpecs: document.querySelector('#card-modal .modal-apps-specs'),
@@ -113,8 +76,60 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCounterWrapper: document.getElementById('modalCounterWrapper'),
         guideModal: document.getElementById('guide-modal'),
         guideModalContent: document.querySelector('#guide-modal .modal-content'),
-        guideModalCloseBtn: document.querySelector('#guide-modal .modal-close-btn')
+        guideModalCloseBtn: document.querySelector('#guide-modal .modal-close-btn'),
+        // === NUEVOS BOTONES DE FILTRO FAVORITOS ===
+        filtroTodos: document.getElementById('filtroTodos'),
+        filtroFavoritos: document.getElementById('filtroFavoritos')
     };
+
+    // --- FUNCIONES DE FAVORITOS ---
+    const loadFavorites = () => {
+        try {
+            const favs = localStorage.getItem('brakeXFavorites');
+            if (favs) {
+                appState.favorites = new Set(JSON.parse(favs).map(Number)); // Asegura que sean números
+            }
+        } catch (e) {
+            console.error("Error al cargar favoritos:", e);
+            appState.favorites = new Set();
+        }
+    };
+
+    const saveFavorites = () => {
+        try {
+            localStorage.setItem('brakeXFavorites', JSON.stringify([...appState.favorites]));
+        } catch (e) {
+            console.error("Error al guardar favoritos:", e);
+        }
+    };
+
+    const toggleFavorite = (e) => {
+        e.stopPropagation(); // Detiene el clic para que no abra el modal
+        const button = e.currentTarget;
+        const card = button.closest('.result-card');
+        if (!card) return;
+
+        const itemId = parseInt(card.dataset.id);
+        if (isNaN(itemId)) return;
+
+        if (appState.favorites.has(itemId)) {
+            appState.favorites.delete(itemId);
+            button.classList.remove('active');
+            button.setAttribute('aria-pressed', 'false');
+        } else {
+            appState.favorites.add(itemId);
+            button.classList.add('active');
+            button.setAttribute('aria-pressed', 'true');
+        }
+        
+        saveFavorites();
+
+        // Si estamos en modo favoritos, re-renderizar para quitar la tarjeta
+        if (appState.isFavoritesMode) {
+            filterData();
+        }
+    };
+
 
     // --- FUNCIONES COMPLETAS ---
     const debounce = (func, delay) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; };
@@ -122,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const getPositionFilter = () => { const activePositions = []; if (els.posDel.classList.contains('active')) activePositions.push('Delantera'); if (els.posTras.classList.contains('active')) activePositions.push('Trasera'); return activePositions; };
     const hasVehicleFilters = () => { return els.busqueda.value.trim() !== '' || els.marca.value.trim() !== '' || els.modelo.value.trim() !== '' || els.anio.value.trim() !== '' || getPositionFilter().length > 0 || els.oem.value.trim() !== '' || els.fmsi.value.trim() !== '' || els.medidasAncho.value.trim() !== '' || els.medidasAlto.value.trim() !== ''; };
 
-    // --- Función para obtener la clase CSS de la referencia ---
     const getRefBadgeClass = (ref) => {
         if (typeof ref !== 'string') {
             return 'ref-default';
@@ -132,34 +146,51 @@ document.addEventListener('DOMContentLoaded', () => {
         if (upperRef.endsWith('BP')) return 'ref-bp';
         if (upperRef.startsWith('K')) return 'ref-k';
         if (upperRef.endsWith('BEX')) return 'ref-bex';
-        return 'ref-default'; // Verde menta
+        return 'ref-default';
     };
 
+    // --- LÓGICA DE ORDENAMIENTO ---
+    const getSortableRefNumber = (refArray) => {
+        if (!Array.isArray(refArray) || refArray.length === 0) {
+            return Infinity; // Pone los N/A al final
+        }
+        
+        // Prioriza referencias que empiezan con 'K-'
+        let primaryRef = refArray.find(ref => typeof ref === 'string' && ref.toUpperCase().startsWith('K-'));
+        
+        // Si no hay 'K-', usa la primera referencia de la lista
+        if (!primaryRef) {
+            primaryRef = refArray[0];
+        }
+
+        // Extrae solo la parte numérica
+        const match = String(primaryRef).match(/(\d+)/);
+        if (match && match[0]) {
+            return parseInt(match[0], 10);
+        }
+        
+        return Infinity; // Si no encuentra número, al final
+    };
+
+
     const filterData = () => {
-        // --- 2. USANDO EL ESTADO ---
         if (!appState.data.length) return;
         
-        const fbusq = (val) => val.toLowerCase().trim(); 
-        const activePos = getPositionFilter();
+        const fbusq = (val) => val.toLowerCase().trim(); const activePos = getPositionFilter();
+        const filters = { busqueda: fbusq(els.busqueda.value), marca: fbusq(els.marca.value), modelo: fbusq(els.modelo.value), anio: fbusq(els.anio.value), oem: fbusq(els.oem.value), fmsi: fbusq(els.fmsi.value), ancho: parseFloat(els.medidasAncho.value), alto: parseFloat(els.medidasAlto.value), pos: activePos };
 
-        // --- MODIFICACIÓN 1: Parsear el filtro de año ---
-        // 'yearRange' es el FILTRO DEL USUARIO (ej. { start: 1995, end: 1995 })
-        const yearRange = parseYearFilter(els.anio.value); 
-        // --- FIN MODIFICACIÓN 1 ---
+        let preFilteredData = appState.data;
 
-        const filters = { 
-            busqueda: fbusq(els.busqueda.value), 
-            marca: fbusq(els.marca.value), 
-            modelo: fbusq(els.modelo.value), 
-            oem: fbusq(els.oem.value), 
-            fmsi: fbusq(els.fmsi.value), 
-            ancho: parseFloat(els.medidasAncho.value), 
-            alto: parseFloat(els.medidasAlto.value), 
-            pos: activePos 
-        };
+        // === PASO 1: FILTRAR POR FAVORITOS (SI ESTÁ ACTIVO) ===
+        if (appState.isFavoritesMode) {
+            preFilteredData = appState.data.filter(item => appState.favorites.has(item._appId));
+        }
 
-        const filtered = appState.data.filter(item => {
-            const itemVehicles = item.aplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
+        // === PASO 2: APLICAR FILTROS DE BÚSQUEDA ===
+        const filtered = preFilteredData.filter(item => {
+            // Asegurarse de que 'aplicaciones' exista antes de mapear
+            const safeAplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
+            const itemVehicles = safeAplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
             const itemPosicion = item.posición;
 
             const busqMatch = !filters.busqueda ||
@@ -168,36 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.busqueda))) ||
                 itemVehicles.includes(filters.busqueda);
 
-            
-            // --- MODIFICACIÓN 2: Lógica de appMatch con rango de año ---
-            const yearFilterActive = !!yearRange; // ¿Hay un filtro de año válido?
-
-            const appMatch = (!filters.marca && !filters.modelo && !yearFilterActive) || // true si no hay filtros de app
-                             item.aplicaciones.some(app => {
-                                 const marcaMatch = !filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca));
-                                 const modeloMatch = !filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo));
-                                 
-                                 // Lógica de AÑO (¡CORREGIDA!)
-                                 let anioMatch = true; // Asumir true si no hay filtro de año
-                                 if (yearFilterActive) {
-                                     // Parsear el RANGO DE AÑO DEL DATO (ej. '1992-2015')
-                                     // 'appYearRange' es el DATO de la pastilla (ej. { start: 1992, end: 2015 })
-                                     const appYearRange = parseYearFilter(app.año); 
-                                     
-                                     if (!appYearRange) { // Si app.año es "N/A" o inválido, appYearRange será null
-                                         anioMatch = false; // El dato no tiene año válido
-                                     } else {
-                                         // Comprobar si los rangos se solapan (overlap)
-                                         // [app.start, app.end] overlaps [filter.start, filter.end]
-                                         // Condición de solapamiento: app.start <= filter.end && app.end >= filter.start
-                                         anioMatch = appYearRange.start <= yearRange.end && appYearRange.end >= yearRange.start;
-                                     }
-                                 }
-                                 
-                                 return marcaMatch && modeloMatch && anioMatch;
-                             });
-            // --- FIN MODIFICACIÓN 2 ---
-
+            const appMatch = !filters.marca && !filters.modelo && !filters.anio || safeAplicaciones.some(app => (!filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca))) && (!filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo))) && (!filters.anio || (app.año && String(app.año).toLowerCase().includes(filters.anio))));
             const oemMatch = !filters.oem || (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.oem)));
             const fmsiMatch = !filters.fmsi || (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.fmsi)));
             let posMatch = true; if (filters.pos.length > 0) { posMatch = filters.pos.includes(itemPosicion); }
@@ -207,9 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return busqMatch && appMatch && oemMatch && fmsiMatch && posMatch && anchoMatchTolerancia && altoMatchTolerancia;
         });
 
-        // --- 2. ACTUALIZANDO EL ESTADO ---
         appState.filtered = filtered;
-        appState.currentPage = 1; // Resetea la página en cada filtro
+        appState.currentPage = 1;
         
         renderCurrentPage();
         updateURLWithFilters();
@@ -229,11 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (counter) counter.textContent = `${newIndex + 1}/${totalImages}`;
     }
 
-    const renderApplicationsList = (aplicaciones) => { const groupedApps = aplicaciones.reduce((acc, app) => { const marca = app.marca || 'N/A'; if (!acc[marca]) { acc[marca] = []; } acc[marca].push(app); return acc; }, {}); Object.keys(groupedApps).forEach(marca => { groupedApps[marca].sort((a, b) => { const serieA = a.serie || ''; const serieB = b.serie || ''; if (serieA < serieB) return -1; if (serieA > serieB) return 1; const anioA = a.año || ''; const anioB = b.año || ''; if (anioA < anioB) return -1; if (anioA > anioB) return 1; return 0; }); }); let appListHTML = ''; for (const marca in groupedApps) { appListHTML += `<div class="app-brand-header">${marca.toUpperCase()}</div>`; groupedApps[marca].forEach(app => { appListHTML += `<div class="app-detail-row"><div>${app.serie || ''}</div><div>${app.litros || ''}</div><div>${app.año || ''}</div></div>`; }); } return appListHTML; };
+    const renderApplicationsList = (aplicaciones) => { 
+        const safeAplicaciones = Array.isArray(aplicaciones) ? aplicaciones : [];
+        const groupedApps = safeAplicaciones.reduce((acc, app) => { const marca = app.marca || 'N/A'; if (!acc[marca]) { acc[marca] = []; } acc[marca].push(app); return acc; }, {}); Object.keys(groupedApps).forEach(marca => { groupedApps[marca].sort((a, b) => { const serieA = a.serie || ''; const serieB = b.serie || ''; if (serieA < serieB) return -1; if (serieA > serieB) return 1; const anioA = a.año || ''; const anioB = b.año || ''; if (anioA < anioB) return -1; if (anioA > anioB) return 1; return 0; }); }); let appListHTML = ''; for (const marca in groupedApps) { appListHTML += `<div class="app-brand-header">${marca.toUpperCase()}</div>`; groupedApps[marca].forEach(app => { appListHTML += `<div class="app-detail-row"><div>${app.serie || ''}</div><div>${app.litros || ''}</div><div>${app.año || ''}</div></div>`; }); } return appListHTML; };
 
-    // --- Función renderSpecs ACTUALIZADA (Maneja "Sin información") ---
     const renderSpecs = (item) => {
-        let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`; // Encabezado de sección
+        let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`;
         specsHTML += `<div class="spec-details-grid">`;
 
         const refsSpecsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
@@ -251,48 +253,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const fmsiText = (Array.isArray(item.fmsi) && item.fmsi.length > 0 ? item.fmsi.join(', ') : 'N/A');
         specsHTML += `<div class="spec-label"><strong>Platina FMSI</strong></div><div class="spec-value">${fmsiText}</div>`;
 
-        // --- INICIO DE LA MODIFICACIÓN (Medidas Múltiples y "Sin información") ---
-        
         let medidasHTML = '';
-        
-        // Comprueba si item.medidas es un array y tiene elementos
         if (Array.isArray(item.medidas) && item.medidas.length > 0) {
-            
-            // Mapea cada string de medida (ej: "183.8 X 64.4") a su propio <div>
             medidasHTML = item.medidas.map(medidaStr => {
-                // Separa el string por 'x' (ignorando mayúsculas/minúsculas)
-                const partes = medidaStr.split(/x/i).map(s => s.trim());
+                const partes = String(medidaStr).split(/x/i).map(s => s.trim());
                 const ancho = partes[0] || 'N/A';
                 const alto = partes[1] || 'N/A';
-                
-                // Devuelve una línea de HTML por cada medida
                 return `<div>Ancho: ${ancho} x Alto: ${alto}</div>`;
-            }).join(''); // Une todas las líneas de HTML
-
+            }).join('');
         } else {
-            // Código de fallback (si no es un array o está vacío, usa anchoNum/altoNum)
-            // Usar !isNaN() para verificar si son números válidos (incluyendo 0)
-            const anchoVal = !isNaN(item.anchoNum) ? item.anchoNum : null;
-            const altoVal = !isNaN(item.altoNum) ? item.altoNum : null;
-
-            if (anchoVal === null && altoVal === null) {
-                // Si ambos son null (porque eran NaN), muestra "Sin información"
-                medidasHTML = '<div>Sin información</div>';
-            } else {
-                // Si al menos uno tiene valor, mostrarlo. Usar 'N/A' para el que falte.
-                const anchoDisplay = anchoVal !== null ? anchoVal : 'N/A';
-                const altoDisplay = altoVal !== null ? altoVal : 'N/A';
-                medidasHTML = `<div>Ancho: ${anchoDisplay} x Alto: ${altoDisplay}</div>`;
-            }
+            const anchoVal = item.anchoNum || 'N/A';
+            const altoVal = item.altoNum || 'N/A';
+            medidasHTML = `<div>Ancho: ${anchoVal} x Alto: ${altoVal}</div>`;
         }
 
-        // Añade el bloque completo al HTML
         specsHTML += `<div class="spec-label"><strong>Medidas (mm)</strong></div>
-                          <div class="spec-value">${medidasHTML}</div>`;
+                        <div class="spec-value">${medidasHTML}</div>`;
         
-        // --- FIN DE LA MODIFICACIÓN ---
-        
-        specsHTML += `</div>`; // Cierre de spec-details-grid
+        specsHTML += `</div>`;
         return specsHTML;
     };
 
@@ -311,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) return;
 
-        // --- 2. USANDO EL ESTADO ---
         let paginationHTML = '';
         paginationHTML += `<button class="page-btn" data-page="${appState.currentPage - 1}" ${appState.currentPage === 1 ? 'disabled' : ''}>Anterior</button>`;
         
@@ -329,9 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
         els.paginationContainer.innerHTML = paginationHTML;
     }
 
-    // --- Función renderCurrentPage ACTUALIZADA ---
     const renderCurrentPage = () => {
-        // --- 2. LEYENDO DEL ESTADO ---
         const totalResults = appState.filtered.length;
         const startIndex = (appState.currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
@@ -342,7 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
         els.countContainer.innerHTML = `Mostrando <strong>${startNum}–${endNum}</strong> de <strong>${totalResults}</strong> resultados`;
 
         if (totalResults === 0) {
-            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"></path><path d="M21 21L16.65 16.65"></path><path d="M11 8V11L13 13"></path></svg><p>No se encontraron pastillas</p><span>Intenta ajustar tus filtros de búsqueda.</span></div>`;
+            const message = appState.isFavoritesMode 
+                ? 'No tienes favoritos guardados' 
+                : 'No se encontraron pastillas';
+            const subMessage = appState.isFavoritesMode
+                ? 'Haz clic en el corazón de una pastilla para guardarla.'
+                : 'Intenta ajustar tus filtros de búsqueda.';
+            
+            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"></path><path d="M21 21L16.65 16.65"></path><path d="M11 8V11L13 13"></path></svg><p>${message}</p><span>${subMessage}</span></div>`;
             els.paginationContainer.innerHTML = '';
             return;
         }
@@ -353,8 +335,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const refsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
                 ? item.ref.flatMap(refString => String(refString).split(' '))
-                    .map(part => `<span class="ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
-                    .join('')
+                        .map(part => `<span class="ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
+                        .join('')
                 : '<span class="ref-badge ref-badge-na">N/A</span>';
 
             let firstImageSrc = 'https://via.placeholder.com/300x200.png?text=No+Img';
@@ -364,16 +346,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 firstImageSrc = item.imagen.replace("text=", `text=Vista+1+`);
             }
 
-            const appSummaryItems = item.aplicaciones.slice(0, 3).map(app => `${app.marca} ${app.serie}`).filter((value, index, self) => self.indexOf(value) === index);
+            const safeAplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
+            const appSummaryItems = safeAplicaciones.slice(0, 3).map(app => `${app.marca} ${app.serie}`).filter((value, index, self) => self.indexOf(value) === index);
             let appSummaryHTML = '';
             if (appSummaryItems.length > 0) {
-                appSummaryHTML = `<div class="card-app-summary">${appSummaryItems.join(', ')}${item.aplicaciones.length > 3 ? ', ...' : ''}</div>`;
+                appSummaryHTML = `<div class="card-app-summary">${appSummaryItems.join(', ')}${safeAplicaciones.length > 3 ? ', ...' : ''}</div>`;
             }
 
             const primaryRefForData = (Array.isArray(item.ref) && item.ref.length > 0) ? String(item.ref[0]).split(' ')[0] : 'N/A';
+            
+            // === LÓGICA DE FAVORITOS PARA EL BOTÓN ===
+            const isFavorite = appState.favorites.has(item._appId);
+            const favoriteBtnHTML = `
+                <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${item._appId}" aria-label="Marcar como favorito" aria-pressed="${isFavorite}">
+                    <svg class="heart-icon" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </button>
+            `;
 
             return `
                 <div class="result-card" data-id="${item._appId}" style="animation-delay: ${index * 50}ms" tabindex="0" role="button" aria-haspopup="dialog">
+                    ${favoriteBtnHTML}
                     <div class="card-thumbnail"><img src="${firstImageSrc}" alt="Referencia ${primaryRefForData}" class="result-image" loading="lazy"></div>
                     <div class="card-content-wrapper">
                         <div class="card-details">
@@ -385,16 +379,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
         }).join('');
         
+        // Asignar listeners a los nuevos botones de corazón
+        els.results.querySelectorAll('.favorite-btn').forEach(btn => {
+            btn.addEventListener('click', toggleFavorite);
+        });
+
         setupPagination(totalResults);
     };
 
-    // --- Función handleCardClick ACTUALIZADA ---
     function handleCardClick(event) {
+        // No abrir el modal si se hizo clic en el botón de favorito
+        if (event.target.closest('.favorite-btn')) {
+            return;
+        }
+
         const card = event.target.closest('.result-card');
         if (card) {
             const itemId = card.dataset.id;
-            
-            // --- 2. LEYENDO DEL ESTADO ---
             const itemData = appState.data.find(item => item._appId == itemId);
 
             if (itemData) {
@@ -407,7 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateScrollIndicator = () => { const wrapper = els.modalDetailsWrapper; const content = els.modalDetailsContent; if (wrapper && content) { const isScrollable = content.scrollHeight > content.clientHeight; const isAtBottom = content.scrollTop + content.clientHeight >= content.scrollHeight - 5; if (isScrollable && !isAtBottom) { wrapper.classList.add('scrollable'); } else { wrapper.classList.remove('scrollable'); } } };
 
-    // --- Función openModal ACTUALIZADA ---
     function openModal(item) {
         const refsHeaderHTML = (Array.isArray(item.ref) && item.ref.length > 0)
             ? item.ref.flatMap(refString => String(refString).split(' '))
@@ -461,9 +461,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function openSideMenu() { els.sideMenu.classList.add('open'); els.sideMenu.setAttribute('aria-hidden', 'false'); els.sideMenuOverlay.style.display = 'block'; requestAnimationFrame(() => { els.sideMenuOverlay.classList.add('visible'); }); els.menuBtn.setAttribute('aria-expanded', 'true'); els.menuCloseBtn.focus(); }
     function closeSideMenu() { els.sideMenu.classList.remove('open'); els.sideMenu.setAttribute('aria-hidden', 'true'); els.sideMenuOverlay.classList.remove('visible'); els.menuBtn.setAttribute('aria-expanded', 'false'); els.menuBtn.focus(); els.sideMenuOverlay.addEventListener('transitionend', () => { if (!els.sideMenuOverlay.classList.contains('visible')) { els.sideMenuOverlay.style.display = 'none'; } }, { once: true }); }
     function setupSwipe(carouselElement) { let startX, startY, endX, endY; const threshold = 50; carouselElement.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, { passive: true }); carouselElement.addEventListener('touchmove', (e) => { if (Math.abs(e.touches[0].clientX - startX) > Math.abs(e.touches[0].clientY - startY)) { e.preventDefault(); } }, { passive: false }); carouselElement.addEventListener('touchend', (e) => { endX = e.changedTouches[0].clientX; endY = e.changedTouches[0].clientY; const diffX = endX - startX; const diffY = endY - startY; if (Math.abs(diffX) > threshold && Math.abs(diffX) > Math.abs(diffY)) { if (diffX > 0) { navigateCarousel(carouselElement, -1); } else { navigateCarousel(carouselElement, 1); } } }); }
-    const clearAllFilters = () => { const inputsToClear = [els.busqueda, els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto]; inputsToClear.forEach(input => input.value = ''); els.posDel.classList.remove('active'); els.posTras.classList.remove('active'); if (els.brandTagsContainer) { els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => { activeTag.classList.remove('active'); }); } filterData(); };
+    const clearAllFilters = () => { const inputsToClear = [els.busqueda, els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto]; inputsToClear.forEach(input => input.value = ''); els.posDel.classList.remove('active'); els.posTras.classList.remove('active'); if (els.brandTagsContainer) { els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => { activeTag.classList.remove('active'); }); } 
+        // Limpiar filtro de favoritos
+        appState.isFavoritesMode = false;
+        els.filtroFavoritos.classList.remove('active');
+        els.filtroTodos.classList.add('active');
+        filterData(); 
+    };
     const createRippleEffect = (event) => { const button = event.currentTarget; const circle = document.createElement('span'); const diameter = Math.max(button.clientWidth, button.clientHeight); const radius = diameter / 2; const rect = button.getBoundingClientRect(); circle.style.width = circle.style.height = `${diameter}px`; circle.style.left = `${event.clientX - (rect.left + radius)}px`; circle.style.top = `${event.clientY - (rect.top + radius)}px`; circle.classList.add('ripple'); const ripple = button.getElementsByClassName('ripple')[0]; if (ripple) { ripple.remove(); } button.appendChild(circle); };
-    const updateURLWithFilters = () => { const params = new URLSearchParams(); const filters = { busqueda: els.busqueda.value.trim(), marca: els.marca.value.trim(), modelo: els.modelo.value.trim(), anio: els.anio.value.trim(), oem: els.oem.value.trim(), fmsi: els.fmsi.value.trim(), ancho: els.medidasAncho.value.trim(), alto: els.medidasAlto.value.trim(), }; for (const key in filters) { if (filters[key]) { params.set(key, filters[key]); } } const activePositions = getPositionFilter(); if (activePositions.length > 0) { params.set('pos', activePositions.join(',')); } const newUrl = `${window.location.pathname}?${params.toString()}`; history.pushState({}, '', newUrl); };
+    const updateURLWithFilters = () => { const params = new URLSearchParams(); const filters = { busqueda: els.busqueda.value.trim(), marca: els.marca.value.trim(), modelo: els.modelo.value.trim(), anio: els.anio.value.trim(), oem: els.oem.value.trim(), fmsi: els.fmsi.value.trim(), ancho: els.medidasAncho.value.trim(), alto: els.medidasAlto.value.trim(), }; for (const key in filters) { if (filters[key]) { params.set(key, filters[key]); } } const activePositions = getPositionFilter(); if (activePositions.length > 0) { params.set('pos', activePositions.join(',')); } 
+        // Añadir favoritos a URL
+        if (appState.isFavoritesMode) { params.set('favorites', 'true'); }
+        const newUrl = `${window.location.pathname}?${params.toString()}`; history.pushState({}, '', newUrl); };
+    
     const applyFiltersFromURL = () => {
         const params = new URLSearchParams(window.location.search);
         els.busqueda.value = params.get('busqueda') || '';
@@ -480,6 +490,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (posParam.includes('Delantera')) els.posDel.classList.add('active');
             if (posParam.includes('Trasera')) els.posTras.classList.add('active');
         }
+        
+        // Aplicar filtro de favoritos desde URL
+        if (params.get('favorites') === 'true') {
+            appState.isFavoritesMode = true;
+            els.filtroTodos.classList.remove('active');
+            els.filtroFavoritos.classList.add('active');
+        } else {
+            appState.isFavoritesMode = false;
+            els.filtroTodos.classList.add('active');
+            els.filtroFavoritos.classList.remove('active');
+        }
+
         if (els.brandTagsContainer) {
             els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => {
                 activeTag.classList.remove('active');
@@ -493,12 +515,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- SETUP EVENT LISTENERS (CON LÓGICA DE 3 TEMAS: Claro, AMOLED Dark, Orbital) ---
     function setupEventListeners() {
-        // Aplicar ripple a todos los botones aplicables
         [els.darkBtn, els.upBtn, els.menuBtn, els.orbitalBtn, els.clearBtn].forEach(btn => btn?.addEventListener('click', createRippleEffect));
 
-        // --- Lógica Animación Iconos Sol/Luna ---
         const iconAnimation = (iconToShow, iconToHide) => {
             if (!iconToShow) return;
             const showKeyframes = [ { opacity: 0, transform: 'translate(-50%, -50%) scale(0.6) rotate(-90deg)' }, { opacity: 1, transform: 'translate(-50%, -50%) scale(1) rotate(0deg)' } ];
@@ -508,7 +527,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (iconToHide) { iconToHide.animate(hideKeyframes, options); }
         };
 
-        // --- Funciones para Aplicar Temas ---
         const applyLightTheme = () => {
             els.body.classList.remove('lp-dark', 'modo-orbital');
             iconAnimation(els.sunIcon, els.moonIcon);
@@ -550,7 +568,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Applied Orbital Theme");
         };
 
-        // --- Event Listener Botón Sol/Luna (Ciclo simple Claro <-> AMOLED) ---
         els.darkBtn.addEventListener('click', () => {
             els.headerX.style.animation = 'bounceHeader 0.6s cubic-bezier(0.68,-0.55,0.27,1.55)';
             setTimeout(() => { els.headerX.style.animation = ''; }, 600);
@@ -562,7 +579,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // --- Event Listener Botón Orbital ---
         if (els.orbitalBtn) {
             els.orbitalBtn.addEventListener('click', () => {
                 els.headerX.style.animation = 'bounceHeader 0.6s cubic-bezier(0.68,-0.55,0.27,1.55)';
@@ -578,20 +594,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (els.body.classList.contains('modo-orbital')) {
-                    applyLightTheme(); // Desactivar Orbital va a Claro
+                    applyLightTheme();
                 } else {
-                    applyOrbitalTheme(); // Activar Orbital
+                    applyOrbitalTheme();
                 }
             });
         }
 
-        // --- Aplicar Tema Guardado al Cargar ---
         const savedTheme = localStorage.getItem('themePreference');
         console.log("Saved theme:", savedTheme);
         switch (savedTheme) {
             case 'orbital':
                 if (els.orbitalBtn) applyOrbitalTheme();
-                else applyLightTheme(); // Fallback
+                else applyLightTheme();
                 break;
             case 'dark':
                 applyAmoledDarkTheme();
@@ -604,7 +619,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
         }
 
-        // --- Resto de Event Listeners ---
         els.upBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         window.addEventListener('scroll', () => { els.upBtn.classList.toggle('show', window.scrollY > 300); });
         els.menuBtn.addEventListener('click', openSideMenu);
@@ -613,7 +627,6 @@ document.addEventListener('DOMContentLoaded', () => {
         els.openGuideLink.addEventListener('click', () => { closeSideMenu(); setTimeout(openGuideModal, 50); });
         window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && els.sideMenu.classList.contains('open')) { closeSideMenu(); } });
 
-        // --- 3. REFACTORIZACIÓN: Asignar el listener de clic de tarjeta UNA SOLA VEZ ---
         els.results.addEventListener('click', handleCardClick);
 
         const debouncedFilter = debounce(filterData, 300);
@@ -666,6 +679,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         [els.posDel, els.posTras].forEach(btn => btn.addEventListener('click', (e) => { e.currentTarget.classList.toggle('active'); filterData(); }));
 
+        // === EVENTOS PARA FILTRO DE FAVORITOS ===
+        els.filtroTodos.addEventListener('click', () => {
+            if (appState.isFavoritesMode) {
+                appState.isFavoritesMode = false;
+                els.filtroTodos.classList.add('active');
+                els.filtroFavoritos.classList.remove('active');
+                filterData();
+            }
+        });
+        els.filtroFavoritos.addEventListener('click', () => {
+            if (!appState.isFavoritesMode) {
+                appState.isFavoritesMode = true;
+                els.filtroTodos.classList.remove('active');
+                els.filtroFavoritos.classList.add('active');
+                filterData();
+            }
+        });
+
+
         const trashLid = els.clearBtn.querySelector('.trash-lid'); const trashBody = els.clearBtn.querySelector('.trash-body'); const NUM_SPARKS = 10; const SPARK_COLORS = ['#00ffff', '#ff00ff', '#00ff7f', '#ffc700', '#ff5722'];
         function createSparks(button) { for (let i = 0; i < NUM_SPARKS; i++) { const spark = document.createElement('div'); spark.classList.add('spark'); const size = Math.random() * 4 + 3; spark.style.width = `${size}px`; spark.style.height = `${size}px`; spark.style.backgroundColor = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)]; spark.style.left = `calc(50% + ${Math.random() * 20 - 10}px)`; spark.style.top = `calc(50% + ${Math.random() * 20 - 10}px)`; const angle = Math.random() * Math.PI * 2; const distance = Math.random() * 25 + 20; const sparkX = Math.cos(angle) * distance; const sparkY = Math.sin(angle) * distance; spark.style.setProperty('--spark-x', `${sparkX}px`); spark.style.setProperty('--spark-y', `${sparkY}px`); button.appendChild(spark); spark.addEventListener('animationend', () => spark.remove(), { once: true }); } }
 
@@ -707,7 +739,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- Listener de Paginación ACTUALIZADO ---
         els.paginationContainer.addEventListener('click', (e) => {
             const btn = e.target.closest('.page-btn');
             if (!btn || btn.disabled || btn.classList.contains('active')) {
@@ -715,9 +746,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const newPage = parseInt(btn.dataset.page);
             if (newPage) {
-                // --- 2. ACTUALIZANDO EL ESTADO ---
                 appState.currentPage = newPage;
-                renderCurrentPage(); // Vuelve a renderizar con la nueva página
+                renderCurrentPage();
                 els.resultsHeaderCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
@@ -730,16 +760,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } // --- Fin de setupEventListeners ---
 
+
+    // --- FUNCIÓN DE INICIALIZACIÓN (MODIFICADA PARA FIRESTORE) ---
     async function inicializarApp() {
         showSkeletonLoader();
+        loadFavorites(); // Cargar favoritos guardados
 
         try {
-            const response = await fetch('data.json');
-            if (!response.ok) {
-                throw new Error(`Error HTTP! estado: ${response.status}`);
-            }
-            let data = await response.json();
+            // ----- INICIO DE LA MODIFICACIÓN (FIRESTORE) -----
 
+            // 1. Apunta a tu COLECCIÓN (cambia 'pastillas' si se llama diferente)
+            const collectionRef = db.collection('pastillas'); 
+            
+            // 2. Obtén todos los documentos de esa colección
+            const snapshot = await collectionRef.get();
+
+            if (snapshot.empty) {
+                // Este error saltará si tu firebaseConfig es correcto
+                // pero el nombre 'pastillas' está mal o la colección está vacía.
+                throw new Error("No se encontraron documentos en la colección 'pastillas'.");
+            }
+
+            // 3. Convierte los documentos a un array de datos
+            let data = [];
+            snapshot.forEach(doc => {
+                const docData = doc.data();
+                data.push(docData); 
+            });
+            
+            // ----- FIN DE LA MODIFICACIÓN -----
+
+
+            // El resto de tu código de procesamiento
             data = data.map((item, index) => {
                 if (item.imagen && (!item.imagenes || item.imagenes.length === 0)) {
                     item.imagenes = [
@@ -748,44 +800,41 @@ document.addEventListener('DOMContentLoaded', () => {
                         item.imagen.replace("text=", `text=Vista+3+`)
                     ];
                 }
-
-                // --- CORRECCIÓN PARA 'medidas' (usa NaN por defecto) ---
                 
-                // 1. Aseguramos que 'medidaString' sea un string o null
                 let medidaString = null;
                 if (Array.isArray(item.medidas) && item.medidas.length > 0) {
-                    // Si es un array (como en "728AINC"), toma el primer elemento
-                    medidaString = item.medidas[0]; 
+                    medidaString = String(item.medidas[0]); // Asegurar que sea string
                 } else if (typeof item.medidas === 'string') {
-                    // Si es un string (como en "001INC"), úsalo
                     medidaString = item.medidas;
                 }
-
-                // 2. Ahora 'partes' se calcula de forma segura
-                // Se usa /x/i para que funcione con 'x' (minúscula) o 'X' (mayúscula)
-                // ¡CAMBIO CLAVE: [NaN, NaN] en lugar de [0, 0] como valor por defecto!
-                const partes = medidaString ? medidaString.split(/x/i).map(s => parseFloat(s.trim())) : [NaN, NaN];
-                
-                // --- FIN DE LA CORRECCIÓN ---
-
-
+                const partes = medidaString ? medidaString.split(/x/i).map(s => parseFloat(s.trim())) : [0,0];
                 const safeRefs = Array.isArray(item.ref) ? item.ref.map(String) : [];
                 const safeOems = Array.isArray(item.oem) ? item.oem.map(String) : [];
                 const safeFmsis = Array.isArray(item.fmsi) ? item.fmsi.map(String) : [];
 
+                // Asegúrate de que 'aplicaciones' exista, o pon un array vacío
+                const aplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
+
                 return { ...item,
-                        _appId: index, // ID único
-                        ref: safeRefs,
-                        oem: safeOems,
-                        fmsi: safeFmsis,
-                        anchoNum: partes[0], // Asigna el valor parseado (será NaN si no existe)
-                        altoNum: partes[1] }; // Asigna el valor parseado (será NaN si no existe)
+                    aplicaciones: aplicaciones, // <-- Corrección de seguridad
+                    _appId: index, // ID único
+                    ref: safeRefs,
+                    oem: safeOems,
+                    fmsi: safeFmsis,
+                    anchoNum: partes[0] || 0,
+                    altoNum: partes[1] || 0 };
             });
 
-            // --- 2. ACTUALIZANDO EL ESTADO ---
-            appState.data = data; // Guarda los datos en el estado central
+            // === AÑADIDO: ORDENAR DATOS DESPUÉS DE CARGAR ===
+            data.sort((a, b) => {
+                const refA = getSortableRefNumber(a.ref);
+                const refB = getSortableRefNumber(b.ref);
+                return refA - refB;
+            });
+            // ===============================================
 
-            // --- 2. LEYENDO DEL ESTADO ---
+            appState.data = data;
+
             const getAllApplicationValues = (key) => { const allValues = new Set(); appState.data.forEach(item => { item.aplicaciones.forEach(app => { const prop = (key === 'modelo') ? 'serie' : key; if (app[prop]) allValues.add(String(app[prop])); }); }); return [...allValues].sort(); };
             
             fillDatalist(els.datalistMarca, getAllApplicationValues('marca'));
@@ -793,11 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fillDatalist(els.datalistAnio, getAllApplicationValues('año'));
             
             const allOems = [...new Set(appState.data.flatMap(i => i.oem || []))].filter(Boolean).sort();
-            
-            // --- CORRECCIÓN DEL TYPO DE LA ÚLTIMA VEZ ---
             const allFmsis = [...new Set(appState.data.flatMap(i => i.fmsi || []))].filter(Boolean).sort();
-            // --- FIN DE LA CORRECCIÓN DEL TYPO ---
-
             fillDatalist(els.datalistOem, allOems);
             fillDatalist(els.datalistFmsi, allFmsis);
             
@@ -818,11 +863,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             applyFiltersFromURL();
-            filterData(); // Filtrar después de aplicar tema y filtros URL
+            filterData();
         
         } catch (error) {
-            console.error("Error al cargar los datos:", error);
-            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="22" x2="12" y2="22"></line></svg><p>Error al cargar datos</p><span>No se pudo conectar con la base de datos (data.json). Asegúrate que el archivo exista.</span></div>`;
+            // Este error SÍ es el que queremos ver si algo falla
+            console.error("Error al cargar los datos desde Firestore:", error);
+            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line><line x1="12" y1="22" x2="12" y2="22"></line></svg><p>Error al cargar datos</p><span>No se pudo conectar con la base de datos (Firestore). Revise la consola.</span></div>`;
             els.countContainer.innerHTML = "Error";
             els.paginationContainer.innerHTML = '';
         }
@@ -834,3 +880,5 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarApp();
 
 }); // Fin DOMContentLoaded
+
+
