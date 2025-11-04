@@ -935,8 +935,8 @@ body.modo-orbital .ref-default, body.modo-orbital .ref-badge-na {
    * que SÍ está definida en todos los temas.
   */
   background-color: var(--watermark-mask-color); /* Color de la marca de agua */
-  -webkit-mask-image: url('../favicon-x.svg'); /* Ruta a tu SVG (ajusta si es necesario) */
-  mask-image: url('../favicon-x.svg');         /* Ruta a tu SVG (ajusta si es necesario) */
+  -webkit-mask-image: url('favicon-x.svg'); /* Ruta a tu SVG (¡CORREGIDA!) */
+  mask-image: url('favicon-x.svg');         /* Ruta a tu SVG (¡CORREGIDA!) */
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
