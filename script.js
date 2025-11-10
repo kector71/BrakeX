@@ -7,10 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
         messagingSenderId: "799264562947",
         appId: "1:799264562947:web:52d860ae41a5c4b8f75336"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-
     const appState = {
         data: [],
         filtered: [],
@@ -18,10 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
         favorites: new Set(),
         isFavoritesMode: false
     };
-
     const itemsPerPage = 24;
+    const MAX_HISTORY = 5;
     let brandColorMap = {};
-
     const els = {
         body: document.body,
         headerX: document.querySelector('.header-x'),
@@ -71,8 +68,116 @@ document.addEventListener('DOMContentLoaded', () => {
         guideModal: document.getElementById('guide-modal'),
         guideModalContent: document.querySelector('#guide-modal .modal-content'),
         guideModalCloseBtn: document.querySelector('#guide-modal .modal-close-btn'),
-        filtroFavoritosBtn: document.getElementById('filtroFavoritosBtn')
+        filtroFavoritosBtn: document.getElementById('filtroFavoritosBtn'),
+        historialBtn: document.getElementById('historialBtn'),
+        searchHistoryContainer: document.getElementById('searchHistoryContainer'),
+        
+        // --- ⬇️ NUEVAS VARIABLES AÑADIDAS ⬇️ ---
+        historyPanel: document.getElementById('historyPanel'),
+        historyListContainer: document.getElementById('historyListContainer')
+        // --- ⬆️ FIN DE NUEVAS VARIABLES ⬆️ ---
     };
+
+    function addToSearchHistory(query) {
+        if (!query.trim()) return;
+        let history = JSON.parse(localStorage.getItem('brakeXSearchHistory') || '[]');
+        history = history.filter(q => q !== query);
+        history.unshift(query);
+        history = history.slice(0, MAX_HISTORY);
+        localStorage.setItem('brakeXSearchHistory', JSON.stringify(history));
+        renderSearchHistory();
+    }
+
+    function renderSearchHistory() {
+        const history = JSON.parse(localStorage.getItem('brakeXSearchHistory') || '[]');
+        const container = els.searchHistoryContainer;
+        if (!container) return;
+        container.innerHTML = history.map(q =>
+            `<button class="search-history-item" data-query="${q}">${q}</button>`
+        ).join('');
+    }
+
+    // --- ⬇️ NUEVAS FUNCIONES AÑADIDAS ⬇️ ---
+
+    function deleteFromSearchHistory(query) {
+        let history = JSON.parse(localStorage.getItem('brakeXSearchHistory') || '[]');
+        history = history.filter(q => q !== query);
+        localStorage.setItem('brakeXSearchHistory', JSON.stringify(history));
+        renderSearchHistory(); // Actualiza la lista vieja (en filtros)
+        renderHistoryPanel(); // Actualiza la lista nueva (en panel principal)
+    }
+
+    function renderHistoryPanel() {
+        const history = JSON.parse(localStorage.getItem('brakeXSearchHistory') || '[]');
+        const container = els.historyListContainer;
+        if (!container) return;
+
+        if (history.length === 0) {
+            container.innerHTML = '<div class="no-history-item">No hay historial de búsqueda.</div>';
+            return;
+        }
+
+        container.innerHTML = history.map(q =>
+            `<div class="history-list-item">
+                <button class="history-term-btn" data-query="${q}">${q}</button>
+                <button class="history-delete-btn" data-query="${q}" aria-label="Eliminar ${q} del historial">&times;</button>
+            </div>`
+        ).join('');
+    }
+
+    function toggleHistoryView(forceState) {
+        // Si forceState es 'true', muestra historial. Si es 'false', oculta historial.
+        // Si no se define, simplemente alterna.
+        const isActivating = typeof forceState !== 'undefined'
+            ? forceState
+            : els.historialBtn.getAttribute('aria-pressed') === 'false';
+
+        if (isActivating) {
+            // Muestra el Panel de Historial
+            renderHistoryPanel();
+            els.historyPanel.style.display = 'block';
+            els.results.style.display = 'none';
+            els.paginationContainer.style.display = 'none';
+            els.historialBtn.classList.add('active');
+            els.historialBtn.setAttribute('aria-pressed', 'true');
+
+            // Desactiva el modo favoritos (son mutuamente excluyentes)
+            appState.isFavoritesMode = false;
+            els.filtroFavoritosBtn.classList.remove('active');
+            els.filtroFavoritosBtn.setAttribute('aria-pressed', 'false');
+
+        } else {
+            // Muestra el Panel de Resultados
+            els.historyPanel.style.display = 'none';
+            els.results.style.display = 'grid';
+            els.paginationContainer.style.display = 'flex';
+            els.historialBtn.classList.remove('active');
+            els.historialBtn.setAttribute('aria-pressed', 'false');
+        }
+    }
+    
+    function setupHistoryPanelListeners() {
+        els.historyListContainer.addEventListener('click', (e) => {
+            const termBtn = e.target.closest('.history-term-btn');
+            const deleteBtn = e.target.closest('.history-delete-btn');
+
+            if (termBtn) {
+                const query = termBtn.dataset.query;
+                els.busqueda.value = query;
+                // Cierra el panel de historial y ejecuta la búsqueda
+                toggleHistoryView(false); 
+                filterData();
+                els.busqueda.focus();
+            }
+
+            if (deleteBtn) {
+                const query = deleteBtn.dataset.query;
+                deleteFromSearchHistory(query);
+            }
+        });
+    }
+
+    // --- ⬆️ FIN DE NUEVAS FUNCIONES ⬆️ ---
 
     const loadFavorites = () => {
         try {
@@ -101,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!card) return;
         const itemId = parseInt(card.dataset.id);
         if (isNaN(itemId)) return;
-
         if (appState.favorites.has(itemId)) {
             appState.favorites.delete(itemId);
             button.classList.remove('active');
@@ -111,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
             button.classList.add('active');
             button.setAttribute('aria-pressed', 'true');
         }
-
         saveFavorites();
         if (appState.isFavoritesMode) {
             filterData();
@@ -158,9 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filterData = () => {
         if (!appState.data.length) return;
-
         const fbusq = (val) => val.toLowerCase().trim();
         const activePos = getPositionFilter();
+
         const filters = {
             busqueda: fbusq(els.busqueda.value),
             marca: fbusq(els.marca.value),
@@ -174,7 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         let preFilteredData = appState.data;
-
         if (appState.isFavoritesMode) {
             preFilteredData = appState.data.filter(item => appState.favorites.has(item._appId));
         }
@@ -183,32 +285,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const safeAplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
             const itemVehicles = safeAplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
             const itemPosicion = item.posición;
-
             const busqMatch = !filters.busqueda ||
                 (Array.isArray(item.ref) && item.ref.some(r => typeof r === 'string' && r.toLowerCase().includes(filters.busqueda))) ||
                 (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.busqueda))) ||
                 (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.busqueda))) ||
                 itemVehicles.includes(filters.busqueda);
-
             const appMatch = !filters.marca && !filters.modelo && !filters.anio ||
                 safeAplicaciones.some(app =>
                     (!filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca))) &&
                     (!filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo))) &&
                     (!filters.anio || (app.año && String(app.año).toLowerCase().includes(filters.anio)))
                 );
-
             const oemMatch = !filters.oem || (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.oem)));
             const fmsiMatch = !filters.fmsi || (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.fmsi)));
-
             let posMatch = true;
             if (filters.pos.length > 0) {
                 posMatch = filters.pos.includes(itemPosicion);
             }
-
             const TOLERANCIA = 1.0;
             const anchoMatch = !filters.ancho || (item.anchoNum >= filters.ancho - TOLERANCIA && item.anchoNum <= filters.ancho + TOLERANCIA);
             const altoMatch = !filters.alto || (item.altoNum >= filters.alto - TOLERANCIA && item.altoNum <= filters.alto + TOLERANCIA);
-
             return busqMatch && appMatch && oemMatch && fmsiMatch && posMatch && anchoMatch && altoMatch;
         });
 
@@ -223,13 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = carouselContainer.querySelectorAll('.result-image');
         const counter = els.modalCounterWrapper.querySelector('.carousel-counter');
         if (!track || images.length <= 1) return;
-
         let currentIndex = parseInt(track.dataset.currentIndex) || 0;
         const totalImages = images.length;
         let newIndex = currentIndex + direction;
         if (newIndex >= totalImages) newIndex = 0;
         else if (newIndex < 0) newIndex = totalImages - 1;
-
         track.style.transform = `translateX(-${newIndex * 100}%)`;
         track.dataset.currentIndex = newIndex;
         if (counter) counter.textContent = `${newIndex + 1}/${totalImages}`;
@@ -271,21 +365,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderSpecs = (item) => {
         let specsHTML = `<div class="app-brand-header">ESPECIFICACIONES</div>`;
         specsHTML += `<div class="spec-details-grid">`;
-
         const refsSpecsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
             ? item.ref.flatMap(ref => String(ref).split(' '))
                 .map(part => `<span class="ref-badge spec-ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
                 .join('')
             : '<span class="ref-badge ref-badge-na spec-ref-badge">N/A</span>';
-
         specsHTML += `<div class="spec-label"><strong>Referencias</strong></div><div class="spec-value modal-ref-container">${refsSpecsHTML}</div>`;
-
         const oemText = (Array.isArray(item.oem) && item.oem.length > 0 ? item.oem.join(', ') : 'N/A');
         specsHTML += `<div class="spec-label"><strong>OEM</strong></div><div class="spec-value">${oemText}</div>`;
-
         const fmsiText = (Array.isArray(item.fmsi) && item.fmsi.length > 0 ? item.fmsi.join(', ') : 'N/A');
         specsHTML += `<div class="spec-label"><strong>Platina FMSI</strong></div><div class="spec-value">${fmsiText}</div>`;
-
         let medidasHTML = '';
         if (Array.isArray(item.medidas) && item.medidas.length > 0) {
             medidasHTML = item.medidas.map(medida => {
@@ -299,7 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const altoVal = item.altoNum || 'N/A';
             medidasHTML = `<div>Ancho: ${anchoVal} x Alto: ${altoVal}</div>`;
         }
-
         specsHTML += `<div class="spec-label"><strong>Medidas (mm)</strong></div><div class="spec-value">${medidasHTML}</div>`;
         specsHTML += `</div>`;
         return specsHTML;
@@ -360,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         paginationHTML += `<button class="page-btn" data-page="${appState.currentPage + 1}" ${appState.currentPage === totalPages ? 'disabled' : ''}>Siguiente</button>`;
         els.paginationContainer.innerHTML = paginationHTML;
-    }
+    };
 
     const renderCurrentPage = () => {
         const totalResults = appState.filtered.length;
@@ -370,7 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const startNum = totalResults === 0 ? 0 : startIndex + 1;
         const endNum = Math.min(endIndex, totalResults);
-
         els.countContainer.innerHTML = `Mostrando <strong>${startNum}–${endNum}</strong> de <strong>${totalResults}</strong> resultados`;
 
         if (totalResults === 0) {
@@ -380,7 +467,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const subMessage = appState.isFavoritesMode
                 ? 'Haz clic en el corazón de una pastilla para guardarla.'
                 : 'Intenta ajustar tus filtros de búsqueda.';
-
             els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"></path><path d="M21 21L16.65 16.65"></path><path d="M11 8V11L13 13"></path></svg><p>${message}</p><span>${subMessage}</span></div>`;
             els.paginationContainer.innerHTML = '';
             return;
@@ -389,7 +475,6 @@ document.addEventListener('DOMContentLoaded', () => {
         els.results.innerHTML = paginatedData.map((item, index) => {
             const posBadgeClass = item.posición === 'Delantera' ? 'delantera' : 'trasera';
             const posBadge = `<span class="position-badge ${posBadgeClass}">${item.posición}</span>`;
-
             const refsHTML = (Array.isArray(item.ref) && item.ref.length > 0)
                 ? item.ref.flatMap(ref => String(ref).split(' '))
                     .map(part => `<span class="ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
@@ -405,15 +490,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const safeAplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
             const appSummaryItems = safeAplicaciones.slice(0, 3).map(app => `${app.marca} ${app.serie}`).filter((value, index, self) => self.indexOf(value) === index);
-
             let appSummaryHTML = '';
             if (appSummaryItems.length > 0) {
                 appSummaryHTML = `<div class="card-app-summary">${appSummaryItems.join(', ')}${safeAplicaciones.length > 3 ? ', ...' : ''}</div>`;
             }
 
             const primaryRefForData = (Array.isArray(item.ref) && item.ref.length > 0) ? String(item.ref[0]).split(' ')[0] : 'N/A';
-
             const isFavorite = appState.favorites.has(item._appId);
+
             const favoriteBtnHTML = `
                 <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${item._appId}" aria-label="Marcar como favorito" aria-pressed="${isFavorite}">
                     <svg class="heart-icon" viewBox="0 0 24 24">
@@ -451,8 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemData = appState.data.find(item => item._appId == itemId);
             if (itemData) {
                 openModal(itemData);
-            } else {
-                console.warn("No item data found for id:", itemId);
             }
         }
     }
@@ -477,7 +559,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 .map(part => `<span class="ref-badge header-ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
                 .join('')
             : '<span class="ref-badge ref-badge-na header-ref-badge">N/A</span>';
-
         els.modalRef.innerHTML = `<div class="modal-header-ref-container">${refsHeaderHTML}</div>`;
 
         const posBadgeClass = item.posición === 'Delantera' ? 'delantera' : 'trasera';
@@ -502,7 +583,6 @@ document.addEventListener('DOMContentLoaded', () => {
         images.forEach((imgSrc, i) => {
             imageTrackHTML += `<img src="${imgSrc}" alt="Referencia ${altRef} Vista ${i + 1}" class="result-image">`;
         });
-
         els.modalCarousel.innerHTML = `<div class="image-track" style="display:flex;" data-current-index="0">${imageTrackHTML}</div> ${imageCount > 1 ? `<button class="carousel-nav-btn" data-direction="-1" aria-label="Imagen anterior">‹</button><button class="carousel-nav-btn" data-direction="1" aria-label="Siguiente imagen">›</button>` : ''}`;
 
         els.modalCarousel.querySelectorAll('.carousel-nav-btn').forEach(btn => {
@@ -513,10 +593,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            setupSwipe(els.modalCarousel);
-        }
-
         if (imageCount > 1) {
             els.modalCounterWrapper.innerHTML = `<span class="carousel-counter">1/${imageCount}</span>`;
         } else {
@@ -524,11 +600,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         els.modalAppsSpecs.innerHTML = `<div class="applications-list-container">${renderApplicationsList(item.aplicaciones)}${renderSpecs(item)}</div>`;
+        const primaryRefForData = (Array.isArray(item.ref) && item.ref.length > 0) ? String(item.ref[0]).split(' ')[0] : 'N/A';
+        const qrBtn = `<button class="qr-btn" data-ref="${primaryRefForData}">Ver QR</button>`;
+        els.modalAppsSpecs.innerHTML += qrBtn;
 
         els.modalContent.classList.remove('closing');
         els.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-
         requestAnimationFrame(() => {
             setTimeout(() => {
                 updateScrollIndicator();
@@ -592,52 +670,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { once: true });
     }
 
-    function setupSwipe(carouselElement) {
-        let startX, startY, endX, endY;
-        const threshold = 50;
-
-        carouselElement.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, { passive: true });
-
-        carouselElement.addEventListener('touchmove', (e) => {
-            if (Math.abs(e.touches[0].clientX - startX) > Math.abs(e.touches[0].clientY - startY)) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        carouselElement.addEventListener('touchend', (e) => {
-            endX = e.changedTouches[0].clientX;
-            endY = e.changedTouches[0].clientY;
-            const diffX = endX - startX;
-            const diffY = endY - startY;
-            if (Math.abs(diffX) > threshold && Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 0) {
-                    navigateCarousel(carouselElement, -1);
-                } else {
-                    navigateCarousel(carouselElement, 1);
-                }
-            }
-        });
-    }
-
     const clearAllFilters = () => {
         const inputsToClear = [els.busqueda, els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto];
         inputsToClear.forEach(input => input.value = '');
         els.posDel.classList.remove('active');
         els.posTras.classList.remove('active');
-
         if (els.brandTagsContainer) {
             els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => {
                 activeTag.classList.remove('active');
             });
         }
-
         appState.isFavoritesMode = false;
         els.filtroFavoritosBtn.classList.remove('active');
         els.filtroFavoritosBtn.setAttribute('aria-pressed', 'false');
-
+        els.historialBtn.classList.remove('active');
+        els.historialBtn.setAttribute('aria-pressed', 'false');
+        els.searchHistoryContainer.style.display = 'none';
+        
+        // --- ⬇️ LÍNEA MODIFICADA ⬇️ ---
+        toggleHistoryView(false); // Oculta el panel de historial y muestra los resultados
+        
         filterData();
     };
 
@@ -687,13 +739,11 @@ document.addEventListener('DOMContentLoaded', () => {
         els.fmsi.value = params.get('fmsi') || '';
         els.medidasAncho.value = params.get('ancho') || '';
         els.medidasAlto.value = params.get('alto') || '';
-
         const posParam = params.get('pos');
         if (posParam) {
             if (posParam.includes('Delantera')) els.posDel.classList.add('active');
             if (posParam.includes('Trasera')) els.posTras.classList.add('active');
         }
-
         if (params.get('favorites') === 'true') {
             appState.isFavoritesMode = true;
             els.filtroFavoritosBtn.classList.add('active');
@@ -703,13 +753,11 @@ document.addEventListener('DOMContentLoaded', () => {
             els.filtroFavoritosBtn.classList.remove('active');
             els.filtroFavoritosBtn.setAttribute('aria-pressed', 'false');
         }
-
         if (els.brandTagsContainer) {
             els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => {
                 activeTag.classList.remove('active');
             });
         }
-
         if (brandFromURL && els.brandTagsContainer) {
             const tagToActivate = els.brandTagsContainer.querySelector(`.brand-tag[data-brand="${brandFromURL}"]`);
             if (tagToActivate) {
@@ -733,7 +781,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             const options = { duration: 400, fill: 'forwards', easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' };
             iconToShow.animate(showKeyframes, options);
-            if (iconToHide) { iconToHide.animate(hideKeyframes, options); }
+            if (iconToHide) {
+                iconToHide.animate(hideKeyframes, options);
+            }
         };
 
         const applyLightTheme = () => {
@@ -823,16 +873,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         els.upBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         window.addEventListener('scroll', () => { els.upBtn.classList.toggle('show', window.scrollY > 300); });
-
         els.menuBtn.addEventListener('click', openSideMenu);
         els.menuCloseBtn.addEventListener('click', closeSideMenu);
         els.sideMenuOverlay.addEventListener('click', closeSideMenu);
-
         els.openGuideLink.addEventListener('click', () => {
             closeSideMenu();
             setTimeout(openGuideModal, 50);
         });
-
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && els.sideMenu.classList.contains('open')) {
                 closeSideMenu();
@@ -842,53 +889,37 @@ document.addEventListener('DOMContentLoaded', () => {
         els.results.addEventListener('click', handleCardClick);
 
         const debouncedFilter = debounce(filterData, 300);
-
+        
+        // --- ⬇️ LISTENER MODIFICADO ⬇️ ---
         els.filtroFavoritosBtn.addEventListener('click', () => {
             appState.isFavoritesMode = !appState.isFavoritesMode;
+            
             if (appState.isFavoritesMode) {
                 els.filtroFavoritosBtn.classList.add('active');
                 els.filtroFavoritosBtn.setAttribute('aria-pressed', 'true');
+                // Desactiva el modo historial (no pueden estar ambos activos)
+                toggleHistoryView(false); 
             } else {
                 els.filtroFavoritosBtn.classList.remove('active');
                 els.filtroFavoritosBtn.setAttribute('aria-pressed', 'false');
             }
-            filterData();
+            
+            filterData(); // filterData se encargará de mostrar los resultados correctos
         });
 
-        const restartSearchIconAnimation = () => {
-            const oldIcon = els.searchContainer.querySelector('.search-icon');
-            if (oldIcon) {
-                const newIcon = oldIcon.cloneNode(true);
-                oldIcon.parentNode.replaceChild(newIcon, oldIcon);
-                if (els.busqueda.value.trim() !== '') {
-                    newIcon.style.animation = 'none';
-                    void newIcon.offsetWidth;
-                    newIcon.style.animation = '';
-                }
-            }
-        };
+        // --- ⬇️ LISTENER MODIFICADO ⬇️ ---
+        els.historialBtn?.addEventListener('click', () => {
+            toggleHistoryView();
+        });
 
         els.busqueda.addEventListener('input', (e) => {
             if (e.target.value.trim() !== '') {
                 els.searchContainer.classList.add('active');
-                restartSearchIconAnimation();
             } else {
                 els.searchContainer.classList.remove('active');
             }
+            addToSearchHistory(e.target.value);
             debouncedFilter();
-        });
-
-        els.busqueda.addEventListener('blur', () => {
-            if (els.busqueda.value.trim() === '') {
-                els.searchContainer.classList.remove('active');
-            }
-        });
-
-        els.busqueda.addEventListener('focus', () => {
-            if (els.busqueda.value.trim() !== '') {
-                els.searchContainer.classList.add('active');
-                restartSearchIconAnimation();
-            }
         });
 
         const otherFilterInputs = [els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto];
@@ -945,13 +976,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!tag) return;
                 const brand = tag.dataset.brand;
                 const isActive = tag.classList.contains('active');
-
                 els.brandTagsContainer.querySelectorAll('.brand-tag.active').forEach(activeTag => {
                     if (activeTag !== tag) {
                         activeTag.classList.remove('active');
                     }
                 });
-
                 if (isActive) {
                     tag.classList.remove('active');
                     els.marca.value = '';
@@ -974,36 +1003,69 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.search-history-item')) {
+                els.busqueda.value = e.target.dataset.query;
+                filterData();
+                els.busqueda.focus();
+            }
+        });
+
+        document.addEventListener('click', async (e) => {
+            if (e.target.matches('.qr-btn')) {
+                const ref = e.target.dataset.ref;
+                const url = `${window.location.origin}${window.location.pathname}?busqueda=${encodeURIComponent(ref)}`;
+                const canvas = document.createElement('canvas');
+                await QRCode.toCanvas(canvas, url, { width: 200 });
+                const modal = document.getElementById('card-modal');
+                const content = modal.querySelector('.modal-content');
+                content.innerHTML = `
+                    <button class="modal-close-btn" aria-label="Cerrar">&times;</button>
+                    <h2 style="margin-bottom:1rem;">Compartir: ${ref}</h2>
+                    <div style="text-align:center; padding:1rem;">
+                        ${canvas.outerHTML}
+                        <p style="margin-top:1rem; font-size:0.85rem;">Escanea para abrir esta pastilla</p>
+                    </div>
+                `;
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                document.querySelector('#card-modal .modal-close-btn').onclick = () => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                };
+            }
+        });
+
         els.modalCloseBtn.addEventListener('click', closeModal);
         els.modal.addEventListener('click', (event) => { if (event.target === els.modal) closeModal(); });
-
         els.guideModalCloseBtn.addEventListener('click', closeGuideModal);
         els.guideModal.addEventListener('click', (event) => { if (event.target === els.guideModal) closeGuideModal(); });
-
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && els.guideModal.style.display === 'flex') {
                 closeGuideModal();
             }
         });
+
+        // --- ⬇️ LÍNEA AÑADIDA ⬇️ ---
+        setupHistoryPanelListeners();
     }
 
     async function inicializarApp() {
         showSkeletonLoader();
         loadFavorites();
-
+        renderSearchHistory();
+        els.searchHistoryContainer.style.display = 'none';
         try {
             const collectionRef = db.collection('pastillas');
             const snapshot = await collectionRef.get();
             if (snapshot.empty) {
                 throw new Error("No se encontraron documentos en la colección 'pastillas'.");
             }
-
             let data = [];
             snapshot.forEach(doc => {
                 const docData = doc.data();
                 data.push(docData);
             });
-
             data = data.map((item, index) => {
                 if (item.imagen && (!item.imagenes || item.imagenes.length === 0)) {
                     item.imagenes = [
@@ -1012,20 +1074,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         item.imagen.replace("text=", `text=Vista+3+`)
                     ];
                 }
-
                 let medidaString = null;
                 if (Array.isArray(item.medidas) && item.medidas.length > 0) {
                     medidaString = String(item.medidas[0]);
                 } else if (typeof item.medidas === 'string') {
                     medidaString = item.medidas;
                 }
-
                 const partes = medidaString ? medidaString.split(/x/i).map(s => parseFloat(s.trim())) : [0, 0];
                 const safeRefs = Array.isArray(item.ref) ? item.ref.map(String) : [];
                 const safeOems = Array.isArray(item.oem) ? item.oem.map(String) : [];
                 const safeFmsis = Array.isArray(item.fmsi) ? item.fmsi.map(String) : [];
                 const aplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
-
                 return {
                     ...item,
                     aplicaciones: aplicaciones,
@@ -1037,13 +1096,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     altoNum: partes[1] || 0
                 };
             });
-
             data.sort((a, b) => {
                 const refA = getSortableRefNumber(a.ref);
                 const refB = getSortableRefNumber(b.ref);
                 return refA - refB;
             });
-
             appState.data = data;
 
             const getAllApplicationValues = (key) => {
@@ -1071,18 +1128,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 counts[brand] = (counts[brand] || 0) + 1;
                 return counts;
             }, {});
-
             const sortedBrands = Object.entries(brandFrequencies)
                 .sort(([, countA], [, countB]) => countB - countA)
                 .slice(0, 10)
                 .map(([brand]) => brand);
-
             const brandColors = [
                 '--brand-color-1', '--brand-color-2', '--brand-color-3', '--brand-color-4',
                 '--brand-color-5', '--brand-color-6', '--brand-color-7', '--brand-color-8',
                 '--brand-color-9', '--brand-color-10'
             ];
-
             brandColorMap = {};
             sortedBrands.forEach((brand, index) => {
                 brandColorMap[brand] = brandColors[index % brandColors.length];
