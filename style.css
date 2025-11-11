@@ -1013,42 +1013,4 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
     }
 }
 
-/* --- Estilos para el QR Pequeño en el Modal --- */
-.small-qr-code {
-    width: 80px; /* Tamaño pequeño */
-    height: 80px;
-    border: 4px solid var(--material-surface-border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    margin-top: 1rem;
-    padding: 4px; /* Espacio entre el borde y el canvas */
-    background-color: #fff; /* Fondo blanco para el QR */
-}
-
-.small-qr-code canvas {
-    width: 100% !important;
-    height: 100% !important;
-    display: block;
-    border-radius: 2px; /* Ligeras esquinas redondeadas para el canvas */
-}
-
-.small-qr-code:hover {
-    transform: scale(1.05);
-    box-shadow: var(--elevation-2);
-}
-
-/* --- Estilos para el Modal de QR Grande --- */
-.qr-modal-large {
-    max-width: 350px; /* Tamaño ideal para un QR grande */
-    width: 90vw;
-}
-
-#qr-large-canvas-container canvas {
-    width: 100% !important;
-    max-width: 280px;
-    height: auto !important;
-    margin: 0 auto;
-    border-radius: 8px;
-    background: #fff; /* Asegura fondo blanco */
-}
+/* --- 🔴 ESTILOS DE QR ELIMINADOS 🔴 --- */

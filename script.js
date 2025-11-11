@@ -74,11 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchHistoryContainer: document.getElementById('searchHistoryContainer'),
         searchHistoryCard: document.getElementById('searchHistoryCard'),
         manufacturerTagsContainer: document.getElementById('manufacturer-tags-container'),
-        qrLargeModal: document.getElementById('qr-large-modal'),
-        qrLargeModalContent: document.querySelector('#qr-large-modal .modal-content'),
-        qrLargeModalCloseBtn: document.querySelector('#qr-large-modal .modal-close-btn'),
-        qrLargeTitle: document.getElementById('qr-large-title'),
-        qrLargeCanvasContainer: document.getElementById('qr-large-canvas-container'),
+        // --- Referencias a QR eliminadas ---
     };
 
     function addToSearchHistory(query) {
@@ -546,7 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemId = card.dataset.id;
             const itemData = appState.data.find(item => item._appId == itemId);
             if (itemData) {
-                openModal(itemData);
+                openModal(itemData); // Ya no es async
             }
         }
     }
@@ -565,7 +561,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    async function openModal(item) {
+    // --- Función openModal LIMPIA (sin QR) ---
+    function openModal(item) {
         const refsHeaderHTML = (Array.isArray(item.ref) && item.ref.length > 0)
             ? item.ref.flatMap(ref => String(ref).split(' '))
                 .map(part => `<span class="ref-badge header-ref-badge ${getRefBadgeClass(part)}">${part}</span>`)
@@ -613,47 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         els.modalAppsSpecs.innerHTML = `<div class="applications-list-container">${renderApplicationsList(item.aplicaciones)}${renderSpecs(item)}</div>`;
         
-        const primaryRefForData = (Array.isArray(item.ref) && item.ref.length > 0) ? String(item.ref[0]).split(' ')[0] : 'N/A';
-        const qrUrl = `${window.location.origin}${window.location.pathname}?busqueda=${encodeURIComponent(primaryRefForData)}`;
-        
-        const qrPlaceholderHTML = `
-            <div class="app-brand-header" style="margin-top: 1.25rem;">COMPARTIR</div>
-            <div id="small-qr-placeholder" class="small-qr-code" role="button" tabindex="0" aria-label="Haz clic para ampliar el QR">
-                </div>
-        `;
-        els.modalAppsSpecs.innerHTML += qrPlaceholderHTML;
-
-        await new Promise(resolve => requestAnimationFrame(resolve));
-
-        // ==============================================================
-        // 🟢 INICIA BLOQUE CORREGIDO: Se busca el QR dentro del modal
-        // ==============================================================
-        const qrPlaceholder = els.modalContent.querySelector('#small-qr-placeholder');
-        // ==============================================================
-        // 🔴 FIN BLOQUE CORREGIDO
-        // ==============================================================
-        
-        if (qrPlaceholder) {
-            try {
-                const canvas = document.createElement('canvas');
-                await QRCode.toCanvas(canvas, qrUrl, { 
-                    margin: 1, 
-                    color: {
-                        dark: "#000000",
-                        light: "#FFFFFF"
-                    }
-                });
-                qrPlaceholder.innerHTML = '';
-                qrPlaceholder.appendChild(canvas);
-                
-                qrPlaceholder.addEventListener('click', () => {
-                    openLargeQrModal(qrUrl, primaryRefForData);
-                });
-            } catch (err) {
-                console.error("Error al generar QR pequeño:", err);
-                qrPlaceholder.innerText = "Error QR";
-            }
-        }
+        // --- 🔴 TODA LA LÓGICA DE QR HA SIDO ELIMINADA DE AQUÍ 🔴 ---
 
         els.modalContent.classList.remove('closing');
         els.modal.style.display = 'flex';
@@ -682,38 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 220);
     }
     
-    async function openLargeQrModal(url, ref) {
-        els.qrLargeTitle.innerText = `Compartir: ${ref}`;
-        els.qrLargeCanvasContainer.innerHTML = '';
-        
-        try {
-            const canvas = document.createElement('canvas');
-            await QRCode.toCanvas(canvas, url, { 
-                width: 280,
-                margin: 2,
-                color: {
-                    dark: "#000000",
-                    light: "#FFFFFF"
-                }
-            });
-            els.qrLargeCanvasContainer.appendChild(canvas);
-        } catch (err) {
-            console.error("Error al generar QR grande:", err);
-            els.qrLargeCanvasContainer.innerText = "Error al generar QR.";
-        }
-        
-        els.qrLargeModalContent.classList.remove('closing');
-        els.qrLargeModal.style.display = 'flex';
-    }
-
-    function closeLargeQrModal() {
-        els.qrLargeModalContent.classList.add('closing');
-        setTimeout(() => {
-            els.qrLargeModal.style.display = 'none';
-            els.qrLargeModalContent.classList.remove('closing');
-            els.qrLargeCanvasContainer.innerHTML = '';
-        }, 220);
-    }
+    // --- Funciones openLargeQrModal y closeLargeQrModal ELIMINADAS ---
 
     function openGuideModal() {
         els.guideModalContent.classList.remove('closing');
@@ -1115,16 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        
-        els.qrLargeModalCloseBtn.addEventListener('click', closeLargeQrModal);
-        els.qrLargeModal.addEventListener('click', (event) => { 
-            if (event.target === els.qrLargeModal) closeLargeQrModal(); 
-        });
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && els.qrLargeModal.style.display === 'flex') {
-                closeLargeQrModal();
-            }
-        });
+        // --- Event listeners de QR eliminados ---
 
         els.modalCloseBtn.addEventListener('click', closeModal);
         els.modal.addEventListener('click', (event) => { if (event.target === els.modal) closeModal(); });
