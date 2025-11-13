@@ -88,6 +88,7 @@ body.lp-dark {
     --badge-trasera-bg: #b91c1c;
     --skeleton-bg: #1a1a1a;
     --skeleton-highlight: #2c2c2c;
+    --btn-google-border: #747775;
     --btn-google-hover-bg: rgba(255, 255, 255, 0.08);
     /* --- PALETA DARK AMPLIADA --- */
     --brand-color-1: #0d6efd;
@@ -223,7 +224,7 @@ header .header-x path {
     cursor: pointer; overflow: hidden;
     transition: box-shadow 0.3s ease, background-color 0.5s ease, opacity 0.3s ease, transform 0.3s ease, border-color 0.5s ease;
     border: 1px solid var(--material-surface-border);
-    outline:none;
+    outline: none;
     padding: 0;
 }
 .material-btn:hover { box-shadow: var(--elevation-4); }
@@ -261,7 +262,7 @@ header .header-x path {
 .main-layout { margin: 0 auto; display: flex; gap: 1rem; align-items: flex-start; width: 100%; flex-grow: 1; padding: 0 0.5rem 1rem; }
 .filters-column { flex: 0 0 262px; display: flex; flex-direction: column; gap: 1rem; }
 .results-panel { flex: 1; }
-.glass { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius:1rem; padding: 0.75rem 1rem; box-shadow: var(--elevation-1); transition: box-shadow 0.3s ease, border-color 0.5s ease, background-color 0.5s ease; }
+.glass { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius: 1rem; padding: 0.75rem 1rem; box-shadow: var(--elevation-1); transition: box-shadow 0.3s ease, border-color 0.5s ease, background-color 0.5s ease; }
 .filter-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; padding-bottom: 0; border-bottom: none; text-align: left; display: flex; align-items: center; gap: 8px; transition: color 0.5s ease; color: var(--text-color); }
 body.lp-dark .filter-title, body.modo-orbital .filter-title { color: var(--text-color); opacity: 0.9; }
 .form-input { width: 100%; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--material-surface-border); background-color: var(--input-bg); color: var(--text-color); font-size: 0.9rem; transition: all 0.3s ease; box-sizing: border-box; box-shadow: none; margin-bottom: 0.3rem; }
@@ -294,18 +295,18 @@ body.lp-dark .form-input::placeholder, body.modo-orbital .form-input::placeholde
 .search-history-item:hover {
     background: var(--btn-google-hover-bg);
 }
-.position-container { display:flex; gap: 0.4rem; }
+.position-container { display: flex; gap: 0.4rem; }
 .position-btn { flex: 1; padding: 6px 4px; border-radius: 100px; cursor: pointer; font-size: 0.8rem; font-weight: 500; text-align: center; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; border: 1px solid var(--material-surface-border); background-color: transparent; color: var(--text-color); }
 .position-btn:hover { background-color: var(--btn-google-hover-bg); }
 #positionDelantera.active { background-color: var(--badge-delantera-bg); border-color: var(--badge-delantera-bg); color: var(--badge-delantera-text); }
 #positionTrasera.active { background-color: var(--badge-trasera-bg); border-color: var(--badge-trasera-bg); color: var(--badge-trasera-text); }
 body.lp-dark .position-btn { border-color: var(--material-surface-border); color: var(--text-color); opacity: 0.9; }
 body.lp-dark .position-btn:hover { background-color: var(--btn-google-hover-bg); color: var(--text-color); opacity: 1; }
-body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { color: #fff; opacity: 1;}
-.input-group-horizontal { display:flex; gap: 0.3rem; margin-bottom: 0.3rem; }
+body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { color: #fff; opacity: 1; }
+.input-group-horizontal { display: flex; gap: 0.3rem; margin-bottom: 0.3rem; }
 .input-group-horizontal .form-input { margin-bottom: 0; flex: 1; }
 .input-group-horizontal:last-of-type { margin-bottom: 0; }
-.result-count-container { font-size:0.85rem; color: var(--text-color); margin-top: 0; opacity: 0.8; transition: color 0.5s ease, opacity 0.5s ease; }
+.result-count-container { font-size: 0.85rem; color: var(--text-color); margin-top: 0; opacity: 0.8; transition: color 0.5s ease, opacity 0.5s ease; }
 .result-count-container strong { font-weight: 600; }
 .filter-group { margin-top: 0.8rem; border-top: 1px solid var(--material-surface-border); padding-top: 0.8rem; transition: border-color 0.5s ease; }
 .glass > .filter-group { margin-top: 0.8rem; }
@@ -345,41 +346,40 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     gap: 0.5rem;
     padding: 0.5rem 0;
 }
-
 /* ======================================================= */
-/* 🟢 INICIO BLOQUE CORREGIDO: Estilo de Etiquetas Sólido y Mate */
+/* 🟢 INICIO BLOQUE CORREGIDO: Estilo de Etiquetas "Outline" (sin relleno) */
 /* ======================================================= */
 .brand-tag {
     font-family: 'Inter', sans-serif;
     font-size: 0.75rem;
-    font-weight: 600; /* Texto más grueso para legibilidad */
-    padding: 4px 12px; /* Un poco más de espacio */
+    font-weight: 600;
+    padding: 4px 12px;
     border-radius: 50px;
-    border: 1px solid var(--tag-brand-color, var(--btn-google-border)); /* Borde del mismo color */
-    color: #ffffff; /* Texto blanco */
-    background-color: var(--tag-brand-color, var(--btn-google-border)); /* Relleno de color sólido */
-    opacity: 0.85; /* Ligera opacidad para el estado inactivo */
+    border: 1px solid var(--tag-brand-color, var(--btn-google-border));
+    color: var(--tag-brand-color, var(--text-color));
+    background-color: transparent;
+    opacity: 0.85; 
     cursor: pointer;
-    transition: opacity 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
-    box-shadow: none; /* SIN SOMBRA/BRILLO */
+    box-shadow: none;
 }
 .brand-tag:hover {
-    opacity: 1; /* Opacidad completa al pasar el mouse */
-    filter: brightness(1.1); /* Ligero brillo al pasar el mouse */
-    box-shadow: none; /* SIN SOMBRA/BRILLO */
+    opacity: 1; 
+    background-color: var(--btn-google-hover-bg);
+    box-shadow: none;
 }
 .brand-tag.active {
-    opacity: 1; /* Opacidad completa */
-    filter: none; /* Sin filtro de brillo */
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); /* Sombra interior de "presionado" */
+    opacity: 1; 
+    filter: none;
+    background-color: var(--tag-brand-color);
+    color: #ffffff;
     border-color: var(--tag-brand-color);
-    padding: 4px 12px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 /* ======================================================= */
 /* 🔴 FIN BLOQUE CORREGIDO                                  */
 /* ======================================================= */
-
 @media (max-width: 767px) {
     .brand-tags-container { display: none; }
 }
@@ -414,7 +414,6 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 .view-btn:hover { background-color: var(--btn-google-hover-bg); }
 .view-btn.active { background-color: var(--input-bg); border-color: var(--material-surface-border); box-shadow: var(--elevation-1); }
 .view-btn.active svg { opacity: 1; }
-
 /* === BOTÓN HISTORIAL === */
 #historialBtn {
     width: auto;
@@ -457,7 +456,6 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     display: inline-block;
     white-space: nowrap;
 }
-
 @keyframes fadeInUpCard { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .results-wrapper {
     display: grid;
@@ -841,33 +839,33 @@ body:not(.lp-dark):not(.modo-orbital) #orbitalBtn.active .lp-icon-palette {
 }
 .card-thumbnail,
 .modal-image-carousel {
- position: relative;
- overflow: hidden;
+position: relative;
+overflow: hidden;
 }
 .card-thumbnail::after,
 .modal-image-carousel::after {
- content: '';
- position: absolute;
- top: 50%;
- left: 50%;
- transform: translate(-50%, -50%) rotate(-30deg);
- width: 60%; 
- height: 60%;
- background: var(--watermark-mask-color);
- -webkit-mask-image: url('favicon-x.svg');
- mask-image: url('favicon-x.svg');
- -webkit-mask-size: contain;
- mask-size: contain;
- -webkit-mask-repeat: no-repeat;
- mask-repeat: no-repeat;
- -webkit-mask-position: center;
- mask-position: center;
- pointer-events: none; 
- z-index: 1; 
- transition: background 0.5s ease;
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%) rotate(-30deg);
+width: 60%; 
+height: 60%;
+background: var(--watermark-mask-color);
+-webkit-mask-image: url('favicon-x.svg');
+mask-image: url('favicon-x.svg');
+-webkit-mask-size: contain;
+mask-size: contain;
+-webkit-mask-repeat: no-repeat;
+mask-repeat: no-repeat;
+-webkit-mask-position: center;
+mask-position: center;
+pointer-events: none; 
+z-index: 1; 
+transition: background 0.5s ease;
 }
 .modal-image-carousel .carousel-nav-btn {
- z-index: 2;
+z-index: 2;
 }
 .favorite-btn {
     position: absolute;
@@ -961,7 +959,6 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
     opacity: 1;
     filter: drop-shadow(0 1px 2px rgba(255, 0, 0, 0.5));
 }
-
 /* === Estilos para Historial de Búsqueda (Tarjeta) === */
 .search-history-item {
     position: relative;
@@ -988,7 +985,6 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
     transform: translateY(-50%) scale(1.1);
     color: var(--btn-primary-bg);
 }
-
 /* --- Estilos para Etiquetas de Fabricante --- */
 .manufacturer-tags-container {
     display: flex;
@@ -997,14 +993,11 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
     padding: 0.5rem 0;
     margin-top: -0.5rem; 
 }
-
 /* Asignar colores basados en las clases de badges existentes */
 .brand-tag[data-manufacturer="INC"] { --tag-brand-color: #0d47a1; }
 .brand-tag[data-manufacturer="K"]   { --tag-brand-color: var(--badge-trasera-bg); }
 .brand-tag[data-manufacturer="BP"]  { --tag-brand-color: #6c757d; }
 .brand-tag[data-manufacturer="B"]   { --tag-brand-color: #64b5f6; }
-
-
 /* Ocultar en móvil, junto con las otras etiquetas */
 @media (max-width: 767px) {
     .brand-tags-container,
@@ -1012,5 +1005,4 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
         display: none; 
     }
 }
-
 /* --- 🔴 ESTILOS DE QR ELIMINADOS 🔴 --- */
