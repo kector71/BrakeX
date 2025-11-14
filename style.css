@@ -347,15 +347,17 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.5rem 0;
+    justify-content: center; /* <-- CORRECCIÓN DE CENTRADO */
 }
+
 /* ======================================================= */
-/* 🟢 INICIO BLOQUE CORREGIDO: Estilo de Etiquetas "Outline" (sin relleno) */
+/* 🟢 INICIO BLOQUE ETIQUETAS (MODIFICADO) 🟢               */
 /* ======================================================= */
 .brand-tag {
     font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.6rem; /* 20% más pequeño (original 0.75rem) */
     font-weight: 600;
-    padding: 4px 12px;
+    padding: 3px 10px; /* 20% más pequeño (original 4px 12px) */
     border-radius: 50px;
     border: 1px solid var(--tag-brand-color, var(--btn-google-border));
     color: var(--tag-brand-color, var(--text-color));
@@ -374,17 +376,16 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 .brand-tag.active {
     opacity: 1; 
     filter: none;
-    background-color: var(--tag-brand-color);
+    /* Añadimos un color gris (#6c757d) por defecto como 'fallback' */
+    background-color: var(--tag-brand-color, #6c757d);
     color: #ffffff;
-    border-color: var(--tag-brand-color);
+    border-color: var(--tag-brand-color, #6c757d);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
 /* ======================================================= */
-/* 🔴 FIN BLOQUE CORREGIDO                                 */
+/* 🔴 FIN BLOQUE ETIQUETAS                                 */
 /* ======================================================= */
-@media (max-width: 767px) {
-    .brand-tags-container { display: none; }
-}
+
 @keyframes skeleton-pulse { 0%, 100% { background-color: var(--skeleton-bg); } 50% { background-color: var(--skeleton-highlight); } }
 .skeleton-card { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius: 0.75rem; padding: 0.75rem; box-shadow: var(--elevation-1); display: flex; flex-direction: column; gap: 0.8rem; transition: background-color 0.5s ease, border-color 0.5s ease; }
 .skeleton-line { height: 1rem; border-radius: 0.25rem; animation: skeleton-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
@@ -788,6 +789,11 @@ body.lp-dark { --arrow-glow-animation: arrow-glow-dark; }
     .input-group-horizontal { flex-direction: column; gap: 0.3rem; }
     .results-wrapper { grid-template-columns: 1fr; }
     .results-header-card { margin-top: 1rem; }
+    
+    /* Esta regla asegura que las etiquetas de fabricante también se centren */
+    .manufacturer-tags-container {
+        justify-content: center;
+    }
 }
 @media (max-width: 600px) { .form-input, .position-btn { font-size: 1rem; padding: 0.75rem; } }
 @media (max-width: 480px) {
@@ -1013,17 +1019,12 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path {
     gap: 0.5rem;
     padding: 0.5rem 0;
     margin-top: -0.5rem; 
+    justify-content: center; /* <-- CORRECCIÓN DE CENTRADO */
 }
 /* Asignar colores basados en las clases de badges existentes */
 .brand-tag[data-manufacturer="INC"] { --tag-brand-color: #0d47a1; }
 .brand-tag[data-manufacturer="K"]   { --tag-brand-color: var(--badge-trasera-bg); }
 .brand-tag[data-manufacturer="BP"]  { --tag-brand-color: #6c757d; }
 .brand-tag[data-manufacturer="B"]   { --tag-brand-color: #64b5f6; }
-/* Ocultar en móvil, junto con las otras etiquetas */
-@media (max-width: 767px) {
-    .brand-tags-container,
-    .manufacturer-tags-container { 
-        display: none; 
-    }
-}
+
 /* --- 🔴 ESTILOS DE QR ELIMINADOS 🔴 --- */
