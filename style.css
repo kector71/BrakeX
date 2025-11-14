@@ -927,10 +927,13 @@ body.modo-orbital .favorite-btn:not(.active) {
 body:not(.lp-dark):not(.modo-orbital) .favorite-btn:not(.active) .heart-icon {
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
 }
+/* --- INICIO CORRECCIÓN 1: Corazón en tarjeta --- */
 body.lp-dark .favorite-btn:not(.active) .heart-icon,
 body.modo-orbital .favorite-btn:not(.active) .heart-icon {
-    filter: drop-shadow(0 1px 1px rgba(255,255,255,0.3));
+    stroke: #000; /* Forzado a negro para visibilidad en imágenes claras */
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); /* Sombra oscura */
 }
+/* --- FIN CORRECCIÓN 1 --- */
 .view-btn .heart-icon {
     width: 20px;
     height: 20px;
@@ -946,10 +949,17 @@ body.modo-orbital .favorite-btn:not(.active) .heart-icon {
 body:not(.lp-dark):not(.modo-orbital) .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
 }
+/* --- INICIO CORRECCIÓN 2: Corazón en filtro header --- */
 body.lp-dark .view-btn#filtroFavoritosBtn:not(.active) .heart-icon,
 body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
-    filter: drop-shadow(0 1px 1px rgba(255,255,255,0.3));
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); /* Sombra oscura */
 }
+/* --- INICIO CORRECCIÓN 3: Path del corazón en filtro --- */
+body.lp-dark .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path,
+body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path {
+    stroke: #000; /* Forzado a negro para visibilidad */
+}
+/* --- FIN CORRECCIONES 2 y 3 --- */
 .view-btn#filtroFavoritosBtn:not(.active):hover .heart-icon {
     transform: scale(1.15);
 }
