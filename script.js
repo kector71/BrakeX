@@ -11,15 +11,66 @@ document.addEventListener('DOMContentLoaded', () => {
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // === INICIO: MEJORA #4 (AppState Class) ===
     // === Estado de la aplicación ===
-    const appState = {
-        data: [],
-        filtered: [],
-        currentPage: 1,
-        favorites: new Set(),
-        isFavoritesMode: false,
-        activeManufacturer: null
-    };
+    class AppState {
+        constructor() {
+            this.data = [];
+            this.filtered = [];
+            this.currentPage = 1;
+            this._favorites = new Set(); // Renombrado a "privado"
+            this.isFavoritesMode = false;
+            this.activeManufacturer = null;
+
+            this._loadFavorites(); // Carga los favoritos automáticamente al iniciar
+        }
+
+        // Carga los favoritos desde localStorage
+        _loadFavorites() {
+            try {
+                const favs = localStorage.getItem('brakeXFavorites');
+                if (favs) {
+                    this._favorites = new Set(JSON.parse(favs).map(Number));
+                }
+            } catch (e) {
+                console.error("Error al cargar favoritos:", e); // Error no crítico, solo log
+                this._favorites = new Set();
+            }
+        }
+
+        // Guarda los favoritos en localStorage
+        _saveFavorites() {
+            try {
+                localStorage.setItem('brakeXFavorites', JSON.stringify([...this._favorites]));
+            } catch (e) {
+                console.error("Error al guardar favoritos:", e); // Error no crítico, solo log
+            }
+        }
+
+        // Método público para alternar un favorito
+        toggleFavorite(itemId) {
+            if (this._favorites.has(itemId)) {
+                this._favorites.delete(itemId);
+            } else {
+                this._favorites.add(itemId);
+            }
+            this._saveFavorites(); // Guarda automáticamente al cambiar
+        }
+        
+        // Método público para verificar si es favorito
+        isFavorite(itemId) {
+            return this._favorites.has(itemId);
+        }
+        
+        // Getter para acceder a los favoritos
+        get favorites() {
+            return this._favorites;
+        }
+    }
+
+    // Instanciar el estado global de la app
+    const appState = new AppState();
+    // === FIN: MEJORA #4 ===
 
     const itemsPerPage = 24;
     const MAX_HISTORY = 5;
@@ -115,26 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === Gestión de favoritos ===
-    const loadFavorites = () => {
-        try {
-            const favs = localStorage.getItem('brakeXFavorites');
-            if (favs) {
-                appState.favorites = new Set(JSON.parse(favs).map(Number));
-            }
-        } catch (e) {
-            console.error("Error al cargar favoritos:", e);
-            appState.favorites = new Set();
-        }
-    };
-
-    const saveFavorites = () => {
-        try {
-            localStorage.setItem('brakeXFavorites', JSON.stringify([...appState.favorites]));
-        } catch (e) {
-            console.error("Error al guardar favoritos:", e);
-        }
-    };
-
+    // REFACTORIZADO (MEJORA #4)
     const toggleFavorite = (e) => {
         e.stopPropagation();
         const button = e.currentTarget;
@@ -142,16 +174,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!card) return;
         const itemId = parseInt(card.dataset.id);
         if (isNaN(itemId)) return;
-        if (appState.favorites.has(itemId)) {
-            appState.favorites.delete(itemId);
-            button.classList.remove('active');
-            button.setAttribute('aria-pressed', 'false');
-        } else {
-            appState.favorites.add(itemId);
-            button.classList.add('active');
-            button.setAttribute('aria-pressed', 'true');
-        }
-        saveFavorites();
+
+        // 1. Llama al método de la clase. Él se encarga de guardar.
+        appState.toggleFavorite(itemId);
+
+        // 2. Actualiza la UI del botón
+        const isNowFavorite = appState.isFavorite(itemId);
+        button.classList.toggle('active', isNowFavorite);
+        button.setAttribute('aria-pressed', isNowFavorite);
+
+        // 3. Refiltra si estamos en modo favoritos
         if (appState.isFavoritesMode) filterData();
     };
 
@@ -164,6 +196,27 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
+    // --- FUNCIÓN DE AYUDA (MEJORA #8) ---
+    const normalizeText = (text = '') => 
+        String(text).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // --- FIN FUNCIÓN ---
+
+    // --- INICIO: MEJORA #5 (MANEJO DE ERRORES) ---
+    const showGlobalError = (title, message) => {
+        els.results.innerHTML = `<div class="no-results-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <p>${title}</p>
+            <span>${message}</span>
+        </div>`;
+        els.paginationContainer.innerHTML = '';
+        els.countContainer.innerHTML = '0 resultados';
+    };
+    // --- FIN: MEJORA #5 ---
+
     const fillDatalist = (datalist, values) => {
         datalist.innerHTML = values.map(v => `<option value="${v}">`).join('');
     };
@@ -175,15 +228,26 @@ document.addEventListener('DOMContentLoaded', () => {
         return activePositions;
     };
 
+    // --- INICIO: MEJORA #3 (BADGES) ---
+    const BADGE_CONFIG = {
+        'K':   { class: 'ref-k',   test: (ref) => ref.startsWith('K') },
+        'INC': { class: 'ref-inc', test: (ref) => ref.endsWith('INC') },
+        'BP':  { class: 'ref-bp',  test: (ref) => ref.endsWith('BP') },
+        'BEX': { class: 'ref-bex', test: (ref) => ref.endsWith('BEX') },
+    };
     const getRefBadgeClass = (ref) => {
-        if (typeof ref !== 'string') return 'ref-default';
+        if (typeof ref !== 'string') {
+            return 'ref-default';
+        }
         const upperRef = ref.toUpperCase();
-        if (upperRef.endsWith('INC')) return 'ref-inc';
-        if (upperRef.endsWith('BP')) return 'ref-bp';
-        if (upperRef.startsWith('K')) return 'ref-k';
-        if (upperRef.endsWith('BEX')) return 'ref-bex';
+        for (const key in BADGE_CONFIG) {
+            if (BADGE_CONFIG[key].test(upperRef)) {
+                return BADGE_CONFIG[key].class;
+            }
+        }
         return 'ref-default';
     };
+    // --- FIN: MEJORA #3 ---
 
     const getSortableRefNumber = (refArray) => {
         if (!Array.isArray(refArray) || refArray.length === 0) return Infinity;
@@ -194,77 +258,125 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // === Filtrado y renderizado ===
+
+    // --- INICIO: BLOQUE DE FILTRADO REFACTORIZADO (MEJORAS #8 Y CÓDIGO DE EJEMPLO) ---
+
+    // Función de ayuda para obtener y normalizar todos los valores de los filtros
+    const getActiveFilters = () => {
+        const activePos = [];
+        if (els.posDel.classList.contains('active')) activePos.push('Delantera');
+        if (els.posTras.classList.contains('active')) activePos.push('Trasera');
+
+        return {
+            busqueda: normalizeText(els.busqueda.value),
+            marca: normalizeText(els.marca.value),
+            modelo: normalizeText(els.modelo.value),
+            anio: normalizeText(els.anio.value),
+            oem: normalizeText(els.oem.value),
+            fmsi: normalizeText(els.fmsi.value),
+            ancho: parseFloat(els.medidasAncho.value) || null,
+            alto: parseFloat(els.medidasAlto.value) || null,
+            pos: activePos,
+            manufacturer: appState.activeManufacturer, 
+            favorites: appState.isFavoritesMode
+        };
+    };
+
+    // Objeto con la lógica de cada filtro (Mejora de Código de Ejemplo)
+    const FILTER_STRATEGIES = {
+        // Búsqueda Rápida (Mejora #8 aplicada)
+        busqueda: (item, value) => {
+            if (!item._searchableText) {
+                const safeAplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
+                const itemVehicles = safeAplicaciones
+                    .map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`)
+                    .join(' ');
+                const allRefs = [
+                    ...(item.ref || []),
+                    ...(item.oem || []),
+                    ...(item.fmsi || [])
+                ].join(' ');
+                item._searchableText = normalizeText(`${allRefs} ${itemVehicles}`);
+            }
+            return item._searchableText.includes(value);
+        },
+        // Filtros de Aplicación (Mejora #8 aplicada)
+        marca: (item, value) => (item.aplicaciones || []).some(app => normalizeText(app.marca).includes(value)),
+        modelo: (item, value) => (item.aplicaciones || []).some(app => normalizeText(app.serie).includes(value)),
+        anio: (item, value) => (item.aplicaciones || []).some(app => normalizeText(app.año).includes(value)),
+        
+        // Filtros de Referencia (Mejora #8 aplicada)
+        oem: (item, value) => (item.oem || []).some(o => normalizeText(o).includes(value)),
+        fmsi: (item, value) => (item.fmsi || []).some(f => normalizeText(f).includes(value)),
+
+        // Filtros de Medidas (con tolerancia)
+        ancho: (item, value) => {
+            const TOLERANCIA = 1.0;
+            return (item.anchoNum >= value - TOLERANCIA && item.anchoNum <= value + TOLERANCIA);
+        },
+        alto: (item, value) => {
+            const TOLERANCIA = 1.0;
+            return (item.altoNum >= value - TOLERANCIA && item.altoNum <= value + TOLERANCIA);
+        },
+
+        // Filtro de Posición
+        pos: (item, activePositions) => activePositions.length === 0 || activePositions.includes(item.posición),
+
+        // Filtro de Fabricante (Tag)
+        manufacturer: (item, manuf) => {
+            const allRefParts = (item.ref || []).flatMap(refStr => String(refStr).toUpperCase().split(' '));
+            return allRefParts.some(refPart => {
+                if (manuf === 'K') return refPart.startsWith('K');
+                if (manuf === 'INC') return refPart.endsWith('INC');
+                if (manuf === 'BP') return refPart.endsWith('BP');
+                if (manuf === 'B') return refPart.endsWith('BEX');
+                return false;
+            });
+        },
+
+        // Filtro de Favoritos (REFACTORIZADO - MEJORA #4)
+        favorites: (item, isFavoritesMode) => !isFavoritesMode || appState.isFavorite(item._appId)
+    };
+
+    // Nueva función `filterData` refactorizada
     const filterData = () => {
         if (!appState.data.length) return;
-        const fbusq = (val) => val.toLowerCase().trim();
-        const activePos = getPositionFilter();
-        const filters = {
-            busqueda: fbusq(els.busqueda.value),
-            marca: fbusq(els.marca.value),
-            modelo: fbusq(els.modelo.value),
-            anio: fbusq(els.anio.value),
-            oem: fbusq(els.oem.value),
-            fmsi: fbusq(els.fmsi.value),
-            ancho: parseFloat(els.medidasAncho.value),
-            alto: parseFloat(els.medidasAlto.value),
-            pos: activePos
-        };
-        const manufacturerFilter = appState.activeManufacturer;
-        let preFilteredData = appState.data;
-        if (appState.isFavoritesMode) {
-            preFilteredData = appState.data.filter(item => appState.favorites.has(item._appId));
-        }
-        const filtered = preFilteredData.filter(item => {
-            const safeAplicaciones = Array.isArray(item.aplicaciones) ? item.aplicaciones : [];
-            const itemVehicles = safeAplicaciones.map(app => `${app.marca} ${app.serie} ${app.litros} ${app.año} ${app.especificacion}`).join(' ').toLowerCase();
-            const itemPosicion = item.posición;
-            const busqMatch = !filters.busqueda ||
-                (Array.isArray(item.ref) && item.ref.some(r => typeof r === 'string' && r.toLowerCase().includes(filters.busqueda))) ||
-                (Array.isArray(item.oem) && item.oem.some(o => typeof o === 'string' && o.toLowerCase().includes(filters.busqueda))) ||
-                (Array.isArray(item.fmsi) && item.fmsi.some(f => typeof f === 'string' && f.toLowerCase().includes(filters.busqueda))) ||
-                itemVehicles.includes(filters.busqueda);
-            const appMatch = !filters.marca && !filters.modelo && !filters.anio ||
-                safeAplicaciones.some(app =>
-                    (!filters.marca || (app.marca && app.marca.toLowerCase().includes(filters.marca))) &&
-                    (!filters.modelo || (app.serie && app.serie.toLowerCase().includes(filters.modelo))) &&
-                    (!filters.anio || (app.año && String(app.año).toLowerCase().includes(filters.anio)))
-                );
-            const oemMatch = !filters.oem || (Array.isArray(item.oem) && item.oem.some(o => o.toLowerCase().includes(filters.oem)));
-            const fmsiMatch = !filters.fmsi || (Array.isArray(item.fmsi) && item.fmsi.some(f => f.toLowerCase().includes(filters.fmsi)));
-            let posMatch = true;
-            if (filters.pos.length > 0) posMatch = filters.pos.includes(itemPosicion);
-            const TOLERANCIA = 1.0;
-            const anchoMatch = !filters.ancho || (item.anchoNum >= filters.ancho - TOLERANCIA && item.anchoNum <= filters.ancho + TOLERANCIA);
-            const altoMatch = !filters.alto || (item.altoNum >= filters.alto - TOLERANCIA && item.altoNum <= filters.alto + TOLERANCIA);
-            let manufacturerMatch = true;
-            if (manufacturerFilter) {
-                const allRefParts = (item.ref || []).flatMap(refStr => String(refStr).toUpperCase().split(' '));
-                manufacturerMatch = allRefParts.some(refPart => {
-                    if (manufacturerFilter === 'K') return refPart.startsWith('K');
-                    if (manufacturerFilter === 'INC') return refPart.endsWith('INC');
-                    if (manufacturerFilter === 'BP') return refPart.endsWith('BP');
-                    if (manufacturerFilter === 'B') return refPart.endsWith('BEX');
-                    return false;
-                });
-            }
-            return busqMatch && appMatch && oemMatch && fmsiMatch && posMatch && anchoMatch && altoMatch && manufacturerMatch;
-        });
-        const isFiltered = filters.busqueda || filters.marca || filters.modelo || filters.anio || filters.oem || filters.fmsi ||
-            !isNaN(filters.ancho) || !isNaN(filters.alto) || filters.pos.length > 0 || appState.isFavoritesMode || appState.activeManufacturer;
-        // --- INICIO: LÓGICA DE HISTORIAL CORREGIDA ---
-        // Guardar en el historial SÓLO SI hay un término de búsqueda.
-        // Esto se ejecuta 300ms después de que el usuario deja de escribir.
+
+        const filters = getActiveFilters();
+        
+        // Guardar en historial SÓLO SI hay un término de búsqueda (Mejora de Historial)
         if (filters.busqueda) {
-            // Usamos el valor original del input, no el 'fbusq' (minúsculas)
-            addToSearchHistory(els.busqueda.value.trim());
+            addToSearchHistory(els.busqueda.value.trim()); // Usamos el valor original sin normalizar
         }
-        // --- FIN: LÓGICA DE HISTORIAL CORREGIDA ---
-        appState.filtered = filtered;
+
+        const isFiltered = Object.values(filters).some(v => 
+            v !== null && v !== false && 
+            (!Array.isArray(v) || v.length > 0) && 
+            (typeof v !== 'string' || v.trim() !== '')
+        );
+
+        // Filtramos los datos
+        appState.filtered = appState.data.filter(item => {
+            // 'every' se asegura de que el item pase TODOS los filtros activos
+            return Object.entries(filters).every(([key, value]) => {
+                // Si el filtro no está activo (valor es null, '', 0, o false), lo ignora
+                if (!value || (Array.isArray(value) && value.length === 0)) {
+                    return true;
+                }
+                // Si el filtro está activo, ejecuta la estrategia correspondiente
+                return FILTER_STRATEGIES[key] ? FILTER_STRATEGIES[key](item, value) : true;
+            });
+        });
+
+        // El resto sigue igual
         appState.currentPage = 1;
         renderCurrentPage();
         updateURLWithFilters();
         renderDynamicBrandTags(appState.filtered, isFiltered);
     };
+
+    // --- FIN: BLOQUE DE FILTRADO REFACTORIZADO ---
+
 
     const renderApplicationsList = (aplicaciones) => {
         const safeAplicaciones = Array.isArray(aplicaciones) ? aplicaciones : [];
@@ -403,7 +515,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `<div class="card-app-summary">${appSummaryItems.join(', ')}${safeAplicaciones.length > 3 ? ', ...' : ''}</div>`
                 : '';
             const primaryRefForData = (Array.isArray(item.ref) && item.ref.length > 0) ? String(item.ref[0]).split(' ')[0] : 'N/A';
-            const isFavorite = appState.favorites.has(item._appId);
+            
+            // REFACTORIZADO (MEJORA #4)
+            const isFavorite = appState.isFavorite(item._appId);
+            
             const favoriteBtnHTML = `
                 <button class="favorite-btn ${isFavorite ? 'active' : ''}" data-id="${item._appId}" aria-label="Marcar como favorito" aria-pressed="${isFavorite}">
                     <svg class="heart-icon" viewBox="0 0 24 24">
@@ -525,6 +640,13 @@ document.addEventListener('DOMContentLoaded', () => {
         els.modalContent.classList.remove('closing');
         els.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        lastFocusedElement = document.activeElement;
+        els.modal.addEventListener('keydown', handleFocusTrap);
+        els.modalCloseBtn.focus(); // Pone el foco en el botón de cerrar
+        // --- FIN: MEJORA #7 ---
+
         requestAnimationFrame(() => {
             setTimeout(() => {
                 updateScrollIndicator();
@@ -552,6 +674,12 @@ document.addEventListener('DOMContentLoaded', () => {
         els.modalContent.classList.add('closing');
         els.modalDetailsContent.removeEventListener('scroll', updateScrollIndicator);
         els.modalDetailsWrapper.classList.remove('scrollable');
+
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        els.modal.removeEventListener('keydown', handleFocusTrap);
+        if (lastFocusedElement) lastFocusedElement.focus();
+        // --- FIN: MEJORA #7 ---
+
         setTimeout(() => {
             els.modal.style.display = 'none';
             document.body.style.overflow = '';
@@ -568,10 +696,22 @@ document.addEventListener('DOMContentLoaded', () => {
         els.guideModalContent.classList.remove('closing');
         els.guideModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        lastFocusedElement = document.activeElement;
+        els.guideModal.addEventListener('keydown', handleFocusTrap);
+        els.guideModalCloseBtn.focus();
+        // --- FIN: MEJORA #7 ---
     }
 
     function closeGuideModal() {
         els.guideModalContent.classList.add('closing');
+
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        els.guideModal.removeEventListener('keydown', handleFocusTrap);
+        if (lastFocusedElement) lastFocusedElement.focus();
+        // --- FIN: MEJORA #7 ---
+
         setTimeout(() => {
             els.guideModal.style.display = 'none';
             document.body.style.overflow = '';
@@ -581,6 +721,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === UI Interactions ===
     function openSideMenu() {
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        lastFocusedElement = document.activeElement; 
+        // --- FIN: MEJORA #7 ---
         els.sideMenu.classList.add('open');
         els.sideMenu.setAttribute('aria-hidden', 'false');
         els.sideMenuOverlay.style.display = 'block';
@@ -589,6 +732,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         els.menuBtn.setAttribute('aria-expanded', 'true');
         els.menuCloseBtn.focus();
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        els.sideMenu.addEventListener('keydown', handleFocusTrap);
+        // --- FIN: MEJORA #7 ---
     }
 
     function closeSideMenu() {
@@ -596,7 +742,12 @@ document.addEventListener('DOMContentLoaded', () => {
         els.sideMenu.setAttribute('aria-hidden', 'true');
         els.sideMenuOverlay.classList.remove('visible');
         els.menuBtn.setAttribute('aria-expanded', 'false');
-        els.menuBtn.focus();
+        
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        if (lastFocusedElement) lastFocusedElement.focus(); 
+        els.sideMenu.removeEventListener('keydown', handleFocusTrap);
+        // --- FIN: MEJORA #7 ---
+        
         els.sideMenuOverlay.addEventListener('transitionend', () => {
             if (!els.sideMenuOverlay.classList.contains('visible')) {
                 els.sideMenuOverlay.style.display = 'none';
@@ -680,6 +831,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === Event Listeners ===
     function setupEventListeners() {
+        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
+        let lastFocusedElement = null;
+        
+        // Función de ayuda para la "trampa de foco"
+        const handleFocusTrap = (e) => {
+            if (e.key !== 'Tab') return;
+
+            // 'e.currentTarget' es el modal o menú que tiene el listener
+            const focusableElements = e.currentTarget.querySelectorAll(
+                'a[href], button:not([disabled]), textarea, input, select'
+            );
+            if (focusableElements.length === 0) return; // No hay nada enfocable
+            
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) { // Si es Shift + Tab
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else { // Si es solo Tab
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        };
+        // --- FIN: MEJORA #7 ---
+
         [els.darkBtn, els.upBtn, els.menuBtn, els.orbitalBtn, els.clearBtn].forEach(btn => btn?.addEventListener('click', createRippleEffect));
         // Temas
         const applyLightTheme = () => {
@@ -736,8 +917,24 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'dark': applyAmoledDarkTheme(); break;
             default: applyLightTheme();
         }
+
+        // Botón Subir
         els.upBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        window.addEventListener('scroll', () => els.upBtn.classList.toggle('show', window.scrollY > 300));
+        
+        // --- INICIO: MEJORA #10 (SCROLL DEBOUNCE) ---
+        // 1. Creamos la función que actualiza el botón
+        const handleScroll = () => {
+            els.upBtn.classList.toggle('show', window.scrollY > 300);
+        };
+
+        // 2. Creamos una versión "debounced" de esa función
+        const debouncedScroll = debounce(handleScroll, 150);
+
+        // 3. Usamos la versión debounced en el listener
+        window.addEventListener('scroll', debouncedScroll);
+        // --- FIN: MEJORA #10 ---
+
+        // Menú lateral
         els.menuBtn.addEventListener('click', openSideMenu);
         els.menuCloseBtn.addEventListener('click', closeSideMenu);
         els.sideMenuOverlay.addEventListener('click', closeSideMenu);
@@ -751,14 +948,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (els.guideModal.style.display === 'flex') closeGuideModal();
             }
         });
+
+        // Clic en Tarjetas
         els.results.addEventListener('click', handleCardClick);
+        
+        // Filtros
         const debouncedFilter = debounce(filterData, 300);
+        
         els.filtroFavoritosBtn.addEventListener('click', () => {
             appState.isFavoritesMode = !appState.isFavoritesMode;
             els.filtroFavoritosBtn.classList.toggle('active', appState.isFavoritesMode);
             els.filtroFavoritosBtn.setAttribute('aria-pressed', appState.isFavoritesMode ? 'true' : 'false');
             filterData();
         });
+        
         els.historialBtn?.addEventListener('click', () => {
             const isActive = els.historialBtn.getAttribute('aria-pressed') === 'true';
             els.historialBtn.classList.toggle('active', !isActive);
@@ -766,21 +969,21 @@ document.addEventListener('DOMContentLoaded', () => {
             els.searchHistoryCard.style.display = !isActive ? 'block' : 'none';
             if (!isActive) els.searchHistoryCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
-        // --- INICIO: LÓGICA DE HISTORIAL CORREGIDA ---
+        
         els.busqueda.addEventListener('input', (e) => {
             els.searchContainer.classList.toggle('active', e.target.value.trim() !== '');
-            // Llama a filterData después de 300ms, y filterData guardará el historial
             debouncedFilter();
         });
-        // Se elimina el listener 'change' porque ahora la lógica está en filterData
-        // --- FIN: LÓGICA DE HISTORIAL CORREGIDA ---
+
         [els.marca, els.modelo, els.anio, els.oem, els.fmsi, els.medidasAncho, els.medidasAlto].forEach(input =>
             input.addEventListener('input', debouncedFilter)
         );
+        
         [els.posDel, els.posTras].forEach(btn => btn.addEventListener('click', () => {
             btn.classList.toggle('active');
             filterData();
         }));
+        
         els.clearBtn.addEventListener('click', () => {
             if (els.clearBtn.disabled) return;
             els.clearBtn.disabled = true;
@@ -796,6 +999,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 els.clearBtn.disabled = false;
             }, 900);
         });
+        
         function createSparks(button) {
             const NUM_SPARKS = 10;
             const SPARK_COLORS = ['#00ffff', '#ff00ff', '#00ff7f', '#ffc700', '#ff5722'];
@@ -816,6 +1020,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 spark.addEventListener('animationend', () => spark.remove(), { once: true });
             }
         }
+        
         if (els.brandTagsContainer) {
             els.brandTagsContainer.addEventListener('click', (e) => {
                 const tag = e.target.closest('.brand-tag');
@@ -824,6 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterData();
             });
         }
+        
         if (els.manufacturerTagsContainer) {
             els.manufacturerTagsContainer.addEventListener('click', (e) => {
                 const tag = e.target.closest('.brand-tag');
@@ -843,6 +1049,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterData();
             });
         }
+        
         els.paginationContainer.addEventListener('click', (e) => {
             const btn = e.target.closest('.page-btn');
             if (!btn || btn.disabled || btn.classList.contains('active')) return;
@@ -853,6 +1060,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 els.resultsHeaderCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
+        
         document.addEventListener('click', (e) => {
             const deleteBtn = e.target.closest('.delete-history-item');
             if (deleteBtn) {
@@ -869,6 +1077,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        // Modales
         els.modalCloseBtn.addEventListener('click', closeModal);
         els.modal.addEventListener('click', (e) => { if (e.target === els.modal) closeModal(); });
         els.guideModalCloseBtn.addEventListener('click', closeGuideModal);
@@ -878,7 +1088,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // === Inicialización ===
     async function inicializarApp() {
         showSkeletonLoader();
-        loadFavorites();
+        // appState.loadFavorites(); // ELIMINADO (MEJORA #4) - La clase AppState lo hace
         renderSearchHistory();
         els.searchHistoryCard.style.display = 'none';
         try {
@@ -951,7 +1161,13 @@ document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
         } catch (error) {
             console.error("Error al inicializar la app:", error);
-            els.results.innerHTML = `<div class="no-results-container"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><path d="M12 9v4l-1.5 1.5"></path><path d="M12 3v1"></path><path d="M21 12h-1"></path><path d="M3 12H2"></path><path d="m18.36 17.36-.7.7"></path><path d="m6.34 6.34-.7-.7"></path></svg><p>Error al cargar datos</p><span>Por favor, revisa la consola para más detalles.</span></div>`;
+            // --- INICIO: MEJORA #5 (MANEJO DE ERRORES) ---
+            // Mostrar un error claro al usuario en lugar de solo en la consola
+            showGlobalError(
+                'Error al cargar datos',
+                'No se pudo conectar con la base de datos. Por favor, revisa tu conexión a internet e inténtalo de nuevo.'
+            );
+            // --- FIN: MEJORA #5 ---
         }
     }
 
