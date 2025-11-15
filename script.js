@@ -1,7 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // === Configuración de Firebase ===
-    // 🚨 ¡ADVERTENCIA! Estas claves son públicas.
-    // DEBES proteger tu base de datos con Reglas de Seguridad en la consola de Firebase.
+
     const firebaseConfig = {
         apiKey: "AIzaSyCha4S_wLxI_CZY1Tc9FOJNA3cUTggISpU",
         authDomain: "brakexadmin.firebaseapp.com",
