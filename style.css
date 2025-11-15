@@ -265,8 +265,26 @@ header .header-x path {
 .filters-column { flex: 0 0 262px; display: flex; flex-direction: column; gap: 1rem; }
 .results-panel { flex: 1; }
 .glass { background-color: var(--material-surface-light); border: 1px solid var(--material-surface-border); border-radius:1rem; padding: 0.75rem 1rem; box-shadow: var(--elevation-1); transition: box-shadow 0.3s ease, border-color 0.5s ease, background-color 0.5s ease; }
-.filter-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; padding-bottom: 0; border-bottom: none; text-align: left; display: flex; align-items: center; gap: 8px; transition: color 0.5s ease; color: var(--text-color); }
+
+/* --- 🔴 REGLA MODIFICADA: `gap: 8px;` ELIMINADO --- */
+.filter-title { 
+    font-weight: 600; 
+    font-size: 0.9rem; 
+    margin-bottom: 0.3rem; 
+    padding-bottom: 0; 
+    border-bottom: none; 
+    text-align: left; 
+    display: flex; 
+    align-items: center; 
+    /* gap: 8px; */ /* <-- Esta línea fue eliminada */
+    transition: color 0.5s ease; 
+    color: var(--text-color); 
+}
 body.lp-dark .filter-title, body.modo-orbital .filter-title { color: var(--text-color); opacity: 0.9; }
+
+/* --- 🔴 REGLA ELIMINADA (ESTABA VACÍA) --- */
+/* .filter-title svg { ... } */
+
 .form-input { width: 100%; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--material-surface-border); background-color: var(--input-bg); color: var(--text-color); font-size: 0.9rem; transition: all 0.3s ease; box-sizing: border-box; box-shadow: none; margin-bottom: 0.3rem; }
 .form-input:last-of-type { margin-bottom: 0; }
 .form-input:focus { border-color: var(--input-focus-border); box-shadow: 0 0 0 2px rgba(var(--input-focus-border-rgb, 37, 99, 235), 0.3); }
@@ -395,6 +413,8 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
 .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; }
 .results-panel > .results-header-card { margin-top: 0; margin-bottom: 0.8rem; }
 .view-toggle-buttons { display: flex; gap: 0.5rem; }
+
+/* === 🔴 INICIO CORRECCIÓN BOTONES HEADER === */
 .view-btn { 
     width: 36px; 
     height: 36px; 
@@ -402,7 +422,7 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     align-items: center; 
     justify-content: center; 
     border-radius: 8px; 
-    border: 1px solid var(--material-surface-border); 
+    border: 1px solid var(--btn-google-border); /* <-- MÁS OSCURO (de 0.1 a #747775) */
     background-color: transparent; 
     cursor: pointer; 
     transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.5s ease; 
@@ -411,13 +431,16 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     width: 20px; 
     height: 20px; 
     stroke: var(--text-color); 
-    opacity: 0.6; 
+    opacity: 0.8; /* <-- MÁS OSCURO (de 0.6 a 0.8) */
     transition: opacity 0.2s ease, stroke 0.5s ease; 
 }
+/* === 🔴 FIN CORRECCIÓN BOTONES HEADER === */
+
 .view-btn:hover { background-color: var(--btn-google-hover-bg); }
 .view-btn.active { background-color: var(--input-bg); border-color: var(--material-surface-border); box-shadow: var(--elevation-1); }
 .view-btn.active svg { opacity: 1; }
-/* === BOTÓN HISTORIAL === */
+
+/* === 🔴 INICIO CORRECCIÓN BOTÓN HISTORIAL === */
 #historialBtn {
     width: auto;
     display: flex;
@@ -427,16 +450,18 @@ body.lp-dark #positionDelantera.active, body.lp-dark #positionTrasera.active { c
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--text-color);
-    opacity: 0.6;
+    opacity: 0.8; /* <-- MÁS OSCURO (de 0.6 a 0.8) */
     transition: all 0.2s ease;
 }
 #historialBtn svg {
     width: 18px;
     height: 18px;
     stroke: var(--text-color);
-    opacity: 0.6;
+    opacity: 1; /* <-- CORREGIDO (de 0.6 a 1, hereda opacidad del padre) */
     transition: stroke 0.2s ease, opacity 0.2s ease;
 }
+/* === 🔴 FIN CORRECCIÓN BOTÓN HISTORIAL === */
+
 #historialBtn:hover {
     background-color: var(--btn-google-hover-bg);
     opacity: 1;
@@ -930,48 +955,57 @@ body.lp-dark .favorite-btn:not(.active),
 body.modo-orbital .favorite-btn:not(.active) {
     opacity: 0.7;
 }
+
+/* === 🔴 INICIO BLOQUE CORREGIDO CORAZONES === */
+
+/* --- 1. Corazón en la TARJETA de producto --- */
 body:not(.lp-dark):not(.modo-orbital) .favorite-btn:not(.active) .heart-icon {
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
 }
-/* --- INICIO CORRECCIÓN 1: Corazón en tarjeta --- */
+/* CORRECTO: Forzar a negro en dark/orbital para que contraste con imágenes claras */
 body.lp-dark .favorite-btn:not(.active) .heart-icon,
 body.modo-orbital .favorite-btn:not(.active) .heart-icon {
     stroke: #000; /* Forzado a negro para visibilidad en imágenes claras */
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); /* Sombra oscura */
 }
-/* --- FIN CORRECCIÓN 1 --- */
+
+
+/* --- 2. Corazón en el BOTÓN DE FILTRO (header) --- */
 .view-btn .heart-icon {
     width: 20px;
     height: 20px;
     transition: all 0.2s ease;
 }
+/* Base: usa el color de texto del tema (claro en modo oscuro, oscuro en modo claro) */
 .view-btn .heart-icon path {
     fill: transparent; 
     stroke: var(--text-color);
     stroke-width: 2;
-    opacity: 0.6;
+    /* opacity: 0.6; */ /* <-- La opacidad ahora se controla en .view-btn svg */
     transition: all 0.2s ease-out;
 }
+
+/* Sombra para modo claro */
 body:not(.lp-dark):not(.modo-orbital) .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
     filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
 }
-/* --- INICIO CORRECCIÓN 2: Corazón en filtro header --- */
+
+/* CORREGIDO: Sombra para modo oscuro/orbital */
 body.lp-dark .view-btn#filtroFavoritosBtn:not(.active) .heart-icon,
 body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon {
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3)); /* Sombra oscura */
+    /* Mantenemos la sombra, pero ahora usará el color de texto (claro) del tema */
+    filter: drop-shadow(0 1px 1px rgba(255,255,255,0.3));
 }
-/* --- INICIO CORRECCIÓN 3: Path del corazón en filtro --- */
-body.lp-dark .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path,
-body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path {
-    stroke: #000; /* Forzado a negro para visibilidad */
-}
-/* --- FIN CORRECCIONES 2 y 3 --- */
+/* --- FIN CORRECCIÓN 2 --- */
+
 .view-btn#filtroFavoritosBtn:not(.active):hover .heart-icon {
     transform: scale(1.15);
 }
 .view-btn#filtroFavoritosBtn:not(.active):hover .heart-icon path {
     opacity: 1;
 }
+
+/* Estilos del botón activo */
 .view-btn#filtroFavoritosBtn.active {
     background-color: var(--input-bg);
     border-color: var(--material-surface-border);
@@ -980,12 +1014,17 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path {
 .view-btn#filtroFavoritosBtn.active .heart-icon {
     transform: scale(1.05);
 }
+
+/* CORRECCIÓN DE TYPO: Se eliminó "Filtro" extra */
 .view-btn#filtroFavoritosBtn.active .heart-icon path {
     fill: #ff0000;
     stroke: #ff0000;
     opacity: 1;
     filter: drop-shadow(0 1px 2px rgba(255, 0, 0, 0.5));
 }
+/* === 🔴 FIN BLOQUE CORREGIDO CORAZONES === */
+
+
 /* === Estilos para Historial de Búsqueda (Tarjeta) === */
 .search-history-item {
     position: relative;
@@ -1026,5 +1065,12 @@ body.modo-orbital .view-btn#filtroFavoritosBtn:not(.active) .heart-icon path {
 .brand-tag[data-manufacturer="K"]   { --tag-brand-color: var(--badge-trasera-bg); }
 .brand-tag[data-manufacturer="BP"]  { --tag-brand-color: #6c757d; }
 .brand-tag[data-manufacturer="B"]   { --tag-brand-color: #64b5f6; }
+
+@media (max-width: 767px) {
+    /* Esta regla asegura que las etiquetas de fabricante también se centren */
+    .manufacturer-tags-container {
+        justify-content: center;
+    }
+}
 
 /* --- 🔴 ESTILOS DE QR ELIMINADOS 🔴 --- */

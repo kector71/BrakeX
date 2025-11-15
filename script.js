@@ -74,7 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const itemsPerPage = 24;
     const MAX_HISTORY = 5;
-    let brandColorMap = {};
+    
+    // --- CORRECCIÓN: Movido al ámbito global ---
+    let lastFocusedElement = null;
 
     // === Referencias a elementos del DOM ===
     const els = {
@@ -216,6 +218,34 @@ document.addEventListener('DOMContentLoaded', () => {
         els.countContainer.innerHTML = '0 resultados';
     };
     // --- FIN: MEJORA #5 ---
+
+    // --- CORRECCIÓN: Movida al ámbito global ---
+    // Función de ayuda para la "trampa de foco" (Mejora #7)
+    const handleFocusTrap = (e) => {
+        if (e.key !== 'Tab') return;
+
+        // 'e.currentTarget' es el modal o menú que tiene el listener
+        const focusableElements = e.currentTarget.querySelectorAll(
+            'a[href], button:not([disabled]), textarea, input, select'
+        );
+        if (focusableElements.length === 0) return; // No hay nada enfocable
+        
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) { // Si es Shift + Tab
+            if (document.activeElement === firstElement) {
+                lastElement.focus();
+                e.preventDefault();
+            }
+        } else { // Si es solo Tab
+            if (document.activeElement === lastElement) {
+                firstElement.focus();
+                e.preventDefault();
+            }
+        }
+    };
+    // --- FIN CORRECCIÓN ---
 
     const fillDatalist = (datalist, values) => {
         datalist.innerHTML = values.map(v => `<option value="${v}">`).join('');
@@ -564,11 +594,13 @@ document.addEventListener('DOMContentLoaded', () => {
             brandsToShow = shuffled.slice(0, 10);
         }
         const activeBrandFilter = els.marca.value.trim().toLowerCase();
+        
+        // MODIFICADO: Eliminado el style="" y la lógica de colorVar
         els.brandTagsContainer.innerHTML = brandsToShow.map(brand => {
-            const colorVar = brandColorMap[brand] || '--brand-color-10';
             const isActive = brand.toLowerCase() === activeBrandFilter;
-            return `<button class="brand-tag ${isActive ? 'active' : ''}" data-brand="${brand}" style="--tag-brand-color: var(${colorVar});">${brand}</button>`;
+            return `<button class="brand-tag ${isActive ? 'active' : ''}" data-brand="${brand}">${brand}</button>`;
         }).join('');
+
         els.brandTagsContainer.style.display = brandsToShow.length ? 'flex' : 'none';
     }
 
@@ -831,36 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === Event Listeners ===
     function setupEventListeners() {
-        // --- INICIO: MEJORA #7 (ACCESIBILIDAD) ---
-        let lastFocusedElement = null;
         
-        // Función de ayuda para la "trampa de foco"
-        const handleFocusTrap = (e) => {
-            if (e.key !== 'Tab') return;
-
-            // 'e.currentTarget' es el modal o menú que tiene el listener
-            const focusableElements = e.currentTarget.querySelectorAll(
-                'a[href], button:not([disabled]), textarea, input, select'
-            );
-            if (focusableElements.length === 0) return; // No hay nada enfocable
-            
-            const firstElement = focusableElements[0];
-            const lastElement = focusableElements[focusableElements.length - 1];
-
-            if (e.shiftKey) { // Si es Shift + Tab
-                if (document.activeElement === firstElement) {
-                    lastElement.focus();
-                    e.preventDefault();
-                }
-            } else { // Si es solo Tab
-                if (document.activeElement === lastElement) {
-                    firstElement.focus();
-                    e.preventDefault();
-                }
-            }
-        };
-        // --- FIN: MEJORA #7 ---
-
         [els.darkBtn, els.upBtn, els.menuBtn, els.orbitalBtn, els.clearBtn].forEach(btn => btn?.addEventListener('click', createRippleEffect));
         // Temas
         const applyLightTheme = () => {
@@ -942,12 +945,24 @@ document.addEventListener('DOMContentLoaded', () => {
             closeSideMenu();
             setTimeout(openGuideModal, 50);
         });
+        
+        // --- INICIO: CORRECCIÓN BUG ESCAPE (keydown) ---
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (els.sideMenu.classList.contains('open')) closeSideMenu();
-                if (els.guideModal.style.display === 'flex') closeGuideModal();
+                // Prioritiza cerrar la capa superior primero.
+                // Usamos "else if" para que solo cierre una cosa a la vez.
+                
+                if (els.sideMenu.classList.contains('open')) {
+                    closeSideMenu();
+                } else if (els.guideModal.style.display === 'flex') {
+                    closeGuideModal();
+                } else if (els.modal.style.display === 'flex') {
+                    // Esta es la línea que faltaba
+                    closeModal();
+                }
             }
         });
+        // --- FIN: CORRECCIÓN BUG ESCAPE ---
 
         // Clic en Tarjetas
         els.results.addEventListener('click', handleCardClick);
@@ -1145,17 +1160,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const allFmsis = [...new Set(appState.data.flatMap(i => i.fmsi || []))].filter(Boolean).sort();
             fillDatalist(els.datalistOem, allOems);
             fillDatalist(els.datalistFmsi, allFmsis);
-            const allBrandsList = appState.data.flatMap(item => item.aplicaciones.map(app => app.marca)).filter(Boolean);
-            const brandFrequencies = allBrandsList.reduce((counts, brand) => {
-                counts[brand] = (counts[brand] || 0) + 1;
-                return counts;
-            }, {});
-            const allUniqueBrandsSorted = Object.keys(brandFrequencies).sort();
-            const brandColors = Array.from({ length: 20 }, (_, i) => `--brand-color-${i + 1}`);
-            brandColorMap = {};
-            allUniqueBrandsSorted.forEach((brand, index) => {
-                brandColorMap[brand] = brandColors[index % brandColors.length];
-            });
+            
+            // ELIMINADO: Lógica de brandColorMap
+            
             applyFiltersFromURL();
             filterData();
             setupEventListeners();

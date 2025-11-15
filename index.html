@@ -35,7 +35,9 @@
     <div class="main-layout">
         <div class="filters-column">
             <div class="glass">
-                <div class="filter-title">Búsqueda Rápida</div>
+                
+                <h3 class="filter-title">Búsqueda Rápida</h3>
+                
                 <div class="search-container" id="searchContainer">
                     <label for="busquedaRapida" class="visually-hidden">Búsqueda Rápida por Marca, Serie, Referencia u OEM</label>
                     <input type="text" id="busquedaRapida" placeholder="Marca, Serie, Ref, OEM..." class="form-input" />
@@ -44,8 +46,9 @@
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                 </div>
+                
                 <div class="filter-group">
-                    <div class="filter-title">Detalles del Vehículo</div>
+                    <h3 class="filter-title">Detalles del Vehículo</h3>
                     <label for="filtroMarca" class="visually-hidden">Filtrar por Marca</label>
                     <input list="marcas" id="filtroMarca" class="form-input" placeholder="Marca" />
                     <datalist id="marcas"></datalist>
@@ -56,15 +59,17 @@
                     <input list="anios" id="filtroAnio" class="form-input" placeholder="Año" />
                     <datalist id="anios"></datalist>
                 </div>
+                
                 <div class="filter-group">
-                    <div class="filter-title">Posición</div>
+                    <h3 class="filter-title">Posición</h3>
                     <div class="position-container">
                         <button type="button" class="position-btn" id="positionDelantera">Delantera</button>
                         <button type="button" class="position-btn" id="positionTrasera">Trasera</button>
                     </div>
                 </div>
+                
                 <div class="filter-group">
-                    <div class="filter-title">Referencias</div>
+                    <h3 class="filter-title">Referencias</h3>
                     <div class="input-group-horizontal">
                         <label for="filtroOem" class="visually-hidden">Filtrar por código OEM</label>
                         <input list="oemList" id="filtroOem" class="form-input" placeholder="OEM" />
@@ -74,8 +79,9 @@
                         <datalist id="fmsiList"></datalist>
                     </div>
                 </div>
+                
                 <div class="filter-group">
-                    <div class="filter-title">Medidas (mm)</div>
+                    <h3 class="filter-title">Medidas (mm)</h3>
                     <div class="input-group-horizontal">
                         <label for="medidasAncho" class="visually-hidden">Filtrar por Ancho en milímetros</label>
                         <input type="number" id="medidasAncho" placeholder="Ancho" class="form-input" />
@@ -83,6 +89,7 @@
                         <input type="number" id="medidasAlto" placeholder="Alto" class="form-input" />
                     </div>
                 </div>
+                
                 <button type="button" class="clear-filters-btn" id="clearFiltersBtn" aria-label="Borrar filtros">
                     <svg id="trashIcon" viewBox="0 0 24 24">
                         <g class="trash-body">
@@ -99,9 +106,9 @@
                 </button>
             </div>
 
-            <div class="brand-tags-container" id="brand-tags-container"></div>
+            <div class="brand-tags-container glass" id="brand-tags-container"></div>
 
-            <div class="manufacturer-tags-container" id="manufacturer-tags-container">
+            <div class="manufacturer-tags-container glass" id="manufacturer-tags-container">
                 <button class="brand-tag" data-manufacturer="INC">Incolbest</button>
                 <button class="brand-tag" data-manufacturer="K">KTC</button>
                 <button class="brand-tag" data-manufacturer="BP">Break Pak</button>
@@ -273,7 +280,6 @@
         </ul>
     </nav>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="script.js"></script>
