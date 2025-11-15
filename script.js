@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // === Configuración de Firebase ===
+    // 🚨 ¡ADVERTENCIA! Estas claves son públicas.
+    // DEBES proteger tu base de datos con Reglas de Seguridad en la consola de Firebase.
     const firebaseConfig = {
         apiKey: "AIzaSyCha4S_wLxI_CZY1Tc9FOJNA3cUTggISpU",
         authDomain: "brakexadmin.firebaseapp.com",
@@ -169,10 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === Gestión de favoritos ===
     // REFACTORIZADO (MEJORA #4)
-    const toggleFavorite = (e) => {
-        e.stopPropagation();
-        const button = e.currentTarget;
-        const card = button.closest('.result-card');
+    // --- MODIFICADO PARA EVENT DELEGATION (YA NO RECIBE 'e') ---
+    const toggleFavorite = (buttonElement) => {
+        // e.stopPropagation() se maneja ahora en el listener delegado
+        const card = buttonElement.closest('.result-card');
         if (!card) return;
         const itemId = parseInt(card.dataset.id);
         if (isNaN(itemId)) return;
@@ -182,8 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. Actualiza la UI del botón
         const isNowFavorite = appState.isFavorite(itemId);
-        button.classList.toggle('active', isNowFavorite);
-        button.setAttribute('aria-pressed', isNowFavorite);
+        buttonElement.classList.toggle('active', isNowFavorite);
+        buttonElement.setAttribute('aria-pressed', isNowFavorite);
 
         // 3. Refiltra si estamos en modo favoritos
         if (appState.isFavoritesMode) filterData();
@@ -569,9 +571,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>`;
         }).join('');
-        els.results.querySelectorAll('.favorite-btn').forEach(btn => {
-            btn.addEventListener('click', toggleFavorite);
-        });
+        
+        // --- ELIMINADO: Bucle de listeners (MEJORA DE RENDIMIENTO) ---
+        
         setupPagination(totalResults);
     };
 
@@ -595,7 +597,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const activeBrandFilter = els.marca.value.trim().toLowerCase();
         
-        // MODIFICADO: Eliminado el style="" y la lógica de colorVar
         els.brandTagsContainer.innerHTML = brandsToShow.map(brand => {
             const isActive = brand.toLowerCase() === activeBrandFilter;
             return `<button class="brand-tag ${isActive ? 'active' : ''}" data-brand="${brand}">${brand}</button>`;
@@ -605,15 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === Modal ===
-    function handleCardClick(event) {
-        if (event.target.closest('.favorite-btn')) return;
-        const card = event.target.closest('.result-card');
-        if (card) {
-            const itemId = card.dataset.id;
-            const itemData = appState.data.find(item => item._appId == itemId);
-            if (itemData) openModal(itemData);
-        }
-    }
+    // --- ELIMINADO: `handleCardClick` (MEJORA DE RENDIMIENTO) ---
 
     function updateScrollIndicator() {
         const wrapper = els.modalDetailsWrapper;
@@ -965,7 +958,27 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- FIN: CORRECCIÓN BUG ESCAPE ---
 
         // Clic en Tarjetas
-        els.results.addEventListener('click', handleCardClick);
+        // --- ELIMINADO: `els.results.addEventListener('click', handleCardClick);` (MEJORA DE RENDIMIENTO) ---
+
+        // === INICIO: MEJORA DE RENDIMIENTO (Event Delegation) ===
+        // Un solo listener en el contenedor de resultados para manejar clics en tarjetas Y favoritos
+        els.results.addEventListener('click', (e) => {
+            const favoriteButton = e.target.closest('.favorite-btn');
+            const card = e.target.closest('.result-card');
+
+            if (favoriteButton) {
+                // 1. Clic en el botón de favorito
+                e.stopPropagation(); // Prevenir que el clic se propague al 'card'
+                toggleFavorite(favoriteButton); // Pasamos el elemento de botón
+            } else if (card) {
+                // 2. Clic en la tarjeta (pero no en el botón)
+                // Esta es la lógica de la antigua 'handleCardClick'
+                const itemId = card.dataset.id;
+                const itemData = appState.data.find(item => item._appId == itemId);
+                if (itemData) openModal(itemData);
+            }
+        });
+        // === FIN: MEJORA DE RENDIMIENTO ===
         
         // Filtros
         const debouncedFilter = debounce(filterData, 300);
